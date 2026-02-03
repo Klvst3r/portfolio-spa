@@ -1,0 +1,7 @@
+3. Instanciar el proyecto 
+
+Al tener Laravel que fue el proyecto se agregaran alcunos ptros paquetes, en el orden de instalación los clocaremos por aca
+
+El primero es Jetstream
+	$  composer require laravel/jetstream (ver 5.4)
+	

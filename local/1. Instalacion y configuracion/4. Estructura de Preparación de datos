@@ -1,0 +1,22 @@
+4. Estructura de Preparación de datos
+
+Para almacenar información debemos configurar la lista de skill para mostrar en el portafolio. con Laravel
+
+1. Crear los Modelos Skills, Migración, el factory y el Controller
+	$  php artisan make:model Skill -mfc
+
+2. Modelos para project
+	$ php artisan make:model Project -mfc
+
+
+Se configuran los modelos de Skill y Project, para tambier dar paso a las migraicones agregando los campos necesarios para las migraciones
+
+3. Ejecuta las migraciones
+
+	$ php artisan migrate
+
+	Si ya habiamos ejecutado una migraicon anterior, dshaciendo la Bd y recreandola nuevamente toda.
+
+		$ php artisan migrate:fresh
+
+4. El archivo database.sqllite tuvo cambios, en el archivo binario, las relaciones, restricciones, etc.

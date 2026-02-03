@@ -1,0 +1,182 @@
+Instalar y Configurar un proyecto para el Portafolio SPA con Laravel - Vue.js Inertia,js y Tailwind CSS
+
+Requerimientos
+Composer
+
+1. verificar la instalación de composer
+	$ composer -v 
+
+2. Crear el Proyecto de Laravel
+	$ composer create-proyect laravel/laravel portfolio-spa
+
+	Portafolio con una Single Page Application y VILT (Vue.js, Inertia.js, Laravel y Tailwind CSS) 
+
+3. configurar entorno y Bd con SQLLite
+	DB_CONNECTION=sqlite
+    # DB_HOST=127.0.0.1
+    # DB_PORT=3306
+    # DB_DATABASE=laravel
+    # DB_USERNAME=root
+    # DB_PASSWORD=
+
+4. Configuración de Sublime Text con Material Theme : Advanced Configuration
+	{
+    "theme": "Material-Theme-Palenight.sublime-theme",
+    "color_scheme": "Packages/Material Theme/schemes/Material-Theme-Palenight.tmTheme",
+    "font_size": 10,
+    "ignored_packages":
+    [
+        "Vintage"
+    ],
+    "indent_guide_options":
+    [
+        "draw_normal",
+        "draw_active"
+    ],
+    "index_files": true,
+    "line_padding_bottom": 5,
+    "line_padding_top": 5,
+    "overlay_scroll_bars": "enabled",
+    "material_theme_accent_orange": true,
+    "material_theme_tabs_autowidth": true,
+    "font_options": ["antialiased", "subpixel_antialiased"]
+}
+
+aunque quedo finalmente con la siguiente configuración
+{
+    "theme": "Material-Theme-Darker.sublime-theme",
+"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
+    "font_size": 9,
+    "font_options": ["antialiased", "subpixel_antialiased"],
+    "draw_white_space": "all",
+    "ignored_packages":
+    [
+        "Vintage"
+    ],
+    "indent_guide_options":
+    [
+        "draw_normal",
+        "draw_active"
+    ],
+    "index_files": true,
+    "line_padding_bottom": 5,
+    "line_padding_top": 5,
+    "overlay_scroll_bars": "enabled",
+    "material_theme_accent_orange": true,
+    "material_theme_tabs_autowidth": true,
+    /*"font_options": ["antialiased", "subpixel_antialiased"]*/
+}
+
+
+Ya con la escala de la interfaz{
+    "theme": "Material-Theme-Darker.sublime-theme",
+"color_scheme": "Packages/Material Theme/schemes/Material-Theme-Darker.tmTheme",
+    "font_size": 8,
+    "font_options": ["antialiased", "subpixel_antialiased"],
+    "draw_white_space": "all",
+    "ignored_packages":
+    [
+        "Vintage"
+    ],
+    "indent_guide_options":
+    [
+        "draw_normal",
+        "draw_active"
+    ],
+    "index_files": true,
+    "line_padding_bottom": 2,
+    "line_padding_top": 2,
+    "overlay_scroll_bars": "enabled",
+    "material_theme_accent_orange": true,
+    "material_theme_tabs_autowidth": true,
+
+    "ui_scale": 0.6,
+    /*"font_size": 8*/
+    /*"font_options": ["antialiased", "subpixel_antialiased"]*/
+}
+
+
+Mi configuración inicial fue:
+configuration y aca mi archivo de configuracion:
+
+{
+
+    "ignored_packages":
+
+    [
+
+        "Vintage",
+
+    ],
+
+    "index_files": true,
+
+    "color_scheme": "Monokai.sublime-color-scheme",
+
+    "theme": "Default Dark.sublime-theme",
+
+    "font_size": 9,
+
+} 
+
+
+5. En la carpeta database y crear un archivo que se llama, ahi buscara y almacenar las migraciones e información de la BD.
+    database.sqlite
+
+6.  Confirmar instalación
+        php artisan serve --port=7000
+
+En el archivo de configuración .env agregamos
+    
+    SERVER_PORT=7000
+Asi al arrancar: 
+    php artisan serve (utilizara el puerto 7000)    
+
+    Para lograr que Laravel siempre use un puerto específico sin tener que escribirlo cada vez en la terminal, tienes dos caminos principales. Lamentablemente, Laravel no lee el puerto directamente desde una variable estándar como PORT en el .env para el comando serve de forma nativa, pero podemos "trucarlo".
+
+Aquí tienes las mejores soluciones para tu entorno de desarrollo:
+1. El truco del archivo .env (Recomendado)
+
+Aunque php artisan serve no lo busca solo, puedes definirlo en tu .env para tenerlo organizado y luego usar un Alias en tu terminal de Debian.
+
+    Abre tu archivo .env y añade al final:
+    Code snippet
+
+SERVER_PORT=7000
+
+Ahora, abre tu archivo de configuración de la terminal (como usas Debian, probablemente es .bashrc o .zshrc si usas Zsh):
+Bash
+
+nano ~/.bashrc
+
+Añade esta línea al final del archivo:
+Bash
+
+    alias pas='php artisan serve --port=$(grep SERVER_PORT .env | cut -d "=" -f2)'
+
+    Guarda (Ctrl+O, Enter) y sal (Ctrl+X). Luego actualiza tu terminal con source ~/.bashrc.
+
+Resultado: Ahora solo escribes pas en tu terminal y Laravel leerá el puerto directamente de tu .env.
+2. Crear un Comando de Artisan Personalizado
+
+Si prefieres que sea algo "nativo" de Laravel y no dependa de la terminal, puedes crear un comando que sobrescriba el puerto.
+
+    Crea el comando: php artisan make:command CustomServe
+
+    En app/Console/Commands/CustomServe.php, edita el método handle:
+    PHP
+
+    public function handle()
+    {
+        $port = env('SERVER_PORT', 8000);
+        $this->call('serve', ['--port' => $port]);
+    }
+
+    Cambia la firma del comando a protected $signature = 'dev';.
+
+Resultado: Al ejecutar php artisan dev, el servidor arrancará en el puerto que definas en el .env.
+3. La opción "Hardcoded" (Solo si no cambias de puerto nunca)
+
+Si quieres que incluso el comando original php artisan serve use el 7000 por defecto sin pasarle parámetros, tendrías que editar el script de arranque, pero no es recomendable porque se borraría al actualizar Laravel.
+
+Lo más profesional es usar la Opción 1, ya que mantienes tu flujo de trabajo limpio y aprovechas que ya usas Debian para manejar alias potentes.
