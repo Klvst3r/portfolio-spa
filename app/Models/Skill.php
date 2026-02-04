@@ -14,4 +14,9 @@ class Skill extends Model
         'name',
         'color',
     ];
+
+    public function getAvailableBackgrundColors()
+    {
+        
+    }
 }
