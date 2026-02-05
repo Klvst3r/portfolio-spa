@@ -21,12 +21,10 @@ class SkillFactory extends Factory
     {
         $color = $this
             ->faker
-            ->randomElement([Skill::getAvailableBackgrundColors()]); //Faker random element pasado a un array
+            ->randomElement(Skill::getAvailableBackgroundColors()); //Faker random element pasado a un array
         return [
-            'name' => $this->faker->unique()->word(), //No repetir palabras, 
+            'name' => $this->faker->unique()->word(), //No repetir palabras,
             'color' => $color, //Colores soportados por TailwindCSS - JTM - Lista de colores
         ];
     }
-
-    
 }

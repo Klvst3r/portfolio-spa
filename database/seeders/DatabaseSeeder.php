@@ -2,6 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Skill;
+use App\Models\Project;
+
+
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,5 +25,10 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        //Skills
+        Skill::factory(6)->create();
+        //Projects
+        Project::factory(5)->create();
     }
 }

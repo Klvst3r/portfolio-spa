@@ -1,0 +1,22 @@
+Notas sobre Laravel Vite
+Laravel Vite se lanzó con Laravel 9 y pretende reemplazar progresivamente a Laravel Mix.
+
+
+
+Eso significa que no necesariamente tienes que usar Vite ahora mismo, pero es la recomendación.
+
+
+
+Ahora, incluso cuando son un poco diferentes, desde tu punto de vista como desarrollador, no hay una diferencias significativa.
+
+
+
+En general, es cuestión de tener en cuenta que, durante el codigo o cualquier otra fuente, cuando sea vea el uso de npm run dev (con Mix), debes usar con npm run build (su equivalente en Vite). Y, cuando se vea npm run watch (en Mix), usar npm run dev.
+
+
+
+Por lo tanto, estará bien en general, usando npm run build en Laravel Vite.
+
+
+
+Puedes encontrar más detalles sobre Laravel Vite, acá: https://laravel.com/docs/9.x/vite

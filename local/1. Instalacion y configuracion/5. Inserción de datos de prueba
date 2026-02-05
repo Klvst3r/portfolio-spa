@@ -2,3 +2,23 @@
 
 Se emplearan los factories y demas elementos para alimentar a BD
 
+En el modelo vamos a obtyener la lista de colores disponibles gracias a la funcion getAvailableBackgrundColors
+
+Models/Skill.php
+
+
+Ahora con Project
+Models/Project.php
+
+
+
+Recurso Json para los colores
+	resources/costumiztion.json
+
+Caleses para colores de fondo y textos para TailwindCSS, para los proyectos
+
+
+
+
+Repositorio para el archivo:
+	https://github.com/JuanDMeGon/Portafolio-SPA-con-Laravel-Vue.js-Intertia.js-y-Tailwind
