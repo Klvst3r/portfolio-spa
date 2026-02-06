@@ -1,0 +1,1177 @@
+2.1. conociendo Laravel Jetstream
+
+Ya tenemos instaado Jetstream, confirmamos quedado todo bien, exporando los componentes veamos la funcionalidad.
+
+Revisando el tema 1.2 Instalación de Jetstream
+
+Para verificar la funcionalidad de nuestro front-end vamos a revisar la funcionalidad de Jetstream
+
+	$ php artisan jetstream:install
+
+	Posiblemente debamos indicar m¿parametros para condicir al stack a utilizar para utilizar jetstream, podemos ver opciones disponibles con
+
+	$ php jetstream --help
+
+
+	- Livewire Cmponente que se incluye con laravel y PHP, se mantienen mas las cosas en el backend, pero vamos a utlizar inertia.js 
+	- Inertia.js: para mover todo hacia el frontend con vue con componentes de vue en las vistas archivos js, Inertia enlazara el backend con laravel y el frontend con vue, y los estilos con tailwindcss
+
+
+Al enfocarnos en Inertia.js haremos entonces esa configuración.
+	$ php artisan jetstream:install inertia
+
+
+	Generando migraciones necesarias, controladores, vistas, acciones, componentes, por encima de los componentes de laravel los llamados fortify, para la estructura escrencial primaria para el registro autenticación de usuarios.
+
+	 INFO  Discovering packages.  
+
+	  inertiajs/inertia-laravel ............................................. DONE
+	  laravel/fortify ....................................................... DONE
+	  laravel/jetstream ..................................................... DONE
+	  laravel/pail .......................................................... DONE
+	  laravel/sail .......................................................... DONE
+	  laravel/tinker ........................................................ DONE
+	  nesbot/carbon ......................................................... DONE
+	  nunomaduro/collision .................................................. DONE
+	  nunomaduro/termwind ................................................... DONE
+	  tightenco/ziggy ....................................................... DONE
+
+
+	En este pnto se instalara na lista gigante de archivos, bastantes cosas implementadas 
+	- Registro de usuarios
+	- autenticacion 
+	- manejar sesiones
+	- componentes de seguridad
+	- recuperación de contraseñas
+
+	Esto modificara el archivo composer.js agregando los componentes necesarios, Inertia para la parte del backend que es el puente y cambios en el package.json donde estan todas las dependencias relacionadas con inertia, tailwind, vue y todo lo demas todo autamaticamente con un solo comando sin agregar paquete por paquete.
+
+	Se tienen resources, as vistas ya no estan en views, no hay practicamente una vista que se encargara 
+
+	resources/views/app.blade.php //Inicializa todo lo de inertia 
+
+
+
+	Problematica con Instalacin de Iertia
+	-------------------------------------
+
+	Laravel-Inertia:
+Vo a utilizar y migrar un poco del backend netamente a pasarle cierto control a vue con Inertia.js, entonces para mi proyecto (nuevo) lo que hago es:
+$ php artisan jetstream:install inertia
+desplegando e instalando todo, configurando lo necesario hasta que llega un punto donde me detendo y ahi esta la duda.
+
+me manda un error y me da las opciones al final que camino debo tomar?
+
+   INFO  Middleware [app/Http/Middleware/HandleInertiaRequests.php] created successfully.   
+
+npm ERR! code ERESOLVE
+npm ERR! ERESOLVE unable to resolve dependency tree
+npm ERR!  
+npm ERR! While resolving: undefined@undefined
+npm ERR! Found: vite@7.3.1
+npm ERR! node_modules/vite
+npm ERR!   dev vite@"^7.0.7" from the root project
+npm ERR!  
+npm ERR! Could not resolve dependency:
+npm ERR! peer vite@"^5.0.0 || ^6.0.0" from @vitejs/plugin-vue@5.2.4
+npm ERR! node_modules/@vitejs/plugin-vue
+npm ERR!   dev @vitejs/plugin-vue@"^5.0.0" from the root project
+npm ERR!  
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+npm ERR!  
+npm ERR!  
+npm ERR! For a full report see:
+npm ERR! /home/klvst3r/.npm/_logs/2026-02-06T17_01_42_533Z-eresolve-report.txt
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/klvst3r/.npm/_logs/2026-02-06T17_01_42_533Z-debug-0.log
+
+
+ ┌ New database migrations were added. Would you like to re-run your migrations? ┐
+ │ ● Yes / ○ No           
+
+
+ Respuesta y camino a tomar:
+--------------
+El error que estás viendo es un clásico conflicto de versiones de Vite. Laravel te instaló Vite 7, pero el plugin de Vue que viene por defecto en el instalador todavía está pidiendo Vite 5 o 6.
+
+Aquí tienes el camino a seguir para desbloquearte:
+1. El conflicto de NPM (El problema real)
+
+El error ERESOLVE detuvo la instalación de las dependencias de JavaScript. No uses --force ni --legacy-peer-deps todavía, es mejor limpiar y actualizar las versiones en tu package.json.
+
+Sigue estos pasos en tu terminal (usando tu Shell Fish en Debian):
+
+    Abre tu archivo package.json (puedes usar Sublime Text o VS Code).
+
+    Busca la línea de @vitejs/plugin-vue y actualízala a la versión 6.0.0 o superior, que ya soporta Vite 7.
+
+    Alternativamente, puedes forzar la actualización desde la terminal:
+    Bash
+
+(Comando recomandado)
+
+npm install @vitejs/plugin-vue@latest --save-dev
+
+Después, ejecuta la instalación limpia:
+Bash
+
+    npm install
+
+2. La pregunta de las Migraciones
+
+Respecto a la pregunta que te hace Artisan:
+
+    New database migrations were added. Would you like to re-run your migrations?
+
+Selecciona "Yes" (o presiona Enter si está marcado). Jetstream crea tablas necesarias para:
+
+    Sesiones (sessions)
+
+    Tokens de API (si los activaste)
+
+    Equipos (si usaste el flag --teams)
+
+Resumen del flujo de solución
+
+    Migraciones: Dile que Sí en la terminal para que la base de datos quede lista.
+
+    Corregir package.json: Asegúrate de que @vitejs/plugin-vue sea compatible con Vite 7.
+
+    Instalar JS: Ejecuta npm install.
+
+    Compilar: Ejecuta npm run dev para levantar el servidor de Vite.
+
+Un pequeño tip extra
+
+Como usas Debian y Nginx, recuerda que para que Inertia funcione correctamente en desarrollo, el comando npm run dev creará un archivo hot en tu carpeta public. Asegúrate de que los permisos de tu carpeta de proyecto permitan a tu usuario escribir ahí sin problemas.
+
+
+
+
+Migraciones
+------------
+
+Despues de instalar inertia y corregir las veriones de vite, ejecutamos lo siguiente para descargar os paquetes necesarios
+	$ npm install
+
+Despues de ello 
+
+Ejecución de Migraciones
+
+Si no lo habías hecho en el paso anterior cuando Artisan te lo preguntó, corre las migraciones ahora. Esto creará las tablas necesarias para Jetstream (usuarios, sesiones, etc.) en tu base de datos MariaDB:
+Bash
+
+	$ php artisan migrate
+
+3. Compilación de Assets
+
+Una vez que termine la instalación, necesitas levantar el servidor de desarrollo de Vite para que compile tus archivos de Vue en tiempo real:
+Bash
+
+npm run dev
+
+¿Qué sigue ahora?
+
+Al ser un proyecto nuevo con Inertia, notarás un par de cambios clave en la estructura que te serán muy útiles para tu proyecto judicial:
+
+    Rutas: Seguirás usando routes/web.php, pero en lugar de view(), usarás Inertia::render('NombreDelComponente').
+
+    Vistas: Ya no buscarás en resources/views (excepto el app.blade.php base), ahora tu trabajo principal estará en resources/js/Pages.
+
+Un detalle sobre Tailwind
+
+Veo que tienes tanto @tailwindcss/vite ^4.0.0 como tailwindcss ^3.4.0 en tu archivo. Si notas que los estilos no cargan bien, es posible que haya una pequeña fricción entre la versión 4 (que es muy nueva y usa el plugin de Vite directamente) y la 3.
+
+Prueba esto: Accede a tu navegador (usualmente http://localhost:8000 o tu dominio local de Nginx). Si ves la pantalla de bienvenida de Jetstream con estilos correctos, ¡estás listo!
+
+
+	Vistas
+	------
+	Ahora las vistas estan en resources/js
+
+	Ah estaran los componentes de 
+	- jetstream
+		Dentro estan los componentes para un button, input, mostrar error, etiquetas, un modal, todo esto a lo largo del curso.
+
+	Todo esto permite tener una serie de ocmponentes modulares, que se puedef reutilizar construidos, funcinales y todo listo para implementarse, para que solamente nosotros los implementemos adecuadamente.
+
+	Ahora solo debemos incluirlos adecuadamente
+
+	Tambien esta en 
+
+	/app/Actions
+
+	Las acciones de fortify, de Jetstream para registrar usuarios, recuparar, eliminar usuarios, actualizarlos, controlsdors con ellor 
+
+	-Controladores
+	-Middlewares
+
+	LAs vostas de welcome 
+
+	Para ello dentro de las nuevas vistas
+
+	/resources/js/Pages/Welcome.php
+
+	Todo esta modificado, es la vista retornada y las rutas 
+
+
+	Rutas
+	-----
+
+	/resources/js/routes
+
+	web.php
+
+	La raiz cambia un poco por que Inertia renderiza una vista llamada welcome, esta es la que esta y retornara, 
+
+	Aunque aun esta en ejecución php artisan server --port=8000
+
+	Posiblemente existan errores, por que hay algunas cosas adicinales a realiar ya que no solo es preparar la estructura de la bd, si no adicionalmente tenemos que complilar los assets relacionados con Js, ahora todo se movio hacia la parte del front-end la parte de javascript, css y entonces debemos hacernos cargo de usas cosas mas.
+
+
+	Como podremos ver puede que haga falta algunas tablas de jetstream, o laravel utiizan y tambien hay cambios en la carpeta database, nuessvas migraciones 
+
+	- personal access Tokens
+	- sesiones
+
+	Entonces ncestamos ejecutar:
+
+	$ php artisan migrate:fresh --seed  //Insertamos nosestros skils y projects
+
+
+	Podremos refresacar y con esto se soluciona que no existia la tablas ffaltantes d de la Bd. 
+
+	Puede que nos aparezca un error en el navegador que no encuenrra el laravel Mix manifest
+
+	el manifest es el archivo que se genera cuando se compilan los assets del frontend, y como se compilan.
+
+	Laravel Mix tiene un archivo de configuracion webpacl.config y dentro laravel mix que se modifica por jetstream a su instalación le dice.
+
+	El css esta ubicado esn 
+
+	Aunque parece que en lugar de laravel mix Jetstream ahora lo hace a traves de vite.config.js
+
+
+
+	Adios Laravel Mix , Hola Vite:
+	------------------------------
+
+	aravel Mix (Webpack) ha sido reemplazado por Vite como el motor de compilación oficial desde Laravel 9.
+
+Lo que estás viendo en tu archivo vite.config.js es la evolución de cómo se gestionan los activos. Aquí te explico por qué tu razonamiento es correcto y qué hace cada parte:
+1. Adiós Mix, Hola Vite
+
+A diferencia de Laravel Mix, que compilaba todo el proyecto cada vez que hacías un cambio (lo cual era lento en proyectos grandes), Vite no compila todo de golpe. Utiliza módulos ES nativos del navegador para cargar solo lo que necesitas, lo que hace que el refresco sea casi instantáneo.
+2. Análisis de tu vite.config.js
+
+Tu configuración es el "cerebro" que conecta Laravel con Vue:
+
+    laravel() plugin: Este es el reemplazo de mix.js().
+
+        input: 'resources/js/app.js': Es el punto de entrada. Aquí es donde se carga Inertia, Vue y, muy importante, ahora también Tailwind se importa frecuentemente desde el JS o mediante el plugin de CSS.
+
+        refresh: true: Esta es la magia del "Hot Module Replacement". Si cambias un componente de Vue o una ruta de PHP, el navegador se actualiza solo.
+
+    vue() plugin: Le dice a Vite cómo interpretar los archivos .vue. La parte de transformAssetUrls es clave para que, cuando uses una imagen en un componente Vue (<img src="/img/logo.png">), Vite sepa cómo manejar esa ruta correctamente en producción.
+
+3. ¿Dónde quedó el CSS de Tailwind?
+
+Como estás usando versiones muy recientes (Vite 7 y Tailwind 4 según tu package.json), hay un cambio importante:
+
+En las versiones que usabas antes (con Mix), tenías que declarar el CSS explícitamente. Ahora, con el plugin de Tailwind para Vite (@tailwindcss/vite), muchas veces ni siquiera necesitas configurar el archivo tailwind.config.js de la manera tradicional, ya que Tailwind 4 es "Vite-native".
+4. Diferencias clave que notarás en tu flujo:
+
+Característica,			Antes (Laravel Mix),			Ahora (Vite)
+Comando Desarrollo,		npm run watch,					npm run dev
+Comando Producción,		npm run prod,					npm run build
+Etiqueta en Blade,		@mix('css/app.css')				,@vite(['resources/js/app.js'])
+Velocidad				Lenta (re-compila todo),		Instantánea (HMR)
+
+Nota para tu entorno Debian/KDE: Cuando ejecutes npm run dev, Vite levantará un servidor local (normalmente en el puerto 5173). Laravel se comunicará con ese puerto para servir tus componentes Vue. Si usas Nginx como proxy, asegúrate de que ese puerto sea accesible para tu navegador.
+
+
+La compilación ahora se hace para archivos css y archivos js, 
+
+App.js incluye todos los componebtes de tailwind, inicializa inertia elaz js con interttia, inicia inertia y con la ruta llamamos a inertia se comunican el back con el front, esta compilación necesaria se phace entonces con:
+
+	$ npm install
+	$ npm run dev
+
+	Si no tenemos instalado
+
+	instalamos con 
+	$ sudo apt install node
+	$ sudo apt install npm
+
+
+Posibems problemas
+----------------
+Dependencias de las dependencias, que no son compatibles, pero podemos actualizar las veriones en el archivo packages.json recomendable o tamieb en psible correr con una bandera
+
+	$ npm install --legacy.peer-deps
+
+Es decir vamos a permitir que las dependencias de las dependencias, se puedan depender las que sean obsoletas es decir que sean legacy que no esten en la ultima versión si no podemos controlar algo con los paquetes.
+
+Si ha sucedido, y por ello es importante mencionarlo en caso d que surga esto.
+
+Ahor podemos ejecutar
+	$npm run dev
+
+	Para compiar el entrno de desarroloc mmpilando los css y js con los archivos legacy, con esto, podremos ver os btons login y register,
+
+	podremos hace runa prueba de registro
+
+	user: text
+	email: test@email.com
+	passord: desarrollo
+
+En este punto sin hacer abslutament casi nada podremos registrar sesiones, acesar al dashbard, cerrar la sesión, poder acceder al peril, subir contenido, acceder al perfil del usuario, sguridad en dos pasos, salir e iniciar sesión con credenciales de registro.
+
+
+
+En este punto que lo ha hecho jetstream, donde hemos hecho algunas compilacionessdespues de las instalaciones b¿vamos a modificar la vista de welcome.
+
+Quitando las cosas de laravel y enfocandonos en el proyecto real.
+
+
+
+
+Laravel Starter JKit
+Our Vue starter kit provides a robust, modern starting point for building Laravel applications with a Vue frontend using Inertia.
+
+Inertia allows you to build modern, single-page Vue applications using classic server-side routing and controllers. This lets you enjoy the frontend power of Vue combined with the incredible backend productivity of Laravel and lightning-fast Vite compilation.
+
+This Vue starter kit utilizes Vue 3 and the Composition API, TypeScript, Tailwind, and the shadcn-vue component library.
+
+
+Vista Welcome
+-------------
+
+Vamos a simlificar la vista de welcome, vayamos a la zona de los scripts
+
+resources/js/Pages/Welcome.vue
+
+
+
+Configuración, en la parte de los scripts eliminamos
+
+import { Head, Link } from '@inertiajs/vue3';
+
+Anteriormente para Lo que estás notando es la evolución de la sintaxis de Vue 3, específicamente el paso del Options API (más antiguo) al Composition API con <script setup>, que es el estándar actual.
+
+Aquí te aclaro la duda para que no mezcles conceptos:
+1. ¿Por qué ya no ves defineComponents?
+
+En versiones anteriores de Vue o cuando se usaba el Options API, tenías que registrar manualmente cada componente que importabas:
+JavaScript
+
+// Estilo antiguo (Options API)
+export default {
+    components: { Head, Link },
+    props: ['canLogin'],
+    // ...
+}
+
+En la versión que instalaste (Vue 3.3+ con Jetstream), se utiliza <script setup>. Con esta sintaxis:
+
+    No necesitas components: {}: Cualquier componente que importes (como Head o Link) queda disponible automáticamente en el template.
+
+    defineProps es una "macro" de compilación que ya no necesita ser importada; Vue la reconoce por defecto para recibir los datos desde el controlador de Laravel.
+
+2. ¿Qué debes hacer?
+
+Quédate con defineProps. Es la forma más moderna, limpia y eficiente de trabajar en Vue 3.
+
+Si en tu archivo Welcome.vue necesitas usar Head (para el título de la pestaña) o Link (para navegar sin recargar la página), simplemente impórtalos al principio de tu script:
+Code snippet
+
+<script setup>
+import { Head, Link } from '@inertiajs/vue3';
+
+// Tu definición de props que ya tienes (esto está perfecto)
+defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+    laravelVersion: String,
+    phpVersion: String,
+});
+</script>
+
+<template>
+    <Head title="Bienvenido" />
+    
+    <div v-if="canLogin">
+        <Link :href="route('login')" class="text-sm">Log in</Link>
+    </div>
+    
+    <h1>Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})</h1>
+</template>
+
+3. Diferencias clave para tu flujo de trabajo
+
+    Reactividad: En el Composition API, si quieres crear una variable que cambie (como un contador o un filtro de búsqueda para tus tablas del Poder Judicial), usarás const valor = ref(0).
+
+    Claridad: Como estás estudiando en la UNADM, aprender esta sintaxis te pone a la vanguardia, ya que es la que se utiliza profesionalmente en proyectos nuevos de gran escala.
+
+Resumen
+
+No implementes defineComponents. Esa es la "vía vieja". Mantén tu estructura con defineProps dentro de <script setup>. Si el autocompletado de tu editor (VS Code o Sublime) te marca error al no ver las importaciones de Head o Link en el template, simplemente asegúrate de tenerlas en la parte de arriba del script como te mostré.
+
+¿Te gustaría que probemos pasando una variable personalizada desde el archivo routes/web.php para que veas cómo recibirla en ese defineProps?
+
+Ok me quedo encotnces con Composition APi que es la version actual de Vue y como debe quedar entonces mi componente welcome: <script setup>
+
+//import { defineComponent } from 'vue';
+
+// import { Head, Link } from '@inertiajs/vue3';
+
+
+defineProps({
+
+canLogin: {
+
+type: Boolean,
+
+},
+
+canRegister: {
+
+type: Boolean,
+
+},
+
+laravelVersion: {
+
+type: String,
+
+required: true,
+
+},
+
+phpVersion: {
+
+type: String,
+
+required: true,
+
+},
+
+});
+
+
+function handleImageError() {
+
+document.getElementById('screenshot-container')?.classList.add('!hidden');
+
+document.getElementById('docs-card')?.classList.add('!row-span-1');
+
+document.getElementById('docs-card-content')?.classList.add('!flex-row');
+
+document.getElementById('background')?.classList.add('!hidden');
+
+}
+
+</script>
+
+Exactamente, Raúl. Para que tu componente funcione correctamente bajo el estándar de Composition API y aproveche las ventajas de Inertia.js, solo necesitas descomentar las importaciones de Inertia.
+
+Recuerda que Head y Link son esenciales: Head gestiona el <title> y metaetiquetas de la página, y Link permite la navegación SPA (Single Page Application) para que no se recargue el navegador cada que cambias de ruta, algo vital para la fluidez de tus sistemas judiciales.
+
+Aquí tienes cómo debe quedar tu bloque de script:
+
+ en la parte del script de mi componente entoces queda correcto asi:
+
+<script setup>
+
+import { Head, Link } from "@inertiajs/vue3";
+
+
+defineProps({
+
+canLogin: {
+
+type: Boolean,
+
+},
+
+canRegister: {
+
+type: Boolean,
+
+},
+
+laravelVersion: {
+
+type: String,
+
+required: true,
+
+},
+
+phpVersion: {
+
+type: String,
+
+required: true,
+
+},
+
+});
+
+
+function handleImageError() {
+
+document.getElementById("screenshot-container")?.classList.add("!hidden");
+
+document.getElementById("docs-card")?.classList.add("!row-span-1");
+
+document.getElementById("docs-card-content")?.classList.add("!flex-row");
+
+document.getElementById("background")?.classList.add("!hidden");
+
+}
+
+</script>
+
+Es totalmente correcto. Así es exactamente como se ve un componente moderno de Vue 3 con el estándar de Composition API y el ecosistema de Laravel/Inertia.
+¿Por qué está bien?
+
+    Importaciones necesarias: Al importar Head y Link, permites que Vue reconozca esas etiquetas en tu <template>. Sin esto, el navegador intentaría tratarlos como etiquetas HTML normales y no harían nada.
+
+    Uso de Macros: defineProps es una macro de compilación. No necesitas importarla de ningún lado porque Vue sabe que estás en un entorno de <script setup> y la procesa automáticamente.
+
+    Lógica encapsulada: Tu función handleImageError ahora vive directamente en el cuerpo del script. Ya no necesitas meterla dentro de un objeto methods: { ... } como se hacía antes.
+
+Un pequeño consejo de "Pro" para tu sistema en Debian:
+
+Como estás usando Tailwind CSS 4 (según tu package.json), notarás que el uso de ! (como en !hidden) es una forma rápida de aplicar un important. Es muy útil, pero intenta no abusar de ello en tus propios componentes para que el diseño sea más fácil de mantener conforme crezca tu proyecto judicial.
+El siguiente paso lógico
+
+Ahora que tienes el componente listo, asegúrate de que tu ruta en routes/web.php esté enviando esos datos. Debería verse algo así:
+PHP
+
+use Inertia\Inertia;
+use Illuminate\Foundation\Application;
+
+Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+});
+
+
+Tal vez los props no los necesitamos
+
+defineProps({
+    canLogin: {
+        type: Boolean,
+    },
+    canRegister: {
+        type: Boolean,
+    },
+    laravelVersion: {
+        type: String,
+        required: true,
+    },
+    phpVersion: {
+        type: String,
+        required: true,
+    },
+});
+
+
+
+puede quedarse tal vez la de canLogin, canRegister, estas vieen desde la ruta:
+
+
+
+routes/web.php
+
+
+Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
+
+
+
+Estan compartidas con Intertia como una vistua usual podemos quedarnos con los props de Welcomde login y register 
+
+
+Podemos eliminar del template del componente de Welcome 
+
+
+comantamos desde 
+
+<template>
+    <Head title="Welcome" />
+    .
+    .
+    .
+     </div>
+</template>
+
+Para tener un template vacio para agregar nuestros elementos de a plantilla.
+
+Aunque seguimos viendo los componentes de Laravel12, veamos que hacemos al respecto
+
+
+retomamos:
+
+ <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
+                <header
+                    class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3"
+                >
+                    <div class="flex lg:justify-center lg:col-start-2">
+
+conservando la estructura:
+
+     <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
+                <header
+                    class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3"
+                >
+                    <div class="flex lg:justify-center lg:col-start-2">
+                    </div>
+                </header>
+    </div>
+
+
+ahora si refrescamos no pasara nada.
+
+Pareciera que no hicimos ningun cambio, aca es donde vemos a asegurarnos de comprender ya que com esto es Front-end tenemos que comprender que tenemos que volver a compilar
+
+	$ nm run dev
+
+Para compilar los nuevos assets, estamos cambiando Javascript para complar el frnt end y al refrescar veremos la vista renderizada correctamente.
+
+
+
+
+Problemas de Renderizado
+------------------
+
+
+En ocaciones al tener varios proyectos y utiizar el mismo puesto podriamos estar visualizando la vista de otro proyecto y no la vista configurada. para esto me sucedio lo siguiente: y como se soluciono.
+
+Prueba esto rápido: Cambia tu Welcome.vue para que el template sea extremadamente simple y cierra bien la etiqueta:
+Code snippet
+
+<template>
+    <div style="background: red; color: white; padding: 50px;">
+        <h1>¡Hola Raúl, esto es Inertia!</h1>
+    </div>
+</template>
+
+Si al guardar esto y tener npm run dev encendido la pantalla no se pone roja en el navegador, es que el navegador no está conectado al servidor de Vite.
+
+¿Qué te aparece en la terminal cuando ejecutas el npm run dev? ¿Se queda "colgado" esperando cambios o te arroja algún error?
+
+bien limpio la cache y las rutas, despues compilo nuevamente:
+
+ klvst3r    \dev\laravel\portfolio-spa  ➜ (  vilt)   20.19.2   151ms   12:19 PM   
+
+⚡klvst3r ❯❯ npm run dev
+
+
+> dev
+
+> vite
+
+
+Port 5173 is in use, trying another one...
+
+
+ VITE v7.3.1  ready in 439 ms
+
+
+ ➜  Local:   http://localhost:5174/
+
+ ➜  Network: use --host to expose
+
+ ➜  press h + enter to show help
+
+
+ LARAVEL v12.49.0  plugin v2.1.0
+
+
+ ➜  APP_URL: http://localhost
+
+
+me dirige hacia un nuev servidor de laravel + vite, pero me manda esto:
+
+
+
+
+This is the Vite development server that provides Hot Module Replacement for your Laravel application.
+
+
+To access your Laravel application, you will need to run a local development server.
+
+
+
+Artisan Serve
+
+
+Laravel's local development server powered by PHP's built-in web server.
+
+
+
+Laravel Sail
+
+
+A light-weight command-line interface for interacting with Laravel's default Docker development environment.
+
+
+
+Your Laravel application's configured APP_URL is:
+
+
+http://localhost
+
+
+Want more information on Laravel's Vite integration?
+
+
+Read the docs →
+
+Edite el archivo correcto:
+
+resources/js/Pages/Welcome.vue
+
+pero sigo sin ver el conteidno como tengo correidno el servidor por otro lado con:
+
+http://localhost:8000/
+
+esto me vistaiza:
+
+Register
+
+
+Let's get started
+
+Laravel has an incredibly rich ecosystem.
+
+We suggest starting with the following.
+
+Read the Documentation
+
+Deploy now
+
+
+
+Watch video tutorials at Laracasts
+
+entnces ya medio me confundi o no estoy apuntando bien a los archivos o algo en la configuración por que no se renderiza la vista welcome correctamente con las nuevasm modificaciones realizadas.
+
+
+
+¡Tranquilo, Raúl! No estás confundido, lo que pasa es que estás viendo dos servidores distintos y te falta conectar el puente entre ellos.
+
+El mensaje que ves en http://localhost:5174 es normal: es solo el "motor" de Vite diciéndote que está vivo, pero Vite no renderiza tu web, solo sirve los archivos JS y CSS.
+
+Aquí está el problema real y cómo solucionarlo:
+1. El conflicto de Puertos (La clave)
+
+Fíjate en tu consola: Port 5173 is in use, trying another one... -> Local: http://localhost:5174/
+
+Vite intentó abrirse en el puerto 5173 (el estándar), pero como algo ya lo estaba usando, se movió al 5174. Sin embargo, Laravel por defecto busca a Vite en el 5173. Al no encontrarlo, Laravel "se rinde" y te muestra la vista vieja o una versión guardada en caché.
+
+Qué hacer:
+
+    Detén el proceso de npm run dev (Ctrl + C).
+
+    Asegúrate de no tener otras terminales con Vite corriendo.
+
+    Si quieres forzar el puerto original, puedes ejecutar: npm run dev -- --port 5173.
+
+    O mejor aún, deja que use el 5174 pero asegúrate de que Laravel sepa dónde está.
+
+2. ¿Por qué ves la vista vieja en el puerto 8000?
+
+Si en localhost:8000 sigues viendo "Documentation", "Laracasts", etc., es porque Inertia no está entrando en acción.
+
+Revisa tu archivo resources/views/app.blade.php. Debe tener la directiva @vite:
+HTML
+
+<head>
+    ...
+    @routes
+    @vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
+    @inertiaHead
+</head>
+<body class="font-sans antialiased">
+    @inertia
+</body>
+
+3. El sospechoso: welcome.blade.php
+
+Laravel prioriza los archivos .blade.php sobre Inertia si existen en la raíz de views.
+
+    Ve a resources/views/.
+
+    Si existe un archivo llamado welcome.blade.php, bórralo o cámbiale el nombre (por ejemplo a old_welcome.blade.php).
+
+    Laravel debe cargar la base de Inertia (app.blade.php) para que esta a su vez llame a tu componente Welcome.vue.
+
+4. Verifica tu Ruta
+
+En tu archivo routes/web.php, asegúrate de que estás usando Inertia::render:
+PHP
+
+// routes/web.php
+Route::get('/', function () {
+    return Inertia::render('Welcome', [ // 'Welcome' apunta a resources/js/Pages/Welcome.vue
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+    ]);
+});
+
+Resumen para arreglarlo ahora mismo:
+
+    Cierra todas las terminales donde tengas npm run dev.
+
+    Borra el archivo resources/views/welcome.blade.php (si existe).
+
+    Ejecuta npm run dev de nuevo. Asegúrate de que diga puerto 5173. Si vuelve a decir 5174, algo en tu Debian está ocupando el puerto (tal vez otra instancia de tu proyecto).
+
+    Refresca http://localhost:8000.
+
+Tip para tu Shell Fish: Para ver qué proceso está bloqueando el puerto 5173, puedes usar: lsof -i :5173 o fuser 5173/tcp
+
+¿Si borras el welcome.blade.php y refrescas el puerto 8000, te sale algún error de "Vite manifest not found" o simplemente cambia la pantalla?
+
+Revisando mi archivo:
+
+/home/klvst3r/dev/laravel/portfolio-spa/resources/views/app.blade.php
+
+tiene la directiva @vite:
+
+<!DOCTYPE html>
+
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<title inertia>{{ config('app.name', 'Laravel') }}</title>
+
+
+<!-- Fonts -->
+
+<link rel="preconnect" href="https://fonts.bunny.net">
+
+<link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+
+<!-- Scripts -->
+
+@routes
+
+@vite(['resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
+
+@inertiaHead
+
+</head>
+
+<body class="font-sans antialiased">
+
+@inertia
+
+</body>
+
+</html>
+
+
+No existe un archivo Welcome.blade.php en resources/views y en:
+
+routes/web.php
+
+tengo:
+
+<?php
+
+
+use Illuminate\Foundation\Application;
+
+use Illuminate\Support\Facades\Route;
+
+use Inertia\Inertia;
+
+
+Route::get('/', function () {
+
+return Inertia::render('Welcome', [
+
+'canLogin' => Route::has('login'),
+
+'canRegister' => Route::has('register'),
+
+'laravelVersion' => Application::VERSION,
+
+'phpVersion' => PHP_VERSION,
+
+]);
+
+});
+
+
+Route::middleware([
+
+'auth:sanctum',
+
+config('jetstream.auth_session'),
+
+'verified',
+
+])->group(function () {
+
+Route::get('/dashboard', function () {
+
+return Inertia::render('Dashboard');
+
+})->name('dashboard');
+
+});
+
+Todo parece estar configurado correctamente en el código, Raúl. Si el archivo app.blade.php está bien, las rutas apuntan a Inertia y no hay un welcome.blade.php que estorbe, el problema es la conexión entre el puerto 8000 y el puerto de Vite.
+
+Aquí está el diagnóstico de por qué sigues viendo la vista vieja:
+1. El conflicto del Puerto 5173
+
+Vimos que tu consola decía: Port 5173 is in use, trying another one... y se movió al 5174. Cuando esto sucede, Laravel intenta buscar el manifiesto de Vite en el puerto por defecto (5173). Si ahí hay otro proyecto de Laravel corriendo (tal vez una prueba anterior o un proceso colgado), estás viendo el frontend de ese otro proyecto en lugar del actual.
+
+Solución rápida en tu Shell Fish:
+
+    Busca qué proceso tiene secuestrado el puerto:
+    Bash
+
+lsof -i :5173
+
+Mata ese proceso (usa el PID que te salga):
+Bash
+
+    kill -9 <PID>
+
+    Reinicia npm run dev. Debe decir: Local: http://localhost:5173/.
+
+2. La configuración del APP_URL
+
+En tu consola de Vite salió: APP_URL: http://localhost. Si estás usando php artisan serve (que usa el puerto 8000), tu APP_URL en el archivo .env debería ser exactamente ese.
+
+Qué hacer:
+
+    Abre tu archivo .env.
+
+    Asegúrate de que diga: APP_URL=http://localhost:8000 (o http://127.0.0.1:8000).
+
+    Si lo cambias, reinicia el servidor de PHP y el de Vite.
+
+3. El "Caché Fantasma" de Nginx/Navegador
+
+Como usas Debian y probablemente configuraste algo con Nginx o simplemente el navegador está muy aferrado al caché:
+
+    Abre tu navegador en Modo Incógnito.
+
+    Entra a http://localhost:8000.
+
+    Si ahí sí ves el "Bienvenido", entonces solo era caché del navegador. Presiona Ctrl + Shift + R en la pestaña normal para forzar la recarga.
+
+4. Revisa el vite.config.js por si acaso
+
+Asegúrate de que no haya una línea que fuerce un puerto distinto. Debería verse limpio como el que pusimos antes. Si el puerto sigue saltando al 5174, Vite nunca se hablará con Laravel correctamente a menos que configures explícitamente el puerto en el servidor de Vite dentro del config.
+
+Resumen de acción: Lo más probable es que tengas otra instancia de Laravel/Vite corriendo en segundo plano. Al limpiar el puerto 5173 y asegurarte de que npm run dev tome ese puerto, tu componente Welcome.vue debería renderizarse instantáneamente.
+
+¿Si ejecutas lsof -i :5173 te aparece algún proceso activo?
+
+ok estaba cargando otro proyecto de laravel en el puerto 8000 y cnsidere que correspondia al proyecto con inertia, ahora ya veo correctamente la vista del proyecto actual utilice:
+
+lsof -i :8000
+
+
+elimine ese proceso o cerre ese servidor y volvi a levantar el servidor localhost:8000 ahroa veo correctamente la vista con el teto Bienvenido del template del componente Welcome, parece que vamos bien, nueamente ya tengo flujo estable
+
+¡Excelente noticia, Raúl! Era el clásico "conflicto de gemelos". Suele pasar mucho cuando trabajamos en varios proyectos a la vez; el servidor de PHP se queda enganchado y nos hace creer que estamos viendo un código que en realidad no ha cambiado.
+
+Qué bueno que usaste lsof -i :8000, es la herramienta definitiva en Debian para estos casos. Ahora que ya tienes el flujo estable y estás viendo tu componente Welcome.vue renderizado correctamente con Inertia, tienes el terreno listo para empezar lo divertido.
+¿Qué acabas de lograr?
+
+    Sincronización total: Laravel (Backend) está enviando datos a través de Inertia.
+
+    Vite enlazado: Cualquier cambio que hagas ahora en el HTML/CSS de tu componente Vue se reflejará al instante (HMR) sin que tengas que refrescar manualmente.
+
+    Arquitectura Limpia: Ya confirmaste que tu app.blade.php funciona como el contenedor base y tus rutas están dirigiendo el tráfico a los componentes correctos.
+
+Un pequeño ejercicio para confirmar el poder de Inertia
+
+Para que veas cómo viajan los datos del Backend al Frontend sin usar una API, intenta esto en tu routes/web.php:
+
+Cambia el valor de una variable, por ejemplo:
+PHP
+
+return Inertia::render('Welcome', [
+    'status' => 'Conexión Exitosa con el Poder Judicial',
+    // ... tus otras props
+]);
+
+Y en tu Welcome.vue, recíbelo en los defineProps y muéstralo:
+Code snippet
+
+<script setup>
+defineProps({
+    status: String,
+    // ...
+});
+</script>
+
+<template>
+    <h1>{{ status }}</h1>
+</template>
+
+¿Cuál es tu siguiente paso?
+
+Ahora que el puente está construido, ¿te gustaría que:
+
+    Creemos un Layout compartido (para no repetir el menú o el footer en cada página)?
+
+    Empecemos a diseñar una Tabla de Datos con Tailwind para mostrar información (como expedientes o registros)?
+
+    Configuremos el Dashboard para que solo los usuarios autenticados puedan entrar?
+
+
+
+
+Ttulo de la pestaa de titulo de Inicio.
+
+
+ Bien parece que ya funciona correcto, solo tengo una duda.
+
+en mi archivo .env tengo en la siguiente diretva:
+
+APP_NAME=Laravel-Inertia
+
+en resources/views/app.blade.php
+
+<title inertia>{{ config('app.name', 'Laravel') }}</title>
+
+
+Pero en el navegador me aperece
+
+- Laravel-Inertia, parece que hay un dato faltante o ese guien inicial en el titulo de donde proviene?
+
+Ese guion inicial es un detalle clásico de la configuración por defecto de Inertia.js. Proviene de cómo está configurado el título dinámico en tu archivo principal de JavaScript.
+
+Inertia utiliza una función llamada title en el helper de configuración para permitir que cada página (como tu componente Welcome.vue) defina su propio título y lo concatene con el nombre de la aplicación.
+¿De dónde viene el guion?
+
+Busca tu archivo resources/js/app.js. Verás una sección dentro de createInertiaApp que se ve así:
+JavaScript
+
+title: (title) => `${title} - ${appName}`,
+
+El problema: Como en tu componente Welcome.vue actual probablemente no has definido una etiqueta <Head title="Inicio" /> (o la tienes vacía), la variable title llega como un string vacío o indefinido, y el resultado es: - Laravel-Inertia.
+¿Cómo solucionarlo?
+
+Tienes dos caminos dependiendo de cómo prefieras que se vea:
+Opción A: Definir un título en el componente (Recomendado)
+
+En tu archivo Welcome.vue, asegúrate de usar el componente Head que ya importamos:
+Code snippet
+
+<template>
+    <Head title="Bienvenido" /> <div>
+        </div>
+</template>
+
+Opción B: Limpiar el formato en app.js
+
+Si prefieres que si no hay título no se ponga el guion, modifica la lógica en resources/js/app.js:
+JavaScript
+
+// Cambia esto:
+title: (title) => `${title} - ${appName}`,
+
+// Por esto (solo añade el guion si existe un título):
+title: (title) => title ? `${title} - ${appName}` : appName,
+
+¿Por qué existe esto?
+
+Inertia busca que tus aplicaciones SPA se sientan como aplicaciones nativas. Al cambiar de "Bienvenido" a "Dashboard", el título de la pestaña del navegador cambiará automáticamente de "Bienvenido - Laravel-Inertia" a "Dashboard - Laravel-Inertia" sin recargar la página.
+Tip adicional:
+
+Como estás usando la directiva <title inertia> en tu app.blade.php, Laravel e Inertia "se ponen de acuerdo" para que el título sea reactivo. Si borras esa directiva, el título se quedará estático con lo que diga el config de PHP y perderás la capacidad de cambiarlo desde Vue.
+
+y regresamos a los props definidos en la ruta web.js
+
+routes/web.php
+Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        // 'laravelVersion' => Application::VERSION,
+        // 'phpVersion' => PHP_VERSION,
+    ]);
+    //Ejercicio de validación
+    // return Inertia::render('Welcome', [
+    //     'status' => 'Conexión Exitosa con el Poder Judicial',
+    //     // ... tus otras props
+    // ]);
+});
+
+
+
+Entocnes cada vez que haga cambios vite recompilara lo necesario de una mejor forma, entonces si hacemos cambios todo con HMR lo hace 
+
+Podemos hacer
+$ npm run watch 
+
+Y estara cambios en los cambios de las rutas vistas contorladores, deonde reuqiera una compilación y refrescara la compilación y renderizara, ya no necesito volver a recompilar csolo tengo que refrescar en ocaciones.
+
+Los cambios ahora se podran hacer cambios y visualización entimpo real
+
+
+
+
+
+
+Referencias
+----------
+
+Jetstream
+
+	https://jetstream.laravel.com/introduction.html
+
+
+Laravel starter kit
+
+https://github.com/laravel/vue-starter-kit
+
+	Documentación
+		https://laravel.com/docs/12.x/starter-kits#vue
+
+
+
+Vue
+
+Resources
+Vue with TypeScript Guide - Official documentation
+	https://vuejs.org/guide/typescript/overview.html
+
+Tooling Guide - Recommended setup for Vue projects
+	https://vuejs.org/guide/scaling-up/tooling.html
+
+Discussions - Share ideas and get help
+	https://github.com/vuejs/language-tools/discussions
