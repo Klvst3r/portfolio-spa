@@ -13,7 +13,7 @@ Para verificar la funcionalidad de nuestro front-end vamos a revisar la funciona
 	$ php jetstream --help
 
 
-	- Livewire Cmponente que se incluye con laravel y PHP, se mantienen mas las cosas en el backend, pero vamos a utlizar inertia.js 
+	- Livewire Cmponente que se incluye con laravel y PHP, se mantienen mas las cosas en el backend, pero vamos a utlizar inertia.js
 	- Inertia.js: para mover todo hacia el frontend con vue con componentes de vue en las vistas archivos js, Inertia enlazara el backend con laravel y el frontend con vue, y los estilos con tailwindcss
 
 
@@ -23,7 +23,7 @@ Al enfocarnos en Inertia.js haremos entonces esa configuración.
 
 	Generando migraciones necesarias, controladores, vistas, acciones, componentes, por encima de los componentes de laravel los llamados fortify, para la estructura escrencial primaria para el registro autenticación de usuarios.
 
-	 INFO  Discovering packages.  
+	 INFO  Discovering packages.
 
 	  inertiajs/inertia-laravel ............................................. DONE
 	  laravel/fortify ....................................................... DONE
@@ -37,18 +37,18 @@ Al enfocarnos en Inertia.js haremos entonces esa configuración.
 	  tightenco/ziggy ....................................................... DONE
 
 
-	En este pnto se instalara na lista gigante de archivos, bastantes cosas implementadas 
+	En este pnto se instalara na lista gigante de archivos, bastantes cosas implementadas
 	- Registro de usuarios
-	- autenticacion 
+	- autenticacion
 	- manejar sesiones
 	- componentes de seguridad
 	- recuperación de contraseñas
 
 	Esto modificara el archivo composer.js agregando los componentes necesarios, Inertia para la parte del backend que es el puente y cambios en el package.json donde estan todas las dependencias relacionadas con inertia, tailwind, vue y todo lo demas todo autamaticamente con un solo comando sin agregar paquete por paquete.
 
-	Se tienen resources, as vistas ya no estan en views, no hay practicamente una vista que se encargara 
+	Se tienen resources, as vistas ya no estan en views, no hay practicamente una vista que se encargara
 
-	resources/views/app.blade.php //Inicializa todo lo de inertia 
+	resources/views/app.blade.php //Inicializa todo lo de inertia
 
 
 
@@ -157,7 +157,7 @@ Migraciones
 Despues de instalar inertia y corregir las veriones de vite, ejecutamos lo siguiente para descargar os paquetes necesarios
 	$ npm install
 
-Despues de ello 
+Despues de ello
 
 Ejecución de Migraciones
 
@@ -192,7 +192,7 @@ Prueba esto: Accede a tu navegador (usualmente http://localhost:8000 o tu domini
 	------
 	Ahora las vistas estan en resources/js
 
-	Ah estaran los componentes de 
+	Ah estaran los componentes de
 	- jetstream
 		Dentro estan los componentes para un button, input, mostrar error, etiquetas, un modal, todo esto a lo largo del curso.
 
@@ -200,22 +200,22 @@ Prueba esto: Accede a tu navegador (usualmente http://localhost:8000 o tu domini
 
 	Ahora solo debemos incluirlos adecuadamente
 
-	Tambien esta en 
+	Tambien esta en
 
 	/app/Actions
 
-	Las acciones de fortify, de Jetstream para registrar usuarios, recuparar, eliminar usuarios, actualizarlos, controlsdors con ellor 
+	Las acciones de fortify, de Jetstream para registrar usuarios, recuparar, eliminar usuarios, actualizarlos, controlsdors con ellor
 
 	-Controladores
 	-Middlewares
 
-	LAs vostas de welcome 
+	LAs vostas de welcome
 
 	Para ello dentro de las nuevas vistas
 
 	/resources/js/Pages/Welcome.php
 
-	Todo esta modificado, es la vista retornada y las rutas 
+	Todo esta modificado, es la vista retornada y las rutas
 
 
 	Rutas
@@ -225,14 +225,14 @@ Prueba esto: Accede a tu navegador (usualmente http://localhost:8000 o tu domini
 
 	web.php
 
-	La raiz cambia un poco por que Inertia renderiza una vista llamada welcome, esta es la que esta y retornara, 
+	La raiz cambia un poco por que Inertia renderiza una vista llamada welcome, esta es la que esta y retornara,
 
 	Aunque aun esta en ejecución php artisan server --port=8000
 
 	Posiblemente existan errores, por que hay algunas cosas adicinales a realiar ya que no solo es preparar la estructura de la bd, si no adicionalmente tenemos que complilar los assets relacionados con Js, ahora todo se movio hacia la parte del front-end la parte de javascript, css y entonces debemos hacernos cargo de usas cosas mas.
 
 
-	Como podremos ver puede que haga falta algunas tablas de jetstream, o laravel utiizan y tambien hay cambios en la carpeta database, nuessvas migraciones 
+	Como podremos ver puede que haga falta algunas tablas de jetstream, o laravel utiizan y tambien hay cambios en la carpeta database, nuessvas migraciones
 
 	- personal access Tokens
 	- sesiones
@@ -242,7 +242,7 @@ Prueba esto: Accede a tu navegador (usualmente http://localhost:8000 o tu domini
 	$ php artisan migrate:fresh --seed  //Insertamos nosestros skils y projects
 
 
-	Podremos refresacar y con esto se soluciona que no existia la tablas ffaltantes d de la Bd. 
+	Podremos refresacar y con esto se soluciona que no existia la tablas ffaltantes d de la Bd.
 
 	Puede que nos aparezca un error en el navegador que no encuenrra el laravel Mix manifest
 
@@ -250,7 +250,7 @@ Prueba esto: Accede a tu navegador (usualmente http://localhost:8000 o tu domini
 
 	Laravel Mix tiene un archivo de configuracion webpacl.config y dentro laravel mix que se modifica por jetstream a su instalación le dice.
 
-	El css esta ubicado esn 
+	El css esta ubicado esn
 
 	Aunque parece que en lugar de laravel mix Jetstream ahora lo hace a traves de vite.config.js
 
@@ -293,7 +293,7 @@ Velocidad				Lenta (re-compila todo),		Instantánea (HMR)
 Nota para tu entorno Debian/KDE: Cuando ejecutes npm run dev, Vite levantará un servidor local (normalmente en el puerto 5173). Laravel se comunicará con ese puerto para servir tus componentes Vue. Si usas Nginx como proxy, asegúrate de que ese puerto sea accesible para tu navegador.
 
 
-La compilación ahora se hace para archivos css y archivos js, 
+La compilación ahora se hace para archivos css y archivos js,
 
 App.js incluye todos los componebtes de tailwind, inicializa inertia elaz js con interttia, inicia inertia y con la ruta llamamos a inertia se comunican el back con el front, esta compilación necesaria se phace entonces con:
 
@@ -302,7 +302,7 @@ App.js incluye todos los componebtes de tailwind, inicializa inertia elaz js con
 
 	Si no tenemos instalado
 
-	instalamos con 
+	instalamos con
 	$ sudo apt install node
 	$ sudo apt install npm
 
@@ -402,11 +402,11 @@ defineProps({
 
 <template>
     <Head title="Bienvenido" />
-    
+
     <div v-if="canLogin">
         <Link :href="route('login')" class="text-sm">Log in</Link>
     </div>
-    
+
     <h1>Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})</h1>
 </template>
 
@@ -604,13 +604,13 @@ Route::get('/', function () {
 
 
 
-Estan compartidas con Intertia como una vistua usual podemos quedarnos con los props de Welcomde login y register 
+Estan compartidas con Intertia como una vistua usual podemos quedarnos con los props de Welcomde login y register
 
 
-Podemos eliminar del template del componente de Welcome 
+Podemos eliminar del template del componente de Welcome
 
 
-comantamos desde 
+comantamos desde
 
 <template>
     <Head title="Welcome" />
@@ -1133,10 +1133,10 @@ Route::get('/', function () {
 
 
 
-Entocnes cada vez que haga cambios vite recompilara lo necesario de una mejor forma, entonces si hacemos cambios todo con HMR lo hace 
+Entocnes cada vez que haga cambios vite recompilara lo necesario de una mejor forma, entonces si hacemos cambios todo con HMR lo hace
 
 Podemos hacer
-$ npm run watch 
+$ npm run watch
 
 Y estara cambios en los cambios de las rutas vistas contorladores, deonde reuqiera una compilación y refrescara la compilación y renderizara, ya no necesito volver a recompilar csolo tengo que refrescar en ocaciones.
 
@@ -1161,6 +1161,23 @@ https://github.com/laravel/vue-starter-kit
 
 	Documentación
 		https://laravel.com/docs/12.x/starter-kits#vue
+
+
+
+
+
+Inertia + Vue.js
+    Build Modern Laravel Apps Using Inertia.js
+        https://laracasts.com/series/build-modern-laravel-apps-using-inertia-js
+
+
+
+Livewire + Blade
+    Build Modern Laravel Apps Using Livewire
+        https://livewire.laravel.com/screencast/getting_started/installation
+
+
+
 
 
 

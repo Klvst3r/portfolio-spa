@@ -1,0 +1,63 @@
+2. instalar Jetstream con Inertia.js
+
+Instalar dependencia con Jetstearm
+Permite manejar todo lo relacionado registro, auenticación de usuarios.Segundospasos, manejos de equipos, Integrar con un asistente las tecnologias de Vue Inertia y Tailwind
+	$ composer require laravel/jetstream
+
+
+
+Comandos para instalar Jetstream
+    composer create-project laravel/laravel example-app
+    cd example-app
+    composer require laravel/jetstream
+
+
+Install Jetstream With Livewire ​
+    php artisan jetstream:install livewire
+
+    Dark Mode
+    php artisan jetstream:install livewire --dark
+
+    Teams
+    php artisan jetstream:install livewire --teams
+
+
+
+Install Jetstream With Inertia ​
+    php artisan jetstream:install inertia
+
+    Dark Mode ​
+    php artisan jetstream:install inertia --dark
+
+    Teams ​
+    php artisan jetstream:install inertia --teams
+
+
+
+Install Jetstream With Inertia.js
+    php artisan jetstream:install inertia
+
+
+Finalizando la instalación de Jetstream
+npm install
+npm run dev
+npm run build
+php artisan migrate
+
+
+
+php artisan jetstream install (No hay que ejecutarlo soloe s para verificar y que esta disponible)
+	Crera rutas, estilos, controladores, por ello no ahy que instalarlo aun
+
+Referencias:
+	TailwindCSS
+		https://tailwindcss.com/docs/installation/using-vite
+
+	Vue.js
+		https://vuejs.org/guide/introduction.html
+
+	Laravel
+		https://laravel.com/docs/9.x/installation
+
+	Inertiajs
+		https://inertiajs.com/

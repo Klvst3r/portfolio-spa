@@ -1,0 +1,84 @@
+2.2. Conocimiendo TailwindCSS
+
+TailwindCss permitira estabecer los estilos CSS, sin trabajar directamente con CSS, tener un control dinamico.
+
+Especificando el control de los estilos.
+
+Los componentes de Jetstream especifican los estilos que podrian lucir los componentes.
+
+Debemso comprender que es TailwindCSS
+
+
+Usando el buscador podremos referir a algun componente CSS tal como
+	- Flex
+	- Grid
+
+Nos vamos a centrar en Flex aunque se pueden utiizar en conjunto
+
+	- Margen
+	- Padding
+
+
+La saber flex, utilizando Margin y Padding, podremos utilizar
+	- Text Color
+	- Background Color (Fondo del componente)
+
+
+Hay ciertos recorsus integrados (Inicialmente)
+	resoruces/json/Customization.json
+
+Tener coocimiento de esto inicialmente podra ayudarnos a tener mayor comprensión en su integración.
+
+
+Vista Welcome
+------------
+
+Velcome, modificamos ciertas cosas:
+
+Eliminamos el contenido inicial:
+    <Head title="Bienvenido" />
+    <div></div>
+    <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
+        <header
+            class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3"
+        >
+            <!-- <div class="flex lg:justify-center lg:col-start-2">Bienvenido</div> -->
+            <div style="background: red; color: white; padding: 50px">
+                <h1>¡Hola Jefe, esto es Inertia!</h1>
+            </div>
+        </header>
+    </div>
+
+
+Creando completamente desde cero
+
+La estructura princiapl sera:
+	    <header></header>
+
+    <section></section>
+    <section></section>
+
+    <footer></footer>
+
+
+    Cmponentes iniciales.
+
+
+Hacemos cambios y los ejecutamos
+
+	$ php artisan serve
+	$ npm run watch
+
+Ponemos el contenido de esta estructura.
+
+Realizamos la maquetación de los elementos principales de la estructura
+
+Aplicando estilos.
+
+
+
+
+Referencias:
+	https://tailwindcss.com/
+
+Documentación:

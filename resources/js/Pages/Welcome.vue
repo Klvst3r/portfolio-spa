@@ -27,18 +27,19 @@ function handleImageError() {
 </script>
 
 <template>
-    <Head title="Bienvenido" />
-    <div></div>
+    <!-- <Head title="Bienvenido" />
+
     <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
         <header
             class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3"
         >
-            <!-- <div class="flex lg:justify-center lg:col-start-2">Bienvenido</div> -->
+
+        <div class="flex lg:justify-center lg:col-start-2">Bienvenido</div>
             <div style="background: red; color: white; padding: 50px">
                 <h1>¡Hola Jefe, esto es Inertia!</h1>
             </div>
         </header>
-    </div>
+    </div> -->
     <!-- Codigo legacy -->
     <!-- <Head title="Welcome" />
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
@@ -391,4 +392,31 @@ function handleImageError() {
             </div>
         </div>
     </div> -->
+
+    <header class="bg-gray-800 pt-16 h-screen px-72">
+        <div class="h-2/3 flex flex-wrap content-between border-gray-600 pb-36">
+            <p
+                class="border-b-2 font-bold border-gay-400 pb-3 text-2xl text-gray-300 uppercase"
+            >
+                Hola Jefe, esto es Inertia!. I'm software enginner and I would
+                like to work with you
+            </p>
+        </div>
+    </header>
+
+    <section class="bg-gray-200 text-gray-800 px-72 py10 h-screen">
+        <h2 class="text-6xl font-bold pt-3">Skills</h2>
+    </section>
+    <section class="bg-gray-600 text-gray-200 px-72 py10 h-screen">
+        <h2 class="text-6xl font-bold pt-3">Projects</h2>
+    </section>
+
+    <footer
+        class="flex justify-between py-10 px-72 bg-gray-800 text-gray-300 text-xl"
+    >
+        <p>&copy; 2026. All rights reserved.- Made with ❤️ by Klvst3r</p>
+        <div class="flex justify-evenly item-center">
+            Github X Stackoverflow Linkedin
+        </div>
+    </footer>
 </template>
