@@ -1,0 +1,321 @@
+2.3 Inertia y Vue
+
+Vams a utilizar Inertia.js junto con Vue.js
+
+Siguiendo con el recorrdio con los componentes de Ineertia.
+
+Es una buena idea recorrer ambos, Inertia funciona sobre Vue, por elo debemos de utiizar cierta sintaxis y ciertos componentes y propiedades de Vue
+
+Vamos a utilizar que Vue es el lenguaje de programación como si Fuera PHP e Inertia fue ra como el Framework como Laravel.Necesitaremos entonces la sintaxis de PHP y Vue (JS) y la progracion sera Ineertia.
+
+
+
+Inertia.js
+
+Tiene componentes, documetación de Laravel o Rail de Ruby, se utiliza route inertia y en lugar de la acción de un controlador, podremos utiizar inertia render indicando cual sera el componente,
+
+Asi entonces la renderización sera a trave d ela carpeta js,
+
+
+Se hablara sobre
+	- Formularios
+	- Redirección
+	- Lins (construir enlaces),
+		 Mantener el historial de navegación
+
+
+Para ello gracias a Inertia basta con especificar el componente, importar el componente y simplemente poner contenido, debe ser importante desde los pompoennete desde vamos a poner un poqueño omponnete con los Title, Podremos ver un componente con las metaetiquetas del layout principal, el titulo de nuestro componente.
+
+
+Tenemros con esto un codigo modular. vamos a hacaer la modularización. Cn un proceso de desarrollo.
+
+Tenemos Link para permitir y especificar como navehar, dentro de un SPA, asi podremos seguir haciendo uso de la Vista con Welcome, deteniendonos en esta sección.
+
+Links en Inertia
+
+
+La importación de los componentes es mediante el import definimos las propiedades, coomo el propio componente las funcionalidades y atributos, y funcinalidades.
+
+La parte del JavaScript, permite definir los componentes, deonde se define las propiedades de los componentes, funiconalidades y atributos, y propiedades de los atributos
+
+
+Routes, se renderizara los componentes que recibimos.
+
+
+Transitino de Option API a Composition API
+------------------------------------------
+
+
+Ineetia + Vue.
+Para el proyecto de mi portafolio, utilizaremos Ineertia + Vue, entonces anteriormente se utilizaba:
+<script>
+import { defineComponent } from "vue";
+
+export default defineComponent({
+    components: {
+        //
+    },
+
+    props: {
+        canLogin: {
+            type: Boolean,
+        },
+        canRegister: {
+            type: Boolean,
+        },
+    },
+});
+</script>
+
+pero ahora vamos a utilizar:
+<script setup>
+import { Head, Link } from "@inertiajs/vue3";
+
+defineProps({
+    canLogin: {
+        type: Boolean,
+    },
+    canRegister: {
+        type: Boolean,
+    },
+    // laravelVersion: {
+    //     type: String,
+    //     required: true,
+    // },
+    // phpVersion: {
+    //     type: String,
+    //     required: true,
+    // },
+});
+
+function handleImageError() {
+    document.getElementById("screenshot-container")?.classList.add("!hidden");
+    document.getElementById("docs-card")?.classList.add("!row-span-1");
+    document.getElementById("docs-card-content")?.classList.add("!flex-row");
+    document.getElementById("background")?.classList.add("!hidden");
+}
+</script>
+
+
+Es totalmente correcto. Estás haciendo la transición de la Options API (usando defineComponent) a la Composition API con el patrón <script setup>, que es la forma moderna y recomendada de trabajar con Vue 3 e Inertia.
+
+Aquí te explico por qué este cambio es el adecuado para tu portafolio y un par de observaciones para que tu código sea aún más limpio:
+¿Por qué es mejor este enfoque?
+
+    Menos código repetitivo (Boilerplate): Al usar <script setup>, no necesitas exportar un objeto ni registrar componentes manualmente en una propiedad components. Todo lo que importes (como Head y Link) está disponible automáticamente en el template.
+
+    defineProps es un macro: No necesitas importarlo; el compilador de Vue lo reconoce automáticamente dentro de <script setup>.
+
+    Rendimiento: La Composition API con script setup permite una mejor optimización en la compilación y una mejor integración con TypeScript si decides usarlo en el futuro.
+
+Ajustes sugeridos para tu código
+
+Aunque tu lógica es correcta, aquí hay unos puntos para pulir tu implementación:
+
+    Importaciones de Inertia: Ya que estás usando Head y Link en tu script, asegúrate de usarlos en tu <template>. Son esenciales para el SEO y la navegación sin recargar la página.
+
+    Manejo del DOM: En Vue, generalmente intentamos evitar el uso de document.getElementById. Para tu función handleImageError, podrías usar v-bind de clases o refs de Vue para manipular esos elementos de forma más "natural" al framework.
+
+
+
+Comparativa rápida: Antes vs. Después
+------------------------------------
+
+Característica,				Options API (defineComponent),					Composition API (script setup)
+Componentes,				Deben registrarse en components: {},			Se usan directamente tras importar
+Props,						Se definen en el objeto props,					Se definen con el macro defineProps()
+Legibilidad,				"Organizado por opciones (data, methods)",		Organizado por lógica funcional
+
+
+
+Routes
+-----
+
+Si vamos a routes, se renderiza en lel siguiente archivo.
+
+
+routes/web.php
+
+
+Por medio de Inertia se renderiza los componentes
+canLogin, Can Register
+
+Esto es el backend asi se envia desde al backend hacia el frontend, el forntend que manda al vue, es indicando a las propiedades para haacer la implemetación a hacia la vista.
+
+Si definimos un componente tal como:
+<Head title="Welcome" />
+
+Entonces se debe importar
+
+import { Head, Link } from "@inertiajs/vue3";
+
+Los componentes estan en ineetia-vue3
+
+Ahora solo es utilzar el componente
+
+Uso de componentes Applicatin marc,  utlizando en lugar de CColumnas un Grid.
+
+
+El uso de:
+    <jet-application-mark class="h-12 w-auto"></jet-application-mark>
+
+Ya podemos utiizar y reutiizar los componentes, los formularios, como tal para el login, todos esos componentes ahorrara mucho tiempo
+
+Teneindo dos columnas, una con acces al Dashboard, y la otra al login.
+
+Si el usuario ha incido sección para registrarse o hacer login.
+
+si v-if va a canLogin, se tiene definida  . si el suasurio se autentifica, si el usuario eta definido, el suaurio esta definido.
+
+Para cuando el suuario quiera registrarse, usamos el v-else,
+
+Con uso de estilos. separación de componentes. con margen
+
+Los estilos guardan y vemos que sucede. Tanto Login como Register vienen de Link para usarse los enlaces. solo se importan tambien como el head
+
+
+JetApplicationMark
+------------------
+
+Composition API se encuentran, pero hay un detalle importante sobre cómo funciona el autocargado.
+La respuesta corta: Sí, debes importarlo.
+
+Aunque estés usando Composition API, los componentes de Jetstream no son globales por defecto en Vue. A diferencia de las etiquetas HTML estándar (como <div> o <h1>), Vue necesita saber exactamente qué es un <jet-application-mark>.
+
+Sin embargo, hay un cambio en la nomenclatura que debes notar si vienes de versiones más antiguas. En las versiones recientes de Jetstream con Inertia:
+
+    Ya no se usa el prefijo jet-: Ahora los componentes suelen llamarse directamente por su nombre, por ejemplo: ApplicationMark.
+
+    Importación manual: Debes importarlos dentro de tu <script setup>.
+
+Cómo implementarlo correctamente en tu Welcome.vue
+
+Para usar la marca de la aplicación (el logo), tu script debería verse así:
+Code snippet
+
+<script setup>
+import { Head, Link } from "@inertiajs/vue3";
+// Importamos el componente específico desde la carpeta de Jetstream
+import ApplicationMark from '@/Components/ApplicationMark.vue';
+
+defineProps({
+    // ... tus props
+});
+</script>
+
+<template>
+    <Head title="Bienvenido" />
+
+    <ApplicationMark class="h-12 w-auto" />
+
+    <div class="flex lg:justify-center lg:col-start-2">
+        Bienvenido
+    </div>
+</template>
+
+
+Respecto a los componentes de Jetstream en tu proyecto personal, aquí tienes cómo debe quedar la implementación con Composition API:
+Importación y Uso
+
+En la versión actual, el componente ya no usa el prefijo jet-. Debes importarlo con su nombre real desde la carpeta de componentes.
+
+    Importa el componente en el <script setup>.
+
+    Úsalo directamente en el <template>.
+
+Code snippet
+
+<script setup>
+import { Head, Link } from "@inertiajs/vue3";
+// Importación necesaria para Composition API
+import ApplicationMark from '@/Components/ApplicationMark.vue';
+
+defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+});
+</script>
+
+<template>
+    <Head title="Bienvenido" />
+
+    <div class="min-h-screen bg-gray-100">
+        <ApplicationMark class="h-12 w-auto" />
+
+        <div class="p-6">
+            Bienvenido a mi proyecto personal
+        </div>
+    </div>
+</template>
+
+¿Por qué hacerlo así?
+
+Al usar la Composition API, el compilador de Vite necesita que las referencias sean explícitas. Si solo pones la etiqueta sin el import, Vue pensará que es una etiqueta HTML personalizada desconocida y no renderizará nada (o verás un aviso en la consola de tu navegador).
+Un detalle sobre los alias
+
+Recuerda que en tu archivo vite.config.js, el símbolo @ es un alias que apunta a la carpeta resources/js. Por eso, @/Components/ApplicationMark.vue es la ruta abreviada para llegar al archivo.
+
+Para la personalilzación del Logo
+Para personalizarlo, tienes dos caminos dependiendo de qué tanta flexibilidad necesites:
+1. El camino rápido: Editar el componente existente
+
+Jetstream creó un archivo específicamente para que lo modifiques. Si editas ese archivo, el cambio se reflejará en todo el proyecto (login, dashboard, barra de navegación, etc.).
+
+    Abre el archivo: resources/js/Components/ApplicationMark.vue
+
+    Borra el <svg> que viene por defecto (el logo de Laravel).
+
+    Pon tu propio código SVG o una etiqueta <img> con tu logo institucional o personal.
+
+Code snippet
+
+<template>
+    <img src="/img/mi-logo.png" alt="Logo Portfolio" class="h-12 w-auto">
+</template>
+
+2. El camino total: Usar tu propio componente
+
+Si prefieres no tocar los archivos de Jetstream y usar uno creado por ti desde cero, puedes hacerlo perfectamente. Solo recuerda importarlo en tu Welcome.vue.
+¿Por qué te funcionaba con jet-application-mark?
+
+Es probable que en tu app.js (el archivo de inicialización principal) haya una configuración que registra los componentes de Jetstream de forma global con ese prefijo. Sin embargo, para tu proyecto personal, lo más limpio y profesional es usar la importación explícita con Composition API:
+Code snippet
+
+<script setup>
+import MiLogoPropio from '@/Components/MiLogoPropio.vue';
+</script>
+
+<template>
+    <MiLogoPropio class="h-12" />
+</template>
+
+
+
+Todo esto es en el frant-end
+
+
+
+
+
+Devemos
+
+
+
+en el componente head servira para tener una barra de navegación
+
+
+
+
+Referencias:
+https://laravel.com/docs/12.x/starter-kits#vue
+
+
+
+
+
+Referencia:
+	https://inertiajs.com/
+
+Documentación:
+	https://inertiajs.com/docs/v2/getting-started/index
+

@@ -1,29 +1,12 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
+import ApplicationMark from "@/Components/ApplicationMark.vue";
 
+// No necesitamos importar defineProps, ya es global en <script setup>
 defineProps({
-    canLogin: {
-        type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-    // laravelVersion: {
-    //     type: String,
-    //     required: true,
-    // },
-    // phpVersion: {
-    //     type: String,
-    //     required: true,
-    // },
+    canLogin: Boolean,
+    canRegister: Boolean,
 });
-
-function handleImageError() {
-    document.getElementById("screenshot-container")?.classList.add("!hidden");
-    document.getElementById("docs-card")?.classList.add("!row-span-1");
-    document.getElementById("docs-card-content")?.classList.add("!flex-row");
-    document.getElementById("background")?.classList.add("!hidden");
-}
 </script>
 
 <template>
@@ -393,6 +376,42 @@ function handleImageError() {
         </div>
     </div> -->
 
+    <Head title="Welcome" />
+
+    <div
+        class="grid grid-cols-2 text-right py-10 px-72 bg-gray-800 text-gray-300"
+    >
+        <!-- <div>
+            <jet-application-mark class="h-12 w-auto"></jet-application-mark>
+        </div> -->
+
+        <ApplicationMark class="h-20 w-auto" />
+
+        <div v-if="canLogin">
+            <Link
+                v-if="$page.props.user"
+                :href="route('dashboard')"
+                class="text-sm underline"
+            >
+                Dashboard
+            </Link>
+
+            <template v-else>
+                <Link :href="route('login')" class="text-base underline">
+                    Log in
+                </Link>
+
+                <Link
+                    v-if="canRegister"
+                    :href="route('register')"
+                    class="text-base underline place-self-end ml-4"
+                >
+                    Register
+                </Link>
+            </template>
+        </div>
+    </div>
+
     <header class="bg-gray-800 pt-16 h-screen px-72">
         <div class="h-2/3 flex flex-wrap content-between border-gray-600 pb-36">
             <p
@@ -404,10 +423,10 @@ function handleImageError() {
         </div>
     </header>
 
-    <section class="bg-gray-200 text-gray-800 px-72 py10 h-screen">
+    <section class="bg-gray-200 text-gray-800 px-72 py-10 h-screen">
         <h2 class="text-6xl font-bold pt-3">Skills</h2>
     </section>
-    <section class="bg-gray-600 text-gray-200 px-72 py10 h-screen">
+    <section class="bg-gray-600 text-gray-200 px-72 py-10 h-screen">
         <h2 class="text-6xl font-bold pt-3">Projects</h2>
     </section>
 
