@@ -49,17 +49,19 @@
         />
     </svg> -->
 
-    <svg
+    <!-- <svg
         viewBox="0 0 100 100"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         :class="classes"
     >
+
         <path
             d="M50 50 L8 28 L92 28 Z"
             fill="currentColor"
             class="text-gray-700 dark:text-gray-300"
         />
+
 
         <path
             d="M10 31 L46 53 L31 60 Z"
@@ -67,11 +69,13 @@
             class="text-blue-600 dark:text-blue-400"
         />
 
+
         <path
             d="M90 31 L69 60 L54 53 Z"
             fill="currentColor"
             class="text-blue-600 dark:text-blue-400"
         />
+
 
         <path
             d="
@@ -86,13 +90,8 @@
             fill="currentColor"
             class="text-gray-700 dark:text-gray-300"
         />
-    </svg>
-    <!-- <svg
-        viewBox="0 0 100 100"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        class="text-black w-20 h-20"
-    >
+    </svg> -->
+    <svg viewBox="0 0 100 100" fill="currentColor" class="w-20 h-20">
         <path d="M50 50 L8 28 L92 28 Z" />
 
         <path d="M10 31 L46 53 L31 60 Z" />
@@ -110,5 +109,5 @@
             Z
         "
         />
-    </svg> -->
+    </svg>
 </template>

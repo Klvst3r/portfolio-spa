@@ -2,6 +2,10 @@
 import { Head, Link } from "@inertiajs/vue3";
 import ApplicationMark from "@/Components/ApplicationMark.vue";
 
+import Button from "@/Components/Button.vue";
+
+import Section from "@/Components/Section.vue"; //Importamos nuestro propio componente Section.vue
+
 // No necesitamos importar defineProps, ya es global en <script setup>
 defineProps({
     canLogin: Boolean,
@@ -412,27 +416,54 @@ defineProps({
         </div>
     </div>
 
-    <header class="bg-gray-800 pt-16 h-screen px-72">
+    <Section class="bg-gray-800 pt-16 h-screen px-72">
         <div class="h-2/3 flex flex-wrap content-between border-gray-600 pb-36">
             <p
-                class="border-b-2 font-bold border-gay-400 pb-3 text-2xl text-gray-300 uppercase"
+                class="border-b-2 font-bold border-gray-400 pb-3 text-2xl text-gray-300 uppercase"
             >
-                Hola Jefe, esto es Inertia!. I'm software enginner and I would
+                Hola Jefe, esto es Inertia!. I'm software engineer and I would
                 like to work with you
             </p>
         </div>
-    </header>
 
-    <section class="bg-gray-200 text-gray-800 px-72 py-10 h-screen">
+        <div class="flex items-end border-b-2 border-gray-500 pb-2 w-fit">
+            <p class="font-bold mr-5 text-gray-500 text-xl">
+                Want to know more about me?
+                <Button
+                    class="bg-green-700 rounded font-bold text-sm text-gray-200 hover:bg-green-500 ml-2"
+                >
+                    Let's chat
+                </Button>
+            </p>
+        </div>
+
+        <div class="animate-pulse mt-3 text-gray-300 text-center text-7xl">
+            <a href="#skills">&#8675;</a>
+        </div>
+    </Section>
+
+    <Section id="skills" class="bg-gray-200 text-gray-800 h-screen">
         <h2 class="text-6xl font-bold pt-3">Skills</h2>
-    </section>
-    <section class="bg-gray-600 text-gray-200 px-72 py-10 h-screen">
+        <div class="flex justify-center mt-10">
+            <Button
+                class="bg-indigo-800 rounded font-bold text-sm text-gray-200 hover:bg-indigo-700 ml-2"
+            >
+                Get in touch
+            </Button>
+        </div>
+    </Section>
+    <Section class="bg-gray-600 text-gray-200 h-screen">
         <h2 class="text-6xl font-bold pt-3">Projects</h2>
-    </section>
+        <div class="flex justify-center mt-10">
+            <Button
+                class="bg-purple-600 rounded font-bold text-sm text-gray-800 hover:bg-purple-800 ml-2"
+            >
+                Know more
+            </Button>
+        </div>
+    </Section>
 
-    <footer
-        class="flex justify-between py-10 px-72 bg-gray-800 text-gray-300 text-xl"
-    >
+    <footer class="flex justify-between kkbg-gray-800 text-gray-300 text-xl">
         <p>&copy; 2026. All rights reserved.- Made with ❤️ by Klvst3r</p>
         <div class="flex justify-evenly item-center">
             Github X Stackoverflow Linkedin

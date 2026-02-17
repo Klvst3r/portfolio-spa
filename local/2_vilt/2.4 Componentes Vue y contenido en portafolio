@@ -1,0 +1,31 @@
+Los componentes escenciales de Tailwind para Laravel se han integrado con Vue. Aprendimos a utlizar un componente propio asi como lo que integra Inertia.
+
+Ya tienen una barra de navegación con enlaces, vamos a aghregar el call to action.
+
+Por medio de un boton integraado en el perfil ponernos en contacto,
+
+Laravel + Jetstream ya tiene un boton.
+
+
+
+Con el cambio de Options API a Composition API (y el paso de las versiones antiguas de Jetstream a las actuales), hubo una pequeña reorganización en los nombres de los componentes para hacerlos más descriptivos.
+¿Qué pasó con el componente Button?
+
+En las versiones actuales de Laravel Jetstream con Inertia y Vue 3, el componente genérico Button.vue fue efectivamente renombrado o especializado. Ahora, por defecto, Jetstream incluye:
+
+    PrimaryButton.vue: Es el antiguo Button.vue. Es el botón principal con el fondo oscuro (o el color de marca que hayas configurado).
+
+    SecondaryButton.vue: Un botón con bordes, usualmente blanco o gris claro, para acciones secundarias.
+
+    DangerButton.vue: Un botón rojo para acciones destructivas.
+
+Respuesta corta: Sí, el PrimaryButton es el sucesor directo, pero puedes crear tu propio componente base si prefieres la versatilidad de antes o si quieres un diseño único.
+
+
+Tenemos entonces la estructura inicial y estandar de nuestro boton.
+
+Definimos nuestro componente en la carpeta de componentes y lo importamos a Welcome d ela siguiente manera:
+import Button from "@/Components/Button.vue";
+
+
+Colocamos los botones con estilos en el componente principal, pero tambien en las secciones de skill y Projects.

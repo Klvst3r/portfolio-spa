@@ -305,6 +305,59 @@ en el componente head servira para tener una barra de navegación
 
 
 
+Creación de propios ocmponentes vue
+------------------------------------
+
+
+Proyecto Laravel -Inerttia - Vue:
+
+en Welcome.vue importo mi componente
+
+import Section from "@/Components/Section.vue";
+
+por que voy a utulizar un componente en el template tal como:
+
+
+    <Section class="bg-gray-800 pt-16 h-screen px-72">
+
+        <div class="h-2/3 flex flex-wrap content-between border-gray-600 pb-36">
+
+            <p
+
+                class="border-b-2 font-bold border-gay-400 pb-3 text-2xl text-gray-300 uppercase"
+
+            >
+
+                Hola Jefe, esto es Inertia!. I'm software enginner and I would
+
+                like to work with you
+
+            </p>
+
+        </div>
+
+    </Section>
+
+en
+
+Module source URI is not allowed in this document: “http://[::1]:5173/resources/js/Components/Section.vue”.
+
+asi qye definimos nuestro componente en:
+resources/js/Components/Section.vue
+
+
+<template>
+    <section class="py-3 px-72">
+        <slot></slot>
+    </section>
+</template>
+
+
+Podemos utilizar mas componentes como Link, Head
+
+con esto creamos uestro primer componente y lo utilizamos en nuestro template Welcome.
+
+
 
 Referencias:
 https://laravel.com/docs/12.x/starter-kits#vue
