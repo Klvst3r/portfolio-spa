@@ -1,0 +1,742 @@
+Definiendo componentes para mostrar la lista de habilidades en el portafolio.
+
+Componentes.
+
+Ya conociemos los componentes de vue cn inertia.
+
+Implementacion de componentes de sskils.
+-----------------------------------
+
+Representara el estilo.
+
+Welcome.vue
+
+Dentro definimos dentro de cada instancia el color de unl componente.
+
+ <Skill :backgound="skill.color">
+                    {{ skill.name }}
+                </Skill>
+
+Y se define dentro de componentes
+
+Dentro del componente se define una clase dinamica
+
+<div class=""
+        :class="">
+
+Por que es variable que depende de un valor,
+
+
+Este componente tiene una propiedad
+
+section class="flex items-center px-44 py-6 justify-between">
+        <div :class="background" class="h-24 w-24 rounded-full border-double-8">
+            <p>
+                <slot class="text-2xl font-extrabold text-gray-800 mx-1">
+                </slot>
+            </p>
+        </div>
+    </section>
+
+
+
+Asi como Welcome, el caso de Skill define una propiedad.
+
+por elo exportamos ala propiedad en la definicion
+
+
+<script>
+export default {
+    props: {
+        background: ["background"],
+    },
+};
+</script>
+
+
+Al definirla la podemos recibir la propiedad la podemos recibir
+Entonces definimos el skill que es el componente definido en Welcome
+
+
+Ahora definimos el skill en Welcome
+import Skill from "@/Components/Skill.vue";
+
+ahora teemos que enviar la lista de skills, que se tienen en el modelo dese la ruta por ello, se agrega
+
+Haciendo un ajuste en la definición hay que hacer los isugiente:
+
+
+Para lograr que la línea inferior se ajuste exactamente al ancho del contenido (en este caso, hasta donde termina el botón) en lugar de ocupar todo el ancho del contenedor, necesitas cambiar el comportamiento del div que contiene el texto y el botón.
+
+Actualmente, el div es un elemento de bloque por defecto, por lo que se expande al 100% del ancho de la <Section>.
+La Solución: inline-block o w-fit
+
+Debes aplicar la clase w-fit (width: fit-content) al contenedor de la línea. Esto hará que el borde solo crezca hasta donde llegue el botón verde.
+
+Aquí tienes el código corregido y un par de ajustes adicionales en typos de Tailwind que noté:
+Code snippet
+
+<Section class="bg-gray-800 pt-16 h-screen px-72">
+    <div class="h-2/3 flex flex-wrap content-between border-gray-600 pb-36">
+        <p class="border-b-2 font-bold border-gray-400 pb-3 text-2xl text-gray-300 uppercase">
+            Hola Jefe, esto es Inertia!. I'm software engineer and I would
+            like to work with you
+        </p>
+    </div>
+
+    <div class="flex items-end border-b-2 border-gray-500 pb-2 w-fit">
+        <p class="font-bold mr-5 text-gray-500 text-xl">
+            Want to know more about me?
+            <Button class="bg-green-400 rounded font-bold text-sm text-gray-800 hover:bg-green-500 ml-2">
+                Let's chat
+            </Button>
+        </p>
+    </div>
+
+    <div class="animate-pulse mt-3 text-gray-300 text-center text-7xl">
+        <a href="#skills">&#8675;</a>
+    </div>
+</Section>
+
+¿Qué corregimos?
+
+    w-fit: Es la clave. Le dice al div que su ancho debe ser igual al de su contenido interno. Sin esto, el div intenta llenar todo el espacio horizontal disponible.
+
+    Typos en clases:
+
+        Cambié border-gay-400 por border-gray-400.
+
+        Cambié border-gray500 por border-gray-500 (faltaba el guion).
+
+    Alineación del botón: Si sientes que el botón está muy pegado al texto, agregué un ml-2 (margin-left) al componente <Button>.
+
+Un consejo para el diseño
+
+Si quieres que ese bloque de "Want to know more..." esté centrado pero con la línea corta, puedes agregar mx-auto al mismo div que tiene el w-fit.
+
+¿Te gustaría que ajustemos también el comportamiento responsivo para que en pantallas pequeñas no se vea tan apretado por el px-72?
+You said
+
+Bien dentro de la seccion de Skills, en Welcome.vue defino un <Skill>
+
+<div class="grid grid-cols-2">
+
+<div v-for="skill in skills">
+
+<Skill :backgound="skill.color">
+
+{{ skill.name }}
+
+</Skill>
+
+</div>
+
+</div>
+
+
+para ello creo el componente y su definción:
+
+resources/js/Components/Skill.vue
+
+<template>
+
+<section class="flex items-center px-44 py-6 justify-between">
+
+<div :class="background" class="h-24 w-24 rounded-full border-double-8">
+
+<p>
+
+<slot class="text-2xl font-extrabold text-gray-800 mx-1">
+
+</slot>
+
+</p>
+
+</div>
+
+</section>
+
+</template>
+
+
+<script>
+
+export default {
+
+props: {
+
+background: ["background"],
+
+},
+
+};
+
+</script>
+
+
+
+y lo agregamos en las rutas:
+
+<?php
+
+
+use Illuminate\Foundation\Application;
+
+use Illuminate\Support\Facades\Route;
+
+use Inertia\Inertia;
+
+use App\Models\Skill;
+
+
+Route::get('/', function () {
+
+return Inertia::render('Welcome', [
+
+'canLogin' => Route::has('login'),
+
+'canRegister' => Route::has('register'),
+
+'skills' => Skill::all(), ]);
+
+});
+
+
+Route::middleware([
+
+'auth:sanctum',
+
+config('jetstream.auth_session'),
+
+'verified',
+
+])->group(function () {
+
+Route::get('/dashboard', function () {
+
+return Inertia::render('Dashboard');
+
+})->name('dashboard');
+
+});
+
+
+egresando a Welcome importamos el componete
+
+y saus props:
+
+
+<script setup>
+
+import { Head, Link } from "@inertiajs/vue3";
+
+import ApplicationMark from "@/Components/ApplicationMark.vue";
+
+
+import Button from "@/Components/Button.vue";
+
+
+import Section from "@/Components/Section.vue"; //Importamos nuestro propio componente Section.vue
+
+import Skill from "@/Components/Skill.vue";
+
+
+// No necesitamos importar defineProps, ya es global en <script setup>
+
+defineProps({
+
+canLogin: Boolean,
+
+canRegister: Boolean,
+
+skills: Boolean,
+
+});
+
+</script>
+
+
+
+pero me marca error,
+
+Uncaught ReferenceError: B is not defined
+
+<anonymous> http://[::1]:5173/resources/js/Pages/Welcome.vue:16
+
+Welcome.vue:16:5
+
+
+
+
+
+Gemini said
+
+El error Uncaught ReferenceError: B is not defined suele ser un error de sintaxis al procesar el JavaScript, pero en tu caso específico con Vue y Tailwind, el problema principal viene de la forma en que estás manejando las props y las clases dinámicas.
+
+Aquí tienes los puntos que están causando el conflicto:
+1. El error en defineProps (Welcome.vue)
+
+En tu Welcome.vue, definiste skills: Boolean. Sin embargo, desde el controlador de Laravel estás enviando una colección de base de datos (Skill::all()). Al decirle a Vue que espera un Booleano pero recibir un Array/Object, el compilador se confunde al intentar iterar.
+
+Corrección:
+JavaScript
+
+defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+    skills: Array, // Cambiado de Boolean a Array
+});
+
+2. El error en el Componente Skill.vue
+
+Tienes tres detalles críticos aquí que probablemente están causando el error de referencia:
+
+    Typo en la prop: En el v-for escribiste :backgound (falta una "r"), pero en el componente esperas background.
+
+    Definición de Props: La sintaxis props: { background: ["background"] } es incorrecta.
+
+    Clases Dinámicas: Tailwind no puede "adivinar" colores si los pasas como variables completas (ej: bg-red-500) a menos que la clase completa exista en el código.
+
+Así debe quedar resources/js/Components/Skill.vue:
+Code snippet
+
+<template>
+    <div class="flex items-center justify-center p-4">
+        <div :class="background" class="h-24 w-24 rounded-full border-8 border-double flex items-center justify-center">
+            <span class="text-xl font-extrabold text-gray-800 text-center uppercase">
+                <slot></slot>
+            </span>
+        </div>
+    </div>
+</template>
+
+<script setup>
+// Usando script setup para ser consistente con Welcome.vue
+defineProps({
+    background: String,
+});
+</script>
+
+3. Ajuste en Welcome.vue
+
+Asegúrate de pasar la prop correctamente (con la "r" de background):
+Code snippet
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4"> <div v-for="skill in skills" :key="skill.id">
+        <Skill :background="skill.color">
+            {{ skill.name }}
+        </Skill>
+    </div>
+</div>
+
+¿Por qué el error "B is not defined"?
+
+Este error críptico a veces ocurre cuando:
+
+    Hay un error de dedo en las etiquetas de cierre.
+
+    Vite intenta minificar una variable que no existe (como B de un Boolean mal parseado).
+
+    Importante: Verifica que en tu base de datos, el campo color tenga el nombre de la clase completo de Tailwind, por ejemplo: bg-blue-500. Si solo guardas "blue", Tailwind no sabrá qué hacer.
+
+Archivo,Problema,Solución
+Welcome.vue,skills: Boolean,Cambiar a skills: Array
+Welcome.vue,:backgound,Corregir a :background
+Skill.vue,Definición de props,Usar defineProps({ background: String })
+Skill.vue,Clases en <slot>,Las clases no funcionan dentro de <slot>. Ponlas en un <span> o <p> alrededor.
+
+
+Poblar la base de datos
+----------------------
+
+
+
+
+ahora para que Para que tus skills aparezcan en la vista, necesitas "poblar" (llenar) tu base de datos. Como estás usando Laravel con Inertia, tienes tres caminos principales para registrar esa información y que Skill::all() tenga algo que devolver.
+1. El camino rápido: Database Seeders (Recomendado)
+
+Es la mejor forma de tener datos de prueba rápidamente.
+
+    Abre tu terminal y crea un seeder:
+    php artisan make:seeder SkillSeeder
+
+    En el archivo database/seeders/SkillSeeder.php, añade los registros:
+
+PHP
+
+use App\Models\Skill;
+
+public function run(): void
+{
+    Skill::create(['name' => 'Laravel', 'color' => 'bg-red-500']);
+    Skill::create(['name' => 'Vue.js', 'color' => 'bg-emerald-500']);
+    Skill::create(['name' => 'Debian', 'color' => 'bg-rose-700']);
+    Skill::create(['name' => 'Tailwind', 'color' => 'bg-sky-400']);
+}
+
+    Ejecuta el seeder:
+    php artisan db:seed --class=SkillSeeder
+
+2. El camino visual: Tinker
+
+Si quieres agregarlos uno por uno desde la terminal para probar:
+
+    Entra a Tinker: php artisan tinker
+
+    Escribe el comando para crear uno:
+    App\Models\Skill::create(['name' => 'PHP', 'color' => 'bg-indigo-500']);
+
+    Escribe exit para salir. Al recargar tu página, debería aparecer.
+
+3. El camino formal: Crear un Formulario
+
+Si quieres que tu portafolio sea administrable, deberías crear una ruta y una vista para "Crear Skill".
+
+Como eres estudiante de la UNADM y estás enfocado en Software Development, te sugiero este flujo de trabajo para tu proyecto:
+
+    Ruta de API/Web: Un Route::post('/skills', ...) en Laravel.
+
+    Componente de Formulario: Un modal o una página en Vue que use useForm de Inertia para enviar los datos.
+
+    Validación: Asegúrate de que el campo color siempre reciba una clase válida de Tailwind (ej: bg-orange-500).
+
+⚠️ Nota Importante sobre Tailwind (Purge)
+
+Si agregas colores desde la base de datos que no has usado nunca en tus archivos .vue, Tailwind no los incluirá en el CSS final y se verán transparentes.
+
+Para solucionar esto, puedes añadir una "Safe List" en tu tailwind.config.js:
+JavaScript
+
+// tailwind.config.js
+export default {
+  content: [ ... ],
+  safelist: [
+    {
+      pattern: /bg-(red|emerald|rose|sky|indigo|orange|gray)-(400|500|700)/,
+    },
+  ],
+  theme: { ... },
+}
+
+
+Pero ya tenemos el facrtory definido
+Si ya tienes el DatabaseSeeder configurado con factories, solo te falta un pequeño paso para que esos datos "cobren vida" en tu base de datos local (que mencionaste que es SQLite).
+
+Aquí tienes lo que debes hacer:
+1. Ejecutar el Seeder
+
+Abre tu terminal en la carpeta del proyecto y ejecuta el comando de "refresco" de base de datos. Esto borrará las tablas, las volverá a crear y ejecutará el seeder:
+Bash
+
+    php artisan migrate:fresh --seed
+
+2. Verificar el Factory de Skill
+
+Para que los colores de Tailwind funcionen correctamente, asegúrate de que tu Factory de Skill esté generando clases de Tailwind reales.
+
+Revisa database/factories/SkillFactory.php. Debería verse algo parecido a esto para que los colores no fallen:
+PHP
+
+public function definition(): array
+{
+    return [
+        'name' => $this->faker->unique()->word(),
+        // Genera una clase de color aleatoria que Tailwind reconozca
+        'color' => $this->faker->randomElement([
+            'bg-red-500', 'bg-blue-500', 'bg-green-500',
+            'bg-yellow-500', 'bg-purple-500', 'bg-pink-500'
+        ]),
+    ];
+}
+
+3. ¿Por qué podrías seguir sin ver nada? (El problema del Cache)
+
+Si después de hacer el migrate y el seed la pantalla sigue vacía, revisa estos puntos:
+
+    Renderizado de Inertia: En tu controlador o ruta, asegúrate de que estás enviando la variable correctamente.
+
+    Inspección Visual: Abre la consola del navegador (F12) y ve a la pestaña de Vue. Selecciona el componente Welcome y revisa si la prop skills tiene datos.
+
+    Vite: Asegúrate de tener corriendo el servidor de desarrollo para ver los cambios:
+    Bash
+
+    npm run dev
+
+Tip adicional para tu portafolio
+
+Como estás usando Debian y planeas migrar a Google Cloud, recuerda que si usas SQLite en producción, los datos se borrarán cada vez que despliegues si no persistes el archivo .sqlite. Para tu entorno de desarrollo en Tlaxcala está perfecto, pero para el "lab" que mencionaste, considera cambiar a MariaDB como tenías planeado.
+
+
+
+Debemos hacer lo siguiente para arrancar el seeder y verificar el modelo Skill, dentrod del modelo soo hay una pequeña modificación-.
+
+Tengo en mi modelo una definicion siguiente:
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
+
+
+
+class Skill extends Model
+{
+    /** @use HasFactory<\Database\Factories\SkillFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'color',
+    ];
+
+    public static function getAvailableBackgroundColors(): array
+    {
+        // Si el archivo está en resources/resources/json/
+        //$path = resource_path('resources/json/customization.json');
+        $path = resource_path('json/customization.json');
+
+        $elements = json_decode(
+            File::get($path) //se carrga tamnien la funcionalidad de Skill con los colres de fondo y de texto
+        );
+
+
+        return $elements->backgrounds; //obtener los elementos de backgrounds
+    }
+}
+
+
+Se sugeria:
+
+
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Skill extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['name', 'color'];
+
+    public static function getAvailableBackgroundColors()
+    {
+        return [
+            'bg-red-500',
+            'bg-blue-500',
+            'bg-green-500',
+            'bg-yellow-500',
+            'bg-indigo-500',
+            'bg-purple-500',
+            'bg-pink-500',
+            'bg-orange-500',
+        ];
+    }
+}
+
+Pero nuestra definición es mas profesional:
+
+
+El archivo actual es mucho más profesional y escalable que el que yo te sugerí inicialmente.
+
+Mantener los colores en un archivo JSON (customization.json) es una excelente práctica de arquitectura de software porque separa la configuración del código fuente (decoupling). Esto te permitirá cambiar la paleta de colores de tu portafolio en el futuro sin tocar una sola línea de lógica en PHP.
+
+Sin embargo, hay un pequeño detalle técnico en tu código actual que podría causar un error al ejecutar el seeder en tu entorno Debian/WSL:
+1. Ajuste de la ruta (Path)
+
+En tu código tienes:
+$path = resource_path('resources/json/customization.json');
+
+El helper resource_path() ya apunta por defecto a la carpeta resources/. Si tu archivo está en resources/json/customization.json, la ruta se está duplicando y Laravel buscará en resources/resources/json/....
+
+Cambia esa línea a:
+PHP
+
+$path = resource_path('json/customization.json');
+
+2. ¿Por qué no ves los Skills todavía?
+
+Si ya corregiste la ruta y los datos están en el JSON, el motivo por el que no los ves es casi seguro uno de estos dos:
+
+A. Falta ejecutar el Seeder:
+Al haber cambiado el código del Modelo o el JSON, debes volver a poblar la base de datos:
+Bash
+
+    php artisan migrate:fresh --seed
+
+B. El "Safelist" de Tailwind:
+Como te mencioné antes, Tailwind es "agresivo" eliminando estilos que no ve escritos en el HTML/Vue. Si tu JSON tiene bg-blue-500 y tú solo lo usas dinámicamente como :class="background", Tailwind borrará el color azul del archivo CSS final porque no sabe que ese string vendrá de la base de datos.
+
+Para solucionarlo, abre tu tailwind.config.js y asegúrate de que sepa que esos colores son importantes:
+JavaScript
+
+// tailwind.config.js
+export default {
+  content: [
+    './resources/js/**/*.vue',
+    // ...
+  ],
+  safelist: [
+    // Esto obliga a Tailwind a incluir estos colores aunque no los vea en el código
+    {
+      pattern: /bg-(red|blue|green|yellow|indigo|purple|pink|orange|emerald|rose|sky)-500/,
+    },
+  ],
+}
+
+Resumen
+
+    Conserva tu modelo: La lectura del JSON es superior.
+
+    Corrige la ruta: Quita el resources/ extra dentro de resource_path().
+
+    Ejecuta el comando: php artisan migrate:fresh --seed.
+
+    Revisa el JSON: Asegúrate de que los valores en backgrounds sean nombres de clases válidos (ej. bg-green-400).
+
+
+
+Se sugiere:
+
+B. El "Safelist" de Tailwind:
+Como te mencioné antes, Tailwind es "agresivo" eliminando estilos que no ve escritos en el HTML/Vue. Si tu JSON tiene bg-blue-500 y tú solo lo usas dinámicamente como :class="background", Tailwind borrará el color azul del archivo CSS final porque no sabe que ese string vendrá de la base de datos.
+
+Para solucionarlo, abre tu tailwind.config.js y asegúrate de que sepa que esos colores son importantes:
+JavaScript
+
+// tailwind.config.js
+export default {
+  content: [
+    './resources/js/**/*.vue',
+    // ...
+  ],
+  safelist: [
+    // Esto obliga a Tailwind a incluir estos colores aunque no los vea en el código
+    {
+      pattern: /bg-(red|blue|green|yellow|indigo|purple|pink|orange|emerald|rose|sky)-500/,
+    },
+  ],
+}
+
+asi que nuestro archivo
+
+tailwind.config.js tenemos a modificar:
+
+bueno primero hicimos una modificacion en el modelo por la ruta de la definición de los colores personalizados:
+
+$path = resource_path('resources/json/customization.json');
+
+se sugera cmabiara a.
+
+        //$path = resource_path('json/customization.json');
+
+Pero marcaba un error de ruta, por lo que dejamos la ruta original.
+
+Entonces volvimoa a ejecutar:
+
+
+ php artisan migrate:fresh --seed
+
+
+y listo, ya se podia ver los colores personalizados en el portafolio.
+
+
+ Gemini said
+
+¡Perfecto! Ya pasó el seeder sin errores. Eso significa que tu base de datos SQLite ya tiene los 6 registros de skills listos para ser mostrados.
+
+Ahora, para que los veas reflejados en tu navegador, asegúrate de que el flujo de datos desde Laravel hasta Vue esté "limpio". Aquí te dejo el checklist final:
+1. Verifica la prop en Welcome.vue
+
+Asegúrate de que estás recibiendo las skills como un Array y no como un Boolean, ya que el controlador está enviando una colección de modelos.
+JavaScript
+
+// En Welcome.vue
+defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+    skills: Array, // <--- Debe ser Array
+});
+
+2. El Componente Skill.vue
+
+Para que los colores de tu JSON se apliquen, el componente debe usar la prop background. Fíjate que en tu Welcome.vue escribiste :backgound (sin la r), corrígelo a :background.
+
+En Skill.vue:
+Code snippet
+
+<template>
+    <div class="flex items-center justify-center p-4">
+        <div :class="background" class="h-24 w-24 rounded-full border-8 border-double flex items-center justify-center shadow-lg">
+            <span class="text-xs font-extrabold text-gray-800 text-center uppercase px-2">
+                <slot></slot>
+            </span>
+        </div>
+    </div>
+</template>
+
+<script setup>
+defineProps({
+    background: String,
+});
+</script>
+
+3. Tailwind Safelist (Crucial)
+
+Como los colores vienen del JSON y son dinámicos, si no has agregado el safelist a tu tailwind.config.js (como vimos en el paso anterior), los círculos se verán transparentes porque Tailwind "limpió" esos colores del CSS.
+
+    Tip: Si ves los nombres de las skills pero los círculos no tienen color, es 100% problema del safelist.
+
+4. Renderizado en el Grid
+
+En tu Welcome.vue, el bucle debería verse así para que se vea ordenado:
+Code snippet
+
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    <div v-for="skill in skills" :key="skill.id">
+        <Skill :background="skill.color">
+            {{ skill.name }}
+        </Skill>
+    </div>
+</div>
+
+¿Cómo saber si todo está bien?
+
+    Abre tu portafolio en el navegador.
+
+    Si los círculos aparecen con colores, ¡lo logramos!
+
+    Si aparecen círculos pero sin color, revisa el archivo tailwind.config.js y asegúrate de que el npm run dev esté activo.
+
+Ahora ya teemos nuestros skills visibles en el portafolio.
+
+Vamos a darles estilos al texto de los skills.
+
+El componente de Skill.vue queda efinido de la siguiente manera:
+
+<template>
+    <section class="flex items-center justify-center p-4">
+        <div
+            :class="background"
+            class="h-24 w-24 rounded-full border-8 border-double flex items-center justify-center"
+        >
+            <p class="text-2xl font-extrabold text-gray-800 mx-1">
+                <slot></slot>
+            </p>
+        </div>
+    </section>
+</template>
+
+<script setup>
+// Usando script setup para ser consistente con Welcome.vue
+defineProps({
+    background: String,
+});
+</script>
+
+
+Dejamos los estilos con circulos de colores personalizados y el texto de los skills con un tamaño de 2xl y un grosor de fuente extrabold.

@@ -22,6 +22,7 @@ class Skill extends Model
     {
         // Si el archivo está en resources/resources/json/
         $path = resource_path('resources/json/customization.json');
+        //$path = resource_path('json/customization.json');
 
         $elements = json_decode(
             File::get($path) //se carrga tamnien la funcionalidad de Skill con los colres de fondo y de texto

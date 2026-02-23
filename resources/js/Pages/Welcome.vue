@@ -5,11 +5,13 @@ import ApplicationMark from "@/Components/ApplicationMark.vue";
 import Button from "@/Components/Button.vue";
 
 import Section from "@/Components/Section.vue"; //Importamos nuestro propio componente Section.vue
+import Skill from "@/Components/Skill.vue";
 
 // No necesitamos importar defineProps, ya es global en <script setup>
 defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
+    skills: Array,
 });
 </script>
 
@@ -444,6 +446,14 @@ defineProps({
 
     <Section id="skills" class="bg-gray-200 text-gray-800 h-screen">
         <h2 class="text-6xl font-bold pt-3">Skills</h2>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div v-for="skill in skills" :key="skill.id">
+                <Skill :background="skill.color">
+                    {{ skill.name }}
+                </Skill>
+            </div>
+        </div>
         <div class="flex justify-center mt-10">
             <Button
                 class="bg-indigo-800 rounded font-bold text-sm text-gray-200 hover:bg-indigo-700 ml-2"
