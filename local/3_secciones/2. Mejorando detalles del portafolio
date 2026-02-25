@@ -1,0 +1,193 @@
+Mejorando algunos detalles del portafolio
+
+Basado en los estilos iniciales del la parte de Skills, aaprecen una serie de elementos del componente
+
+colores estilos.
+
+Esto es por una caracteristica de tailwind que permite definir clases dinamicas.
+
+Justi in time, JIT lo que hace es una lectura rapida de una serie de elementos o ubucaciones del proyeccto y verifica cuales son los estilos que se estan ocupando, un apadding border.
+
+Tiene sentido ya que toda la capacidad de Tailwind e incluirloas todas generaria un archivo CSS pesado y solo se utilizara lo necesario.
+
+Por eso en la compilaciń solo coge lo necesario y lo que se esta utilizando.
+
+Hasta aca esta bien.
+
+Todo esto esta en la configuración
+
+Tailwind.config.js
+
+En la parte deonde se definen los contenidos
+
+export default {
+    content: [
+        "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
+        "./vendor/laravel/jetstream/**/*.blade.php",
+        "./storage/framework/views/*.php",
+        "./resources/views/**/*.blade.php",
+        "./resources/js/**/*.vue",
+    ],
+
+Que se buscan las clases, vemos las vistas compiladas vemos nuestras vstas.
+
+Entonces podremos ucpar nuestros propios recursos.
+
+Este viene de la Bd y no esta en ninguno de estso archivos, esto es un problema por que entonces Tailwind no lo podra encontrar y no podra hacer uso de esas clases.
+
+Lo que debemos indicar es que tenemos un archivo donde se especifica cuales son tambien, las clases los fondos, los colores de fondo, incluso los iconos que estamos utlilizando
+
+Ese archivo precisamente es.
+
+resources/resources/json/customization.json
+
+
+Aca tenemos que incluir esa configuración para decirle: ve por favor lee ese archivo en particular por ello vamos a incluir esa inea de a siguiente manera en:
+
+Quedando nuestra ultima linea:
+
+export default {
+    content: [
+        "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
+        "./vendor/laravel/jetstream/**/*.blade.php",
+        "./storage/framework/views/*.php",
+        "./resources/views/**/*.blade.php",
+        "./resources/js/**/*.vue",
+        "./resources/json/*.json",
+    ],
+
+
+si queremos ser mas especificos podemos poner
+
+"./resources/json/customization.json",
+
+
+Incluso si tenemos varios archivos de cnfiguración podremos utilizar la primera linea.
+
+ahora en la terminal y por si acaso para hacer.
+
+Y volver a compilar los elementos de js y css.
+
+    npm run dev
+
+Para tener la nueva configuración.
+
+entonces la lista de colores estara disponible en nuestro elementos de Skills
+
+
+Para ver un diseño de colores en el componente Skils queda:
+<template>
+    <div class="flex items-center space-x-4 p-2">
+        <div
+            :class="background"
+            class="h-20 w-20 flex-shrink-0 rounded-full border-8 border-double flex items-center justify-center shadow-sm"
+        >
+            <span class="text-xl font-extrabold text-gray-800">
+                <slot name="icon"></slot>
+            </span>
+        </div>
+
+        <div class="flex-1">
+            <h3
+                class="text-lg font-bold text-gray-700 uppercase tracking-wider"
+            >
+                <slot name="name"></slot>
+            </h3>
+            <p class="text-sm text-gray-500">
+                <slot name="level"></slot>
+            </p>
+        </div>
+    </div>
+</template>
+
+<script setup>
+defineProps({
+    background: {
+        type: String,
+        default: "bg-gray-200 border-gray-400",
+    },
+});
+</script>
+
+
+y el cmponente padre especificamente la seccion de skils queda:
+
+ <Section
+        id="skills"
+        class="bg-gray-200 text-gray-800 min-h-screen px-72 py-20"
+    >
+        <h2 class="text-6xl font-bold pt-3 mb-12">Skills</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10 pl-16">
+            <div v-for="skill in skills" :key="skill.id">
+                <Skill :background="skill.color">
+                    <template #icon>{{ skill.name.substring(0, 2) }}</template>
+                    <template #name>{{ skill.name }}</template>
+                    <!-- <template #level>{{
+                        skill.level || "Professional"
+                    }}</template> -->
+                </Skill>
+            </div>
+        </div>
+
+        <div class="flex justify-center mt-12">
+            <Button
+                class="bg-indigo-800 rounded font-bold text-sm text-gray-200 hover:bg-indigo-700 ml-2"
+            >
+                Get in touch
+            </Button>
+        </div>
+    </Section>
+
+
+Corrigiendo vamos a checar la parte de los enlaces al final
+
+Para ello en el footer que es un Section
+
+Definimos el componente Link para los enlaces del footer.
+
+Preparandolo personalización de los iconos en el archivo.
+    resources/resources/json/customization.json
+
+
+Vamos a buscar heroicons
+
+    https://heroicons.com/
+
+
+Ahi estan todos los posibes iconos que se pueden utiizar, de moento estamos utilizando solo unos cuantos.
+
+Podremos poner una lista diferente,
+Por ejemplo
+    terminal
+
+Para poder utilizar debemos instar el paquete y podremos definir los iconos que queramos utilizar.
+
+    npm install @heroicons/vue
+
+Podremos hacerlo asi.
+
+En terminal.
+    npm run dev
+
+asi se agregara a nuestra ista de dependencias. Entonces podremos encontrarlo en e larchivo package.json
+
+Primero desinstalamos el paquete.
+
+    npm uninstall @heroicons/vue
+
+Ahora podremos instalarlo como una dependencia de desarrollo.
+
+    npm install @heroicons/vue --save-dev
+
+
+esto en el archivo package.json
+
+queda como:
+  "devDependencies": {
+        "@heroicons/vue": "^2.2.0",
+
+
+En este punto ya esta dispnible y como podremos preparar para e terreno para todo el proceso que tenemos escencialmente y como resolvemos esos iconos.
+
+

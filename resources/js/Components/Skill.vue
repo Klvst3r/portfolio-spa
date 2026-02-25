@@ -1,19 +1,32 @@
 <template>
-    <section class="flex items-center justify-center p-4">
+    <div class="flex items-center space-x-4 p-2">
         <div
             :class="background"
-            class="h-24 w-24 rounded-full border-8 border-double flex items-center justify-center"
+            class="h-20 w-20 flex-shrink-0 rounded-full border-8 border-double flex items-center justify-center shadow-sm"
         >
-            <p class="text-2xl font-extrabold text-gray-800 mx-1">
-                <slot></slot>
+            <span class="text-xl font-extrabold text-gray-800">
+                <slot name="icon"></slot>
+            </span>
+        </div>
+
+        <div class="flex-1">
+            <h3
+                class="text-lg font-bold text-gray-700 uppercase tracking-wider"
+            >
+                <slot name="name"></slot>
+            </h3>
+            <p class="text-sm text-gray-500">
+                <slot name="level"></slot>
             </p>
         </div>
-    </section>
+    </div>
 </template>
 
 <script setup>
-// Usando script setup para ser consistente con Welcome.vue
 defineProps({
-    background: String,
+    background: {
+        type: String,
+        default: "bg-gray-200 border-gray-400",
+    },
 });
 </script>

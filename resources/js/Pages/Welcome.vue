@@ -444,17 +444,25 @@ defineProps({
         </div>
     </Section>
 
-    <Section id="skills" class="bg-gray-200 text-gray-800 h-screen">
-        <h2 class="text-6xl font-bold pt-3">Skills</h2>
+    <Section
+        id="skills"
+        class="bg-gray-200 text-gray-800 min-h-screen px-72 py-20"
+    >
+        <h2 class="text-6xl font-bold pt-3 mb-12">Skills</h2>
 
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10 pl-16">
             <div v-for="skill in skills" :key="skill.id">
                 <Skill :background="skill.color">
-                    {{ skill.name }}
+                    <template #icon>{{ skill.name.substring(0, 2) }}</template>
+                    <template #name>{{ skill.name }}</template>
+                    <!-- <template #level>{{
+                        skill.level || "Professional"
+                    }}</template> -->
                 </Skill>
             </div>
         </div>
-        <div class="flex justify-center mt-10">
+
+        <div class="flex justify-center mt-12">
             <Button
                 class="bg-indigo-800 rounded font-bold text-sm text-gray-200 hover:bg-indigo-700 ml-2"
             >
@@ -473,10 +481,33 @@ defineProps({
         </div>
     </Section>
 
-    <footer class="flex justify-between kkbg-gray-800 text-gray-300 text-xl">
+    <footer class="flex justify-between bg-gray-800 text-gray-200 text-xl">
         <p>&copy; 2026. All rights reserved.- Made with ❤️ by Klvst3r</p>
         <div class="flex justify-evenly item-center">
-            Github X Stackoverflow Linkedin
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >Github</Link
+            >
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >X</Link
+            >
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >Stackoverflow</Link
+            >
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >Linkedin</Link
+            >
         </div>
     </footer>
 </template>
