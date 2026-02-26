@@ -15,10 +15,14 @@ export default {
     // AGREGA ESTA SECCIÓN
     safelist: [
         {
-            // Este patrón busca cualquier clase de fondo con nivel 400 o 500
-            // Puedes ajustarlo según los colores que tengas en tu customization.json
+            // Patrón para fondos: bg-color-nivel
             pattern:
-                /bg-(red|blue|green|yellow|indigo|purple|pink|orange|emerald|rose|sky|gray)-(400|500|600|700|800)/,
+                /bg-(red|blue|green|yellow|indigo|purple|pink|orange|emerald|rose|sky|gray|violet)-(100|400|500|600|700|800)/,
+        },
+        {
+            // Patrón para bordes: border-color-nivel (Necesario para tus Skills)
+            pattern:
+                /border-(red|blue|green|yellow|indigo|purple|pink|orange|emerald|rose|sky|gray|violet)-(400|500|600|700|800)/,
         },
     ],
     theme: {

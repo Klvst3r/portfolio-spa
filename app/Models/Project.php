@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,7 +24,7 @@ class Project extends Model
             File::get(resource_path('resources/json/customization.json')) //se carrga tamnien la funcionalidad de Skill con los colres de fondo y de texto
         );
 
-        return $elements->texts;
+        return $elements->backgrounds;
     }
 
     public static function getAvailableIcons(): array

@@ -4,4 +4,176 @@ Ya en este punto tenemos un conocimiento escencial de Tailwind Inercia.js y Vue 
 
 No se ha profundizado.
 
+Implementar ahora los proyectos, arrancamos con un componente independiente, duplicamos skills.vue y lo renombramos a projects.vue
+
+Un proyecto escencialmente tiene un tiulo, uns descripción y un icono con un color.
+
+En la parte izquierda ponemos el proyecto, y en a parte derecha la descripción del proyecto.
+
+Vamos a tene run template
+
+Primero en Project definimos nuestro componente:
+
+<template>
+    <section
+        class="flex items-end px-44 py-6 justify-between border-b border-gray-500/30 hover:bg-gray-500/5 transition-colors"
+    >
+        <div
+            :class="[color]"
+            class="h-24 w-24 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+        >
+            <slot></slot>
+        </div>
+
+        <p class="text-4xl font-extrabold mx-10 flex-1 leading-none uppercase">
+            {{ title }}
+        </p>
+
+        <p
+            class="text-2xl mx-10 flex-1 leading-tight text-gray-400 font-light italic"
+        >
+            {{ description }}
+        </p>
+    </section>
+</template>
+
+<script setup>
+defineProps({
+    title: String,
+    description: String,
+    color: String,
+});
+</script>
+
+
+Luego en el componente padre Welcome.vue
+
+Importamos el componenteimport Project from "@/Components/Project.vue";
+import { BeakerIcon } from "@heroicons/vue/24/solid";
+
+y en el template, seccion de Project
+
+<Section
+        id="skills"
+        class="bg-gray-200 text-gray-800 min-h-screen px-72 py-20"
+    >
+        <h2 class="text-6xl font-bold pt-3 mb-12">Skills</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10 pl-16">
+            <div v-for="(skill, index) in skills" :key="skill.id">
+                <Skill
+                    :background="
+                        skill.color || skillColors[index % skillColors.length]
+                    "
+                >
+                    <template #icon>{{ skill.name.substring(0, 2) }}</template>
+                    <template #name>{{ skill.name }}</template>
+                </Skill>
+            </div>
+        </div>
+
+        <div class="flex justify-center mt-12">
+            <Button
+                class="bg-indigo-800 rounded font-bold text-sm text-gray-200 hover:bg-indigo-700 ml-2"
+            >
+                Get in touch
+            </Button>
+        </div>
+    </Section>
+
+Es importante que en la rutas definamos los proyectos
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Models\Skill;
+use App\Models\Project;
+
+Route::get('/', function () {
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'skills' => Skill::all(),
+        'projects' => Project::all(),
+
+en el modelo de Proyectos cambiamos el color por los fondos del icono.
+
+ public static function getAvailableTextColors(): array
+    {
+        $elements = json_decode(
+            File::get(resource_path('resources/json/customization.json')) //se carrga tamnien la funcionalidad de Skill con los colres de fondo y de texto
+        );
+
+        return $elements->backgrounds;
+    }
+
+
+Volvimos a ejecutar los seeders paa cambiar los colores de la base de datos.
+
+1. Actualizar el Modelo Project.php
+
+Cambia el método para que en lugar de leer texts, lea la propiedad backgrounds del JSON.
+PHP
+
+// app/Models/Project.php
+
+public static function getAvailableTextColors(): array
+{
+    $elements = json_decode(
+        File::get(base_path('resources/json/customization.json'))
+    );
+
+    // Cambiamos $elements->texts por $elements->backgrounds
+    return $elements->backgrounds;
+}
+
+2. Sincronizar la Base de Datos
+
+Como cambiaste el origen de los datos en el modelo, el Factory ahora tomará los valores de bg-. Debes ejecutar este comando en tu terminal para limpiar los datos viejos (los que tenían text-) y meter los nuevos:
+Bash
+
+php artisan migrate:fresh --seed
+
+3. Ajuste de Iconos Dinámicos en Welcome.vue
+
+Veo que en tu JSON los iconos están guardados solo con el nombre (ej. "AcademicCap"). Heroicons en Vue 3 suele requerir el sufijo Icon (ej. AcademicCapIcon).
+
+Para que no te salgan todos iguales con el BeakerIcon, podemos usar el componente dinámico de Vue en tu sección de proyectos dentro de Welcome.vue:
+Code snippet
+
+<div v-for="(project, index) in projects" :key="project.id">
+    <Project
+        :title="project.title"
+        :description="project.description"
+        :color="project.color"
+    >
+        <span class="text-3xl font-black text-white">
+            {{ getIconText(project.title) }}
+        </span>
+    </Project>
+</div>
+
+
+Levanta el servidor de Vite (Entorno de Desarrollo)
+
+Vite necesita estar corriendo en segundo plano para servir los archivos dinámicamente. Abre una terminal en la carpeta de tu proyecto y ejecuta:
+Bash
+
+npm run dev
+
+Nota: Mantén esta terminal abierta mientras trabajas.
+2. Si estás en Producción o quieres una compilación fija
+
+Si prefieres generar los archivos físicamente en la carpeta public/build (que es donde el error dice que no los encuentra), ejecuta:
+Bash
+
+npm run build
+
+Esto creará el archivo manifest.json y los archivos compilados, con lo que el error desaparecerá de inmediato al recargar el navegador.
+
+
+Con esto ya tenemos la seccin de Proyectos lista
+
+Posteriormente trabajaresmos con los iconos de maera diamica.
 

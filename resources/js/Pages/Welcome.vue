@@ -1,20 +1,33 @@
 <script setup>
 import { Head, Link } from "@inertiajs/vue3";
 import ApplicationMark from "@/Components/ApplicationMark.vue";
-
 import Button from "@/Components/Button.vue";
-
-import Section from "@/Components/Section.vue"; //Importamos nuestro propio componente Section.vue
+import Section from "@/Components/Section.vue";
 import Skill from "@/Components/Skill.vue";
+import Project from "@/Components/Project.vue";
+import { BeakerIcon } from "@heroicons/vue/24/solid";
 
-// No necesitamos importar defineProps, ya es global en <script setup>
+// 1. Definimos las propiedades (en minúsculas para coincidir con Laravel)
 defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
     skills: Array,
+    projects: Array, // Asegúrate que Laravel envíe 'projects'
 });
-</script>
 
+const projectColors = [
+    "bg-red-500",
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-purple-500",
+];
+
+// Función para obtener la inicial o siglas (ej: "Laravel" -> "L", "C Algorithms" -> "C")
+const getIconText = (title) => {
+    return title ? title.charAt(0).toUpperCase() : "?";
+};
+</script>
 <template>
     <!-- <Head title="Bienvenido" />
 
@@ -451,13 +464,14 @@ defineProps({
         <h2 class="text-6xl font-bold pt-3 mb-12">Skills</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10 pl-16">
-            <div v-for="skill in skills" :key="skill.id">
-                <Skill :background="skill.color">
+            <div v-for="(skill, index) in skills" :key="skill.id">
+                <Skill
+                    :background="
+                        skill.color || skillColors[index % skillColors.length]
+                    "
+                >
                     <template #icon>{{ skill.name.substring(0, 2) }}</template>
                     <template #name>{{ skill.name }}</template>
-                    <!-- <template #level>{{
-                        skill.level || "Professional"
-                    }}</template> -->
                 </Skill>
             </div>
         </div>
@@ -470,11 +484,26 @@ defineProps({
             </Button>
         </div>
     </Section>
-    <Section class="bg-gray-600 text-gray-200 h-screen">
-        <h2 class="text-6xl font-bold pt-3">Projects</h2>
-        <div class="flex justify-center mt-10">
+    <Section class="bg-gray-600 text-gray-200 min-h-screen">
+        <div class="px-72 pt-16 mb-10">
+            <h2 class="text-6xl font-bold">Projects</h2>
+        </div>
+
+        <div v-for="(project, index) in projects" :key="project.id">
+            <Project
+                :title="project.title"
+                :description="project.description"
+                :color="project.color"
+            >
+                <span class="text-3xl font-black text-white">
+                    {{ getIconText(project.title) }}
+                </span>
+            </Project>
+        </div>
+
+        <div class="flex justify-center mt-16">
             <Button
-                class="bg-purple-600 rounded font-bold text-sm text-gray-800 hover:bg-purple-800 ml-2"
+                class="bg-purple-600 rounded font-bold text-sm text-gray-800 hover:bg-purple-800 px-10 py-3"
             >
                 Know more
             </Button>
