@@ -2,6 +2,38 @@
 
 Al tener Laravel que fue el proyecto se agregaran alcunos ptros paquetes, en el orden de instalación los clocaremos por aca
 
+Lo primero al clonar el proyecto del repositorio es instalar las dependencias de composer
+
+1. Nos ubicamos en la carpeta del proyecto
+	$ cd portfolio-spa
+
+2. Instalación de composer
+	$ composer install
+	
+3. Vamos ca copiar el archivo .env.example y lo pegamos como .env
+	$ cp .env.example .env
+
+4. Creamos la llave del proyecto
+	$ php artisan key:generate
+
+
+5. En la carpeta database y crear un archivo que se llama, ahi buscara y almacenar las migraciones e información de la BD.
+    touch database/database.sqlite	
+
+6. Verificar que .env tiene DB_CONNECTION=sqlite
+
+7. Vamos ejecutar las migraciones
+	$ php artisan migrate
+
+8. Arrancamos el servidor de Laravel en el puerto elegido (7000)	
+	$ php artisan serve --port=7000
+
+Ahora podremos pasar el tema de Jetstream	
+
 El primero es Jetstream
+Ejemplo:
 	$  composer require laravel/jetstream (ver 5.4)
+
+
+	$ composer require laravel/jetstream
 	
