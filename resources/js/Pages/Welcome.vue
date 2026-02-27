@@ -5,15 +5,27 @@ import Button from "@/Components/Button.vue";
 import Section from "@/Components/Section.vue";
 import Skill from "@/Components/Skill.vue";
 import Project from "@/Components/Project.vue";
-import { BeakerIcon } from "@heroicons/vue/24/solid";
+//import { BeakerIcon } from "@heroicons/vue/24/solid";
+import { defineAsyncComponent } from "vue";
 
-// 1. Definimos las propiedades (en minúsculas para coincidir con Laravel)
-defineProps({
+// Importamos todos los iconos de Heroicons Solid
+import * as SolidIcons from "@heroicons/vue/24/solid";
+
+// 1. Definimos las propiedades correctamente
+const props = defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
     skills: Array,
-    projects: Array, // Asegúrate que Laravel envíe 'projects'
+    projects: Array, 
 });
+
+// 2. Convertimos el antiguo "method" en una función normal
+// Nota: En script setup no usamos "this", usamos la constante "props"
+const getIcon = (iconName) => {
+    // Si iconName es "Beaker", buscamos "BeakerIcon" en el objeto SolidIcons
+    const name = `${iconName}Icon`;
+    return SolidIcons[name] || SolidIcons.QuestionMarkCircleIcon; // Icono por defecto si no existe
+};
 
 const projectColors = [
     "bg-red-500",
@@ -23,7 +35,6 @@ const projectColors = [
     "bg-purple-500",
 ];
 
-// Función para obtener la inicial o siglas (ej: "Laravel" -> "L", "C Algorithms" -> "C")
 const getIconText = (title) => {
     return title ? title.charAt(0).toUpperCase() : "?";
 };
@@ -395,7 +406,7 @@ const getIconText = (title) => {
         </div>
     </div> -->
 
-    <Head title="Welcome" />
+     <Head title="Welcome" />
 
     <div
         class="grid grid-cols-2 text-right py-10 px-72 bg-gray-800 text-gray-300"
@@ -485,20 +496,30 @@ const getIconText = (title) => {
         </div>
     </Section>
     <Section class="bg-gray-600 text-gray-200 min-h-screen">
-        <div class="px-72 pt-16 mb-10">
-            <h2 class="text-6xl font-bold">Projects</h2>
-        </div>
+    <div class="px-72 pt-16 mb-10">
+        <h2 class="text-5xl font-bold">Projects</h2>
+    </div>
 
-        <div v-for="(project, index) in projects" :key="project.id">
-            <Project
-                :title="project.title"
-                :description="project.description"
-                :color="project.color"
-            >
-                <span class="text-3xl font-black text-white">
+    <div class="space-y-7 px-7">
+    <div v-for="(project, index) in projects" :key="project.id">
+        <Project
+            :title="project.title"
+            :description="project.description"
+            :color="project.color"
+        >
+                <!-- <span class="text-3xl font-black text-white">
                     {{ getIconText(project.title) }}
-                </span>
-            </Project>
+                </span> -->
+                <!-- <BeakerIcon></BeakerIcon> -->
+                <component 
+                :is="getIcon(project.icon_name)" 
+                class="h-8 w-8 text-white" 
+            />
+            
+            <!-- <span class="ml-2">{{ project.title }}</span> -->
+        </Project>
+            
+        </div>
         </div>
 
         <div class="flex justify-center mt-16">

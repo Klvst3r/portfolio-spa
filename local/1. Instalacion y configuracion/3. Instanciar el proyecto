@@ -28,6 +28,18 @@ Lo primero al clonar el proyecto del repositorio es instalar las dependencias de
 8. Arrancamos el servidor de Laravel en el puerto elegido (7000)	
 	$ php artisan serve --port=7000
 
+Laravel - Jetstream
+-------------------
+Uno de los componentes de autenticación es Jetstream, proporciona el kit de inicio necesarios para login, registro de usuarios, panel de control
+
+	- Registro de usuarios
+	- autenticacion
+	- manejar sesiones
+	- componentes de seguridad
+	- recuperación de contraseñas
+
+
+
 Ahora podremos pasar el tema de Jetstream	
 
 El primero es Jetstream
@@ -37,3 +49,89 @@ Ejemplo:
 
 	$ composer require laravel/jetstream
 	
+Ejecución de Migraciones y datos semilla	
+	$ php artisan migrate --seed
+
+Si ya teniamos construido la Bd y los datos semilla reconstruimos la BD
+	$ php artisan migrate:fresh --seed
+
+
+Laravel Inertia
+----------------
+
+Laravel tiene dos caminos para trabajar del lado del front-end.
+
+El primero es utilizar Laravel + Livewire con Blade
+Y elsegundo es utilizar Laravel + Ineetia.js con vista en Vue.
+
+Es el segundo camino el que eligiremos para nuestro proyecto, por eso es que es necesario instalar el paquete de Inertia.js, para trabajar con Vue, y el motor vite.
+
+Ejecutamos:
+
+	$ php artisan jetstream:install inertia
+
+El ejecutar este comando, se modificara el archivo composer.js agregando los componentes necesarios, Inertia para la parte del backend que es el puente y cambios en el package.json donde estan todas las dependencias relacionadas con inertia, tailwind, vue y todo lo demas todo autamaticamente con un solo comando sin agregar paquete por paquete.
+
+	Se tienen resources, as vistas ya no estan en views, no hay practicamente una vista que se encargara
+
+	resources/views/app.blade.php //Inicializa todo lo de inertia	
+
+
+Despues de instalar inertia y corregir las veriones de vite, ejecutamos lo siguiente para descargar os paquetes necesarios
+	$ npm install
+
+Nota para tu entorno Debian/KDE: Cuando ejecutes npm run dev, Vite levantará un servidor local (normalmente en el puerto 5173). Laravel se comunicará con ese puerto para servir tus componentes Vue. Si usas Nginx como proxy, asegúrate de que ese puerto sea accesible para tu navegador.
+
+
+La compilación ahora se hace para archivos css y archivos js,
+
+App.js incluye todos los componebtes de tailwind, inicializa inertia elaz js con interttia, inicia inertia y con la ruta llamamos a inertia se comunican el back con el front, esta compilación necesaria se phace entonces con:
+
+	$ npm install
+	$ npm run dev
+
+	Si no tenemos instalado
+
+	instalamos con
+	$ sudo apt install node
+	$ sudo apt install npm	
+
+
+Restaurar Archivos clave
+-----------------------
+
+Es muy común que, al instalar Jetstream con Inertia, el instalador sobrescriba archivos clave como Welcome.vue y la ruta principal en web.php. No es necesario quitar Inertia; de hecho, es mejor aprovecharlo, ya que es el "puente" que estás usando para conectar Laravel con Vue 3 en tu portafolio.
+
+Aquí tienes cómo recuperar tu diseño anterior sin perder la funcionalidad de Jetstream:
+1. Recuperar tu código de Welcome.vue
+
+Jetstream reemplaza el contenido de resources/js/Pages/Welcome.vue (y a veces crea un componente en Components/Welcome.vue).
+
+Lo que debes hacer:
+
+    Ve a tu historial de Git.
+
+    Recupera el código que tenías originalmente en tu vista de bienvenida.
+
+    Pégalo en resources/js/Pages/Welcome.vue.
+
+    Ojo: Asegúrate de que el archivo esté en la carpeta Pages, ya que Inertia busca las vistas que retornas desde el controlador específicamente en esa ruta.
+
+Uno de los componentes que se sobreescribe es el 
+
+ApplicationMarck.vue en la seccion de componentes, en el se define el logo del proyecto, y se utiliza en la mayoria de las secciones por ello es necesario actualizarlo segun nuestro componente definido para nuestra marca.
+
+
+2. Ajustar la ruta en routes/web.php
+
+El instalador de Jetstream suele cambiar la ruta / para que apunte a la página de bienvenida de Laravel/Inertia por defecto
+
+En caso necesario podria recompilarse los assets de Ineetia
+	$npm run dev
+
+Volvemos a levantar nuestro servidor de Laravel y problemamos en el Navegador.
+
+	$ php artisan serve --port=7000
+
+Verificamos el resultado en el nacegador.
+	http://localhost:7000/	

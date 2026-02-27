@@ -259,7 +259,7 @@ Prueba esto: Accede a tu navegador (usualmente http://localhost:8000 o tu domini
 	Adios Laravel Mix , Hola Vite:
 	------------------------------
 
-	aravel Mix (Webpack) ha sido reemplazado por Vite como el motor de compilación oficial desde Laravel 9.
+	Laravel Mix (Webpack) ha sido reemplazado por Vite como el motor de compilación oficial desde Laravel 9.
 
 Lo que estás viendo en tu archivo vite.config.js es la evolución de cómo se gestionan los activos. Aquí te explico por qué tu razonamiento es correcto y qué hace cada parte:
 1. Adiós Mix, Hola Vite

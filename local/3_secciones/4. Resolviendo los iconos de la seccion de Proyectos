@@ -1,0 +1,65 @@
+Al final de la seccion de Projectos tebemos resultados visualizados de los proyectos, con subtitulos descripcion e iconomos, pero nos falta la seccion del icono que debe ser dinamico,
+
+En la Base de datos solo estamos guardando el nmbre del icono de la lista posoibe de iconos, que tenemos definido,
+
+Ahora vamos a utilizar uyn componente que se utiliza a traves de etiquetas de manera dinamica, para que con el nombre de la etiqueta tiene que ser icono y dinamico. 
+
+Esto se resuelve en tiempo real en tiempo de ejecución, es decir El sistema pregunta cual es el nombre del icono y traerlo, de la lista de todos los posibles paquetes.
+
+Para ello se introduce el concepto de componente asincrono, que es una funcionalidad que ya viene con vue, es igual a los componentes, pero asincrono, es decir se resuelve en tiempo real o en tiempo de ejecucion.
+
+Componentes dinamicos.
+
+Se refieren a que su nombre proviene de cualquier cosa. empezamos en Welcome.vue y por medio de una propiedad is puede ser cualquier componente, y podremos definirlo de una variable podremos obtenerlo desde una vista, desde otro controlador, desde la bd o incluso que una fucnion misma lo pueda resolver.
+
+
+A traves de una propieda de nuestro proyecto, eso es lo que haremos com una funcion llamama 
+
+componentName(index), 
+Esto significa que traremos dentro de un index a traves de un ciclo for. para ello haremos en Welcome lo siguiente.
+
+Cambiamos el componente del proyecto con el indice del arreglo que recorre en la lista de proyectos que estan en la bd.
+
+ <Section class="bg-gray-600 text-gray-200 min-h-screen">
+    <div class="px-72 pt-16 mb-10">
+        <h2 class="text-5xl font-bold">Projects</h2>
+    </div>
+
+    <div class="space-y-7 px-7">
+    <div v-for="(project, index) in projects" :key="project.id">
+        <Project
+            :title="project.title"
+            :description="project.description"
+            :color="project.color"
+        >
+                <!-- <span class="text-3xl font-black text-white">
+                    {{ getIconText(project.title) }}
+                </span> -->
+                <!-- <BeakerIcon></BeakerIcon> -->
+                <component 
+                :is="getIcon(project.icon_name)" 
+                class="h-8 w-8 text-white" 
+            />
+            
+            <!-- <span class="ml-2">{{ project.title }}</span> -->
+        </Project>
+            
+        </div>
+        </div>
+
+        <div class="flex justify-center mt-16">
+            <Button
+                class="bg-purple-600 rounded font-bold text-sm text-gray-800 hover:bg-purple-800 px-10 py-3"
+            >
+                Know more
+            </Button>
+        </div>
+    </Section>
+
+
+Ahora podremos definir la fucnionalidad de este componente, haciendose de manera asincrona:
+
+Se define dentro de la seccion del script
+
+
+Y finalmente arreglamos los tamaños del texto en el componente Project.vue para los titulos del proyecto, con esto podremos concluir con la presentación de la seccion del proyecto.
