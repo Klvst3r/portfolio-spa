@@ -1,0 +1,186 @@
+Ahora e las Secciones de Skils y Proyectos tenemos los Call to actions o bonotes para para que los cleintes se pongan en contacto, para ello tiene que presionar un boton y tiene que suceder algo, ingresar losdatos ponerse en ocntacto eso es lo que hacremos.
+
+El look and fell que es un modal toma precedencia sobre todo lo demas, la ventaja es que ya hay dos componentes de Jetstream que vienen con el que es el modal y el sgundo es el input, que utilizaremos con un formulario.
+
+con Modal.vue e Input.vue
+Hay un pequeño cambioi para nuestro portafolio a Marzo de 2026.
+
+ Ahora en nuestro portafolio SPA con Laravel Inertia y vue, vamos a utilizar dos componentes, anteriormente habia antes dos componentes con Option api, ahora con composition api ya no estan precisamente asi, esta Modal.vue, y otro que se llamaba input.vue, pero ahora hay una que se llema inputLabel.vue, sera el mismo para utilizarlo en mi formulario de contacto?
+Gemini said
+
+Es muy probable que no sea el mismo. En la transición de las plantillas clásicas de Jetstream/Breeze (Option API) a las versiones más modernas con Composition API, los componentes se volvieron más atómicos y específicos.
+
+Bueno el Inputo que era todo en uno ahora se subdivide en tres componentes.
+
+- InputLabel.vue
+- TextInput.vue
+- InputError.vue
+
+
+
+
+Aquí te explico la diferencia para que no te confundas al armar tu formulario de contacto en klvst3r.me:
+1. La diferencia entre los componentes
+
+Anteriormente, Input.vue solía ser un componente "todo en uno" o simplemente el campo de texto. Ahora se dividen así:
+
+    InputLabel.vue: Solo contiene la etiqueta <label>. Su única función es mostrar el texto (ej. "Nombre", "Correo") y gestionar el atributo for para que al dar clic se enfoque el input.
+
+    TextInput.vue (o similar): Es el antiguo Input.vue. Contiene el <input type="text"> con los estilos de Tailwind y el v-model.
+
+    InputError.vue: El componente especializado para mostrar los mensajes de validación que regresan de Laravel.
+
+2. Cómo estructurar tu Formulario de Contacto
+
+Para tu formulario de contacto usando Composition API y los nuevos componentes, la estructura ideal dentro de tu página de Vue debería verse así:
+Code snippet
+
+<script setup>
+import { useForm } from '@inertiajs/vue3';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue'; // Revisa si se llama así en tu carpeta
+import InputError from '@/Components/InputError.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+
+const form = useForm({
+    name: '',
+    email: '',
+    message: '',
+});
+
+const submit = () => {
+    form.post(route('contact.send'), {
+        onFinish: () => form.reset(),
+    });
+};
+</script>
+
+<template>
+    <form @submit.prevent="submit">
+        <div>
+            <InputLabel for="name" value="Nombre Completo" />
+            
+            <TextInput
+                id="name"
+                v-model="form.name"
+                type="text"
+                class="mt-1 block w-full"
+                required
+            />
+            
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+        
+        <PrimaryButton :disabled="form.processing">
+            Enviar Mensaje
+        </PrimaryButton>
+    </form>
+</template>
+
+3. ¿Qué pasó con Input.vue?
+
+Busca en tu carpeta resources/js/Components/. Lo más probable es que ahora se llame TextInput.vue. Laravel hizo este cambio de nombre para ser más explícito, ya que ahora también suelen incluir componentes específicos para Checkbox.vue o TextArea.vue.
+
+Sugerencia para tu portafolio:
+Como es un formulario de contacto, es muy probable que necesites un campo de "Mensaje" más largo. Si no tienes un componente TextArea.vue, podrías crear uno basado en el diseño de TextInput.vue o simplemente usar un <textarea> estándar con las clases de Tailwind que ya tienes en los otros componentes para que no pierda la estética.
+
+
+
+ No existe un componente para TextArea, si enconte el componente de TextInput, ya veremos en el desarrollo del formulario si adaptamos un nuevo compoente para el textarea o utilizamos solamente un <textArea> con clases de Tailwind para no perder la estetica, segun se requiera, ahora vamos a empezar con el componente modala y de ahi vemos que componentes para el formulario utilizaremos.
+Gemini said
+
+Es una excelente decisión empezar por el Modal, ya que en los proyectos de Inertia + Vue (especialmente si usas las bases de Breeze o Jetstream), el componente de Modal es uno de los más robustos y te servirá de contenedor perfecto para ese formulario de contacto.
+El Componente Modal en Composition API
+
+En las versiones modernas, el componente Modal.vue suele ser un "wrapper" que utiliza Teleport para renderizarse fuera del DOM principal y evitar problemas de z-index.
+
+Aquí tienes cómo podrías integrarlo para tu formulario de contacto:
+Code snippet
+
+<script setup>
+import { ref } from 'vue';
+import Modal from '@/Components/Modal.vue';
+import TextInput from '@/Components/TextInput.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+
+// Control del estado del modal
+const showingContactModal = ref(false);
+
+const openModal = () => {
+    showingContactModal.value = true;
+};
+
+const closeModal = () => {
+    showingContactModal.value = false;
+};
+</script>
+
+<template>
+    <PrimaryButton @click="openModal">
+        Contactarme
+    </PrimaryButton>
+
+    <Modal :show="showingContactModal" @close="closeModal">
+        <div class="p-6">
+            <h2 class="text-lg font-medium text-gray-900">
+                Enviar un mensaje
+            </h2>
+
+            <div class="mt-6">
+                <InputLabel for="email" value="Tu correo" />
+                <TextInput id="email" type="email" class="mt-1 block w-full" placeholder="email@ejemplo.com" />
+            </div>
+
+            <div class="mt-6">
+                <InputLabel for="message" value="Mensaje" />
+                <textarea 
+                    id="message" 
+                    rows="4" 
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                ></textarea>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button @click="closeModal" class="ml-3 text-gray-600 underline">Cancelar</button>
+                <PrimaryButton class="ml-3">Enviar</PrimaryButton>
+            </div>
+        </div>
+    </Modal>
+</template>
+
+Consideración para el TextArea
+
+Como bien dices, si terminas usando un <textarea> simple, lo ideal es que copies las clases de TextInput.vue. Si abres ese archivo, verás que tiene algo como esto:
+
+border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm
+
+Simplemente pegando esas clases en tu textarea mantendrás la estética "Pixel Perfect" de tu portafolio sin necesidad de crear un archivo .vue extra solo para un campo.
+Siguiente paso:
+
+Para que el modal funcione correctamente, asegúrate de que el componente Modal.vue esté recibiendo las props correctas (generalmente :show y el evento @close).
+
+
+Modal
+-------
+
+En el componente del modal hay una etiqueta v-show="show" que tenemos que darle esa propiedad funcionalidad para ver si se puestra o no se muestra tambien existe una propiedad que se llama clasable que permite definir si ese coponente se puede cerrar o no hay cosas que veremos con los cambios por que ahora no vamos a usar option api, si no composition api, y la cosa cambia para los componentes de vue.
+
+Pero si mantenemos las propiedades que permiten abrir el modal, estabecer su tamaño y que sea closable:
+
+
+const props = defineProps({
+    show: {
+        type: Boolean,
+        default: false,
+    },
+    maxWidth: {
+        type: String,
+        default: '2xl',
+    },
+    closeable: {
+        type: Boolean,
+        default: true,
+    },
+});
+
