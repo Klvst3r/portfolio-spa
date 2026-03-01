@@ -184,3 +184,10 @@ const props = defineProps({
     },
 });
 
+Podra cerrarse usancdo esc o cerrandolo con una X, tenemos un elekemnto v-show que indica que eleento se puede mostrar. El cual es el disparador con base a que el modal se va a abrir o cerrar.
+
+Tiene un tamaño dinamico dependiendo de las diferentes resoluciones, vamos aimportar esos componentes, entonces en el componente de Welcome vamos a importar los componentes, Modal 
+
+
+
+

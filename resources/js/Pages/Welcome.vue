@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { Head, Link } from "@inertiajs/vue3";
 import ApplicationMark from "@/Components/ApplicationMark.vue";
 import Button from "@/Components/Button.vue";
@@ -6,10 +7,48 @@ import Section from "@/Components/Section.vue";
 import Skill from "@/Components/Skill.vue";
 import Project from "@/Components/Project.vue";
 //import { BeakerIcon } from "@heroicons/vue/24/solid";
-import { defineAsyncComponent } from "vue";
+//import { defineAsyncComponent } from "vue";
 
 // Importamos todos los iconos de Heroicons Solid
 import * as SolidIcons from "@heroicons/vue/24/solid";
+
+
+//Importamos Componentes del modal y los input
+
+import Modal from "@/Components/Modal.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import TextInput from "@/Components/TextInput.vue";
+import InputError from "@/Components/InputError.vue";
+import SecondaryButton from "@/Components/SecondaryButton.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import { useForm } from "@inertiajs/vue3";
+
+
+// Estado para abrir/cerrar el modal
+const showingContactModal = ref(false);
+
+// Formulario reactivo con Inertia
+const form = useForm({
+    name: '',
+    email: '',
+    message: '',
+});
+
+const openContactModal = () => {
+    showingContactModal.value = true;
+};
+
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.reset();
+};
+
+const sendMessage = () => {
+    // Aquí es donde conectarás con tu controlador de Laravel más adelante
+    console.log("Enviando mensaje:", form.data());
+    // form.post(route('contact.send'), { ... });
+};
+
 
 // 1. Definimos las propiedades correctamente
 const props = defineProps({
@@ -23,7 +62,7 @@ const props = defineProps({
 // Nota: En script setup no usamos "this", usamos la constante "props"
 const getIcon = (iconName) => {
     // Si iconName es "Beaker", buscamos "BeakerIcon" en el objeto SolidIcons
-    const name = `${iconName}Icon`;
+   const name = `${iconName || 'QuestionMarkCircle'}Icon`; // Agregamos un fallback inicial
     return SolidIcons[name] || SolidIcons.QuestionMarkCircleIcon; // Icono por defecto si no existe
 };
 
@@ -90,7 +129,8 @@ const getIconText = (title) => {
         <div class="flex items-end border-b-2 border-gray-500 pb-2 w-fit">
             <p class="font-bold mr-5 text-gray-500 text-xl">
                 Want to know more about me?
-                <Button
+               <Button 
+                    @click="openContactModal"
                     class="bg-green-700 rounded font-bold text-sm text-gray-200 hover:bg-green-500 ml-2"
                 >
                     Let's chat
@@ -195,4 +235,63 @@ const getIconText = (title) => {
             >
         </div>
     </footer>
+
+    <Modal :show="showingContactModal" @close="closeModal">
+    <div class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                type="text" 
+                class="mt-1 block w-full" 
+                placeholder="Raúl Aguilar" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                v-model="form.email" 
+                type="email" 
+                class="mt-1 block w-full" 
+                placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+            <PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+                @click="sendMessage"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+        </div>
+    </div>
+</Modal>
 </template>
