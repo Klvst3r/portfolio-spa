@@ -1,0 +1,276 @@
+Conectando el Formulario de contacto con Laravel por medio de Inertia.js
+
+en este punto ya tenemos definida la apariencia y cierta funcionalidad frontend para nuestro formulario de contacto, por medio del cual, los clientes se podran poner en contacto con nosotros.
+
+Pero es necesaria la parte de funcionalidad
+
+En eso nos ayudara Inertia.js
+
+Revisando la documentacion de inertia.jsm y en la documebtación hay un copmponente llamado forms
+
+https://inertiajs.com/docs/v2/the-basics/forms
+
+
+Aca es donde podremos interactuar con los formularios y ver las posibilidades, y podemos ver que definiendo los formularios importando los componentes de inertia, y en elformulario define toda la serie de elementos y componentes y atributos que lo conforman podremos inicizlizarlo con null pero estamos en libertad de usar otro valor y despues por medio de una funcion, propia de vue veremos como queremos enviar el formulario.
+
+tenemos el ejemplo:
+
+Form Component
+Inertia provides a <Form> component that behaves much like a classic HTML form, but uses Inertia under the hood to avoid full page reloads. This is the simplest way to get started with forms in Inertia.
+
+<script setup>
+import { Form } from '@inertiajs/vue3'
+</script>
+
+<template>
+    <Form action="/users" method="post">
+        <input type="text" name="name" />
+        <input type="email" name="email" />
+        <button type="submit">Create User</button>
+    </Form>
+</template>
+
+
+Escencialmente se importa inertia
+import { Form } from '@inertiajs/vue3'
+
+
+
+dentro del template definimos los elementos y componentes y atributos que lo conforman 
+
+luego por medio de una funcion proipia de vue definimos como queremos enviar inertia post
+
+function submit(){
+    Inertia.post('/users',form)
+    
+}
+
+return { form, submit}
+
+el mismo formulario nios esta indicando como lo queremos enviar, en este caso con el metodo post, podremos utilizar algo que ya laravel usa utiliza jeststream formularios y en la lista de componentes tenemos en la parte de auth 
+Tenemos el de Login.
+
+bueno ese login esta en 
+
+resources/js/Pages/Auth/Login.vue
+
+
+
+Login es un formulario que envia los campos del correo electronico para que laravel los verifique y el form tiene un elemento llamado 
+
+<form @submit.prevent="submit">
+
+
+lo que hace es que cuando se esta haciendo submit, esta enviando una funcion y en modificar con el prevent lo que hace es prevenir que la pagina se recargue, por que ya lo estamos haciendolo de manera asincrona.
+
+y en el metoden la parte del submit.
+
+const submit = () => {
+    form.transform(data => ({
+        ...data,
+        remember: form.remember ? 'on' : '',
+    })).post(route('login'), {
+        onFinish: () => form.reset('password'),
+    });
+};
+
+lo que hace es llamar el formulario con el form de inertia y es justamente su definicion y lo que hace es un envio de este formulario, y hace una peticion de tipo post, enviando la ruta y la petcicion a la ruta login y cuando esta peticion termina restablezca el valor del campo password, el llamado a post y la ruta donde se va a aenviar es viable, y ya el elemtno form sabe que inforamción enviar por que ya esta definida en su interior, eso es mas omenos es lo que tenemos que hacer.
+
+entonces en nuestro welcome .vue definiriamos nuestro propio formulario y dentro vamos a definir el elemento form, para hacer el llamado a 
+
+form: this.$inertia.form
+y form recibe un objeto con los elementos que vamos a definir y mapear en ese formulario, algo asi como:
+form: this.$inertia.form({
+    'email' : '',
+    'message' : '',
+})
+
+entonces ya nuestro elemento es un objeto form con email y message y utilizar esos valores para usarlos luego con el controlador y manejar los valoress, ahora tenemos que definir como es que tenemos que enviar ese formulario, entoncs asi como lo tenemos que definir un anueva funcionalidad llamada
+
+submit algo somo el submit de login, y esto lo que hara es una llamada  a este formulario con la información y tendra una peticion post con una ubucacion que definamos, se llamada
+route()
+
+que es el helper que tenemos en javascript y la ruta tenemos algo asi:
+
+
+submit():{
+    this.form.post(route('contact'));
+
+   
+}
+
+
+con esto el componente ya tiene estos dos elementos y los va a enviar a la ruta por medio de una peticion post, eso es la forma mas sencilla de hacerlo 
+
+Lo que hay que hacer ahora es enlzacar el formulario que tenemos al evento submit.
+
+
+ahora cuando nuestro formulario se envie
+
+<form @submit.prevent="sendMessage" class="p-6">
+
+y tal como en el coponente login tenemos
+entonces
+<form @submit.prevent="sendMessage" class="p-6"
+@submit.prevent="submit"
+>
+
+
+En este punto ya casi nuestro front end esta casi terminado, tenemos que ir al backend, y lo que va a hacer la ruta es contact, con que controlador se va a entender, entonces primero en nuestro consola vamos a crear un controlador 
+
+php artisan make:controller ContactController
+
+Definicion del funcionalidad de Composition api del formulario de contacto.
+-------------------------------------------------
+
+Hemos desglosado anteriormentecómo funciona la reactividad de Inertia comparándola con el sistema de autenticación de Laravel (Breeze/Jetstream).
+
+Sin embargo, hay un pequeño detalle importante: como estamos usando Composition API (con <script setup>), la sintaxis de this.$inertia.form (que es de Options API) cambia un poco para ser más moderna y directa.
+
+Aquí tenemos cómo debe quedar en Welcome.vue para que sea totalmente compatible con el estándar actual de Inertia v2:
+
+
+1. Ajuste en el Script (Composition API)
+
+En lugar de this.$inertia.form, usamos el hook useForm que importamos de @inertiajs/vue3. Esto es mucho más limpio:
+
+
+
+JavaScript
+
+<script setup>
+import { useForm } from '@inertiajs/vue3';
+
+// Definimos el formulario con sus campos iniciales
+const form = useForm({
+    name: '',
+    email: '',
+    message: '',
+});
+
+const sendMessage = () => {
+    // Enviamos el formulario mediante POST a la ruta 'contact.send'
+    form.post(route('contact.send'), {
+        preserveScroll: true, // Evita que la página salte al inicio tras enviar
+        onSuccess: () => {
+            closeModal(); // Cerramos el modal si todo salió bien
+            alert('¡Mensaje enviado con éxito!');
+        },
+        onError: () => {
+            console.log("Hubo errores en el formulario");
+        }
+    });
+};
+
+// ... tus otras funciones como closeModal y openContactModal
+</script>
+
+2. Ajuste en el Template
+
+La etiqueta <form> debe llamar a sendMessage (que es nuestra función de envío). No necesitamos poner el @submit dos veces, con una es suficiente:
+HTML
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <form @submit.prevent="sendMessage" class="p-6">
+        
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton type="button" @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+            <PrimaryButton
+                type="submit"
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+        </div>
+    </form>
+</Modal>
+
+3. El siguiente paso: El Backend
+
+Como bien dijiste, ahora toca ir al "corazón" de Laravel.
+A. Crear la Ruta
+
+En tu archivo routes/web.php, debes definir la ruta a la que apunta tu formulario:
+PHP
+
+use App\Http\Controllers\ContactController;
+use Illuminate\Support\Facades\Route;
+
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+
+B. Crear el Controlador
+
+Ejecutamos el comando que mencionaste:
+Bash
+
+php artisan make:controller ContactController
+
+Resumen de lo que hemos logrado:
+
+    Encapsulamiento: El objeto form de Inertia ahora rastrea automáticamente si se está enviando (form.processing) y los errores que devuelva Laravel (form.errors).
+
+    Experiencia de Usuario (UX): Al usar preserveScroll: true, si el usuario está al final de la página y envía el formulario, no perderá su posición.
+
+    Limpieza: Al usar onSuccess, nos aseguramos de que el modal solo se cierre si los datos son válidos y se guardaron.
+
+
+
+
+
+en la funcionalidad de sendMesage cambimos de
+const sendMessage = () => {
+    // Aquí es donde conectarás con tu controlador de Laravel más adelante
+    console.log("Enviando mensaje:", form.data());
+    // form.post(route('contact.send'), { ... });
+};
+
+
+A
+
+const sendMessage = () => {
+    // Enviamos el formulario mediante POST a la ruta 'contact.send'
+    form.post(route('contact.send'), {
+        preserveScroll: true, // Evita que la página salte al inicio tras enviar
+        onSuccess: () => {
+            closeModal(); // Cerramos el modal si todo salió bien
+            alert('¡Mensaje enviado con éxito!');
+        },
+        onError: () => {
+            console.log("Hubo errores en el formulario");
+        }
+    });
+};
+
+cambiamos la definicion de nuestro modal:
+  <Modal :show="showingContactModal" @close="closeModal">
+    <form @submit.prevent="sendMessage" class="p-6">
+
+    y cambiamos nuestro boton de enviar de:
+
+     <PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+
+A
+ <PrimaryButton
+                type="submit"
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
+                Enviar Mensaje
+            </PrimaryButton>            
+
+
+
+Referencia:
+https://inertiajs.com/docs/v2/getting-started

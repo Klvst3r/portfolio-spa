@@ -44,12 +44,20 @@ const closeModal = () => {
     form.reset();       // Regresa los campos a su estado inicial (vacíos)
 };
 
-const sendMessage = () => {
-    // Aquí es donde conectarás con tu controlador de Laravel más adelante
-    console.log("Enviando mensaje:", form.data());
-    // form.post(route('contact.send'), { ... });
-};
 
+const sendMessage = () => {
+    // Enviamos el formulario mediante POST a la ruta 'contact.send'
+    form.post(route('contact.send'), {
+        preserveScroll: true, // Evita que la página salte al inicio tras enviar
+        onSuccess: () => {
+            closeModal(); // Cerramos el modal si todo salió bien
+            alert('¡Mensaje enviado con éxito!');
+        },
+        onError: () => {
+            console.log("Hubo errores en el formulario");
+        }
+    });
+};
 
 // 1. Definimos las propiedades correctamente
 const props = defineProps({
@@ -239,7 +247,7 @@ const getIconText = (title) => {
         </div>
     </footer>
 
-    <Modal :show="showingContactModal" @close="closeModal">
+  <Modal :show="showingContactModal" @close="closeModal">
     <form @submit.prevent="sendMessage" class="p-6">
         <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
             Cuéntame sobre tu proyecto
@@ -274,7 +282,8 @@ const getIconText = (title) => {
                 Cancelar
             </SecondaryButton>
 
-            <PrimaryButton
+             <PrimaryButton
+                type="submit"
                 class="ml-3"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
