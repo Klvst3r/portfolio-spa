@@ -191,3 +191,634 @@ Tiene un tamaño dinamico dependiendo de las diferentes resoluciones, vamos aimp
 
 
 
+Definicion del modal
+-----------------
+
+siguiendo con el modal en laravel inertia, tenemos en el script:
+// Estado para abrir/cerrar el modal
+const showingContactModal = ref(false);
+
+// Formulario reactivo con Inertia
+const form = useForm({
+    name: '',
+    email: '',
+    message: '',
+});
+
+const openContactModal = () => {
+    showingContactModal.value = true;
+};
+
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.reset();
+};
+
+const sendMessage = () => {
+    // Aquí es donde conectarás con tu controlador de Laravel más adelante
+    console.log("Enviando mensaje:", form.data());
+    // form.post(route('contact.send'), { ... });
+};
+
+
+
+antes con option apí 
+manejabamos 
+data(){
+ return{
+contacting: null,
+}
+}
+teneniasmo que definir y usar el componente, los casos bajos los casos se muestra con tres opciones, 
+al comienzo del portafolio tenemos el let's chat se establezca la propiedad de contacto en ese dato se establezca en true.
+
+<Button 
+                    @click="openContactModal"
+                    class="bg-green-700 rounded font-bold text-sm text-gray-200 hover:bg-green-500 ml-2"
+                >
+                    Let's chat
+                </Button>
+en el momento de hacer click abrira el modal, y permitimos agregar con un aexpresion programating 
+
+@click="contacting = true"
+
+pero en nuestro caso lo hacemos desde 
+
+    @click="openContactModal"
+
+para los botones de skill y proyect en los botones
+
+@click="contacting = true" o que debo poner en los otros dos bonotes (skill y proyect)
+ya que al hacer click el componente se convierte en true
+
+dentro de nuestro Welcome.vue definimos
+
+ <Modal :show="showingContactModal" @close="closeModal">
+    <div class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                type="text" 
+                class="mt-1 block w-full" 
+                placeholder="Raúl Aguilar" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                v-model="form.email" 
+                type="email" 
+                class="mt-1 block w-full" 
+                placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+            <PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+                @click="sendMessage"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+        </div>
+    </div>
+</Modal>
+
+pero entonces el componente modal.vue importado no lo utilizamos??
+
+de entyrada el modal estara oculto, el trigger 
+:show="contacting
+
+<Modal :show="showingContactModal" @close="closeModal">
+
+consideraba hacer
+<Modal :show="contacting" closable="true" @close="closeModal">
+
+de hecho ya funciona asi como lo tengo definido, pero pongo la forma de como se hacia con option api, pero ahora usamos composition api,
+definiamos a null cuando se hacia close.
+
+y poniamos la sombra 
+veo que i mandamos a traer el componente modal y los componentes inputLabel y TextInput y hacemos uso de InputError en caso de generar errores, ya nuestro modal se cierra con cancol o esc.
+
+definimos nuestro modal ya solo detallabamos algunas opciones que haciamos antes pero nuestro modal ya esta bien haber revia si me falta algo en el componente modal con el formulario, 
+
+nuestro modal esta en una sola columna, alineado al centro y con un padding y con los elementos del formulario ya definidos.
+
+nuestro modal tiene bordes redondeados, y para el text area lo utilizamos un textarea y no se pierde el estilo y los botonoes de procesamiento del formulario estan definidos, ahora podemos pasar a procesar el formulario enviando el mensaje ya de momento no hace nada pero lo hara con laravel despues. 
+
+solo tengo duda si consideras qque el formulario de modal se despliegue en los otros dos botones de las secciones de Skills y Proyect, ya estan integradas las validaciones y manejo de errores en el formulario.
+
+
+
+Es genial ver cómo estás migrando esa lógica de Options API a Composition API. La transición de data() a ref() hace que el código sea mucho más legible y fácil de rastrear.
+
+Aquí tienes el análisis de tus dudas y algunos puntos para pulir tu implementación:
+1. ¿Qué poner en los botones de Skills y Projects?
+
+Antes usabas contacting = true. En Composition API, para mantener la consistencia y aprovechar la función que ya creaste (que además podría limpiar el formulario si lo necesitas), lo ideal es usar openContactModal.
+
+En tus secciones de Skills y Projects, los botones deberían quedar así:
+HTML
+
+<button @click="openContactModal" class="...">
+    ¿Tienes un proyecto en mente?
+</button>
+
+<button @click="openContactModal" class="...">
+    Contratar para un proyecto similar
+</button>
+
+¿Por qué usar la función y no showingContactModal = true directamente?
+Porque si en el futuro decides que al abrir el modal desde "Projects" el mensaje por defecto diga "Hola Raúl, vi tu proyecto de...", solo tendrás que modificar la lógica dentro de la función openContactModal en un solo lugar.
+2. Sobre el componente Modal.vue importado
+
+Mencionaste: ¿entonces el componente modal.vue importado no lo utilizamos?
+¡Sí lo estás utilizando! Al escribir <Modal :show="showingContactModal" @close="closeModal">, Vue está renderizando el archivo Modal.vue que viene por defecto en las instalaciones de Laravel Starter Kits (Breeze o Jetstream).
+
+Ese componente es el que se encarga de:
+
+    La capa oscura de fondo (overlay).
+
+    La animación de entrada/salida.
+
+    Cerrar el modal con la tecla Esc.
+
+    El diseño responsive (centrado y ancho).
+
+
+En la definicion del componente del Modal tenemos:
+
+const showSlot = ref(props.show);
+
+watch(() => props.show, () => {
+    if (props.show) {
+        document.body.style.overflow = 'hidden';
+        showSlot.value = true;
+        dialog.value?.showModal();
+    } else {
+        document.body.style.overflow = null;
+        setTimeout(() => {
+            dialog.value?.close();
+            showSlot.value = false;
+        }, 200);
+    }
+});
+
+ahi es donde se moestra el conenido ono, el dialogo, y el tiempo de visualización en caso de que se defina, 
+
+
+
+
+3. Ajustes sugeridos en tu Formulario
+
+Tu estructura está muy bien, pero para que sea 100% funcional con Inertia, te sugiero estos pequeños ajustes:
+A. Usar el evento @submit
+
+En lugar de poner el @click en el botón, es mejor envolver todo en un <form> y usar el evento de envío. Esto permite que el usuario pueda enviar el formulario presionando "Enter".
+HTML
+
+<form @submit.prevent="sendMessage">
+    <div class="mt-8 flex justify-end">
+        <SecondaryButton type="button" @click="closeModal">
+            Cancelar
+        </SecondaryButton>
+
+        <PrimaryButton
+            class="ml-3"
+            :class="{ 'opacity-25': form.processing }"
+            :disabled="form.processing"
+        >
+            Enviar Mensaje
+        </PrimaryButton>
+    </div>
+</form>
+
+B. Resetear el estado al cerrar
+
+En la Options API ponías el valor a null. Aquí en tu función closeModal, ya estás haciendo form.reset(), lo cual es perfecto. Solo asegúrate de que el modal se limpie para que, si el usuario lo abre de nuevo, no vea los errores del intento anterior:
+JavaScript
+
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.clearErrors(); // Limpia los mensajes rojos de error
+    form.reset();      // Limpia los campos
+};
+
+4. Resumen de Estructura Visual
+
+Tu modal ya sigue una estructura limpia en una sola columna, lo cual es ideal para formularios de contacto.
+Elemento	Componente Usado	Función
+Contenedor	Modal	Animación y fondo oscuro
+Títulos	h2 estándar	Encabezado visual
+Inputs	TextInput	Entrada de texto con estilos Breeze
+Errores	InputError	Feedback reactivo de Laravel
+Acciones	PrimaryButton	Gatillo para form.post
+¿Qué sigue?
+
+Tu lógica de frontend está lista. El siguiente paso natural es crear la ruta en routes/web.php y el controlador en Laravel para recibir ese form.post.
+
+
+Detalles del modal
+-----------------
+
+Para que la definicion de mi modal 
+    <Modal :show="showingContactModal" @close="closeModal">
+    <div class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                type="text" 
+                class="mt-1 block w-full" 
+                placeholder="Raúl Aguilar" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                v-model="form.email" 
+                type="email" 
+                class="mt-1 block w-full" 
+                placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+            <PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+                @click="sendMessage"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+        </div>
+    </div>
+</Modal>
+coincida con tu sugerencia:
+<form @submit.prevent="sendMessage">
+    <div class="mt-8 flex justify-end">
+        <SecondaryButton type="button" @click="closeModal">
+            Cancelar
+        </SecondaryButton>
+
+        <PrimaryButton
+            class="ml-3"
+            :class="{ 'opacity-25': form.processing }"
+            :disabled="form.processing"
+        >
+            Enviar Mensaje
+        </PrimaryButton>
+    </div>
+</form>
+como puedo envolver mi formulario dentro de la etiqueta form dentro del modal para usar el evento @submit, o sugieres que como esta definido funcione mejor?
+ya que l boton primary tiene:
+<PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+                @click="sendMessage"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+y asegurarnos de que el modal se limpie si el usuario lo abre de nuevo:
+yo tengo:
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.reset();
+};
+sugieres:
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.clearErrors(); // Limpia los mensajes rojos de error
+    form.reset();      // Limpia los campos
+};
+
+
+Escalabilidad el modal y del formulario
+---------------------------------------
+
+La transición que estás haciendo es excelente. Usar la etiqueta <form> no solo es una "buena práctica", sino que mejora la accesibilidad y la usabilidad de tu portafolio (por ejemplo, permite enviar el formulario con la tecla Enter sin programar nada extra).
+
+Aquí te muestro cómo integrar todo para que tu código sea sólido y profesional:
+1. Envolver el contenido en <form>
+
+Debes colocar la etiqueta <form> justo dentro del primer div de tu modal. Esto asegura que todos los inputs y botones queden bajo el control del evento @submit.
+
+Así quedaría tu estructura optimizada:
+HTML
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <form @submit.prevent="sendMessage" class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" placeholder="Raúl Aguilar" />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" placeholder="tu@correo.com" />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton type="button" @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+            <PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+        </div>
+    </form>
+</Modal>
+
+2. ¿Por qué es mejor así que con el @click en el botón?
+
+Si dejas el @click="sendMessage" en el botón, el formulario funciona, pero pierdes el comportamiento nativo del navegador. Al usar <form @submit.prevent="...">:
+
+    Soporte de Teclado: Si el usuario termina de escribir su mensaje y presiona Enter, el formulario se enviará automáticamente. Con tu versión anterior, tendría que usar el ratón forzosamente.
+
+    Semántica: Los lectores de pantalla para personas con discapacidad visual entienden mejor que hay un proceso de envío de datos.
+
+3. La limpieza del formulario (clearErrors)
+
+Tu versión original con form.reset() limpia los textos de los inputs, pero no quita los mensajes rojos de InputError.
+
+Imagina este escenario:
+
+    El usuario intenta enviar el formulario vacío.
+
+    Laravel (Inertia) devuelve errores: "El nombre es obligatorio".
+
+    El usuario se arrepiente y cierra el modal.
+
+    Dos minutos después, lo vuelve a abrir.
+
+    Sin clearErrors(): El modal se abre y lo primero que ve el usuario es el texto rojo de "El nombre es obligatorio", lo cual da una sensación de "error" antes de empezar.
+
+    Con clearErrors(): El modal aparece totalmente limpio, como si fuera la primera vez.
+
+Por eso, mi recomendación firme es:
+JavaScript
+
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.clearErrors(); // Elimina los mensajes de error previos
+    form.reset();       // Regresa los campos a su estado inicial (vacíos)
+};
+
+4. Detalles de diseño en Debian 13
+
+Como estás en Debian 13, asegúrate de que el textarea herede correctamente los estilos de Tailwind. Veo que usas clases manuales ahí; si quieres que se vea exactamente igual a tus TextInput, podrías considerar crear un componente TextArea.vue más adelante, pero de momento tu código con border-gray-300 focus:border-indigo-500 es correcto y se verá bien.
+
+
+Cambiamos nuestro modal de esto:
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <div class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                type="text" 
+                class="mt-1 block w-full" 
+                placeholder="Raúl Aguilar" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                v-model="form.email" 
+                type="email" 
+                class="mt-1 block w-full" 
+                placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+            <PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+                @click="sendMessage"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+        </div>
+    </div>
+</Modal>
+
+a esto:
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <form @submit.prevent="sendMessage" class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" placeholder="Raúl Aguilar" />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" placeholder="tu@correo.com" />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton type="button" @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+            <PrimaryButton
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+        </div>
+    </form>
+</Modal>
+
+
+el segundo ajusto es el reseteo del modal:
+
+de esto:
+
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.reset();
+};
+
+a esto:
+
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.clearErrors(); // Elimina los mensajes de error previos
+    form.reset();       // Regresa los campos a su estado inicial (vacíos)
+};
+
+
+Finalmente para text area no tenemos un componente para este elemento del formulario pero con los estilos aplicados funciona de la misma manera solo no estamos utilizando un componenete para text ara, solo definimos un text area dentro del modal y el formulario, siguiendo los estilos.
+
+
+
+El comportamiento del boton y mostrar el modal se despliega en las secciones de Skill y Project si volvemos a compilar los assets:
+
+    $ npm run build
+
+Al ejecutar npm run build, generaste los archivos estáticos finales, lo que "forzó" a Vue a compilar todo el árbol de componentes y las directivas @click correctamente. El hecho de que funcionen en el build pero no en el dev (cuando usas npm run dev) suele deberse a un problema de HMR (Hot Module Replacement).
+
+Aquí te explico por qué pasó y cómo evitar que te frustre en el futuro:
+¿Por qué fallaban en desarrollo?
+
+    Caché del Navegador/Vite: A veces, al añadir nuevas funciones reactivas como openContactModal, el servidor de desarrollo de Vite no actualiza correctamente el rastro de los eventos en componentes que están muy "abajo" en el DOM o dentro de bucles v-for.
+
+    Límites de archivos en WSL: Debian tiene un límite de archivos que puede "observar" (inotify). Si tienes muchos componentes, Vite puede dejar de detectar cambios en tiempo real en las secciones inferiores.
+
+    Fragmentación del DOM: Si el componente Button es importado, a veces el Hot Reload pierde la referencia de la función openContactModal en las instancias secundarias del botón.
+
+Cómo solucionarlo sin tener que hacer build cada vez
+
+Hacer un build para probar cada cambio es muy lento. Para que tu flujo en Debian 13 + WSL sea fluido, intenta esto:
+
+    Reinicia el servidor de Vite con limpieza:
+    A veces, solo necesitas detenerlo (Ctrl+C) y ejecutar:
+    Bash
+
+npm run dev -- --force
+
+La bandera --force obliga a Vite a pre-empaquetar las dependencias de nuevo.
+
+Limpia la caché del navegador:
+Abre la consola (F12), haz clic derecho en el botón de refrescar y selecciona "Vaciar la caché y volver a cargar de manera forzada".
+
+Verifica el v-bind en tu componente Button:
+Si tu componente Button.vue (el que importas) no tiene los atributos heredados, los eventos @click pueden fallar aleatoriamente. Asegúrate de que en Button.vue tengas algo como:
+HTML
+
+    <template>
+        <button v-bind="$attrs" class="...">
+            <slot />
+        </button>
+    </template>
+
+Tu Modal ya es "Omnipresente"
+
+Lo importante es que ahora que confirmaste que con el build funcionan, sabemos que tu lógica de código es perfecta. El estado showingContactModal es accesible para todos los botones de la página, sin importar en qué sección estén.    

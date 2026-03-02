@@ -40,7 +40,8 @@ const openContactModal = () => {
 
 const closeModal = () => {
     showingContactModal.value = false;
-    form.reset();
+    form.clearErrors(); // Elimina los mensajes de error previos
+    form.reset();       // Regresa los campos a su estado inicial (vacíos)
 };
 
 const sendMessage = () => {
@@ -164,9 +165,10 @@ const getIconText = (title) => {
 
         <div class="flex justify-center mt-12">
             <Button
+                @click="openContactModal"
                 class="bg-indigo-800 rounded font-bold text-sm text-gray-200 hover:bg-indigo-700 ml-2"
             >
-                Get in touch
+                ¿Tienes un proyecto en mente?
             </Button>
         </div>
     </Section>
@@ -199,9 +201,10 @@ const getIconText = (title) => {
 
         <div class="flex justify-center mt-16">
             <Button
+            @click="openContactModal"
                 class="bg-purple-600 rounded font-bold text-sm text-gray-800 hover:bg-purple-800 px-10 py-3"
             >
-                Know more
+                Contratar para un proyecto similar
             </Button>
         </div>
     </Section>
@@ -237,32 +240,20 @@ const getIconText = (title) => {
     </footer>
 
     <Modal :show="showingContactModal" @close="closeModal">
-    <div class="p-6">
+    <form @submit.prevent="sendMessage" class="p-6">
         <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
             Cuéntame sobre tu proyecto
         </h2>
 
         <div class="mt-6">
             <InputLabel for="name" value="Nombre" />
-            <TextInput 
-                id="name" 
-                v-model="form.name" 
-                type="text" 
-                class="mt-1 block w-full" 
-                placeholder="Raúl Aguilar" 
-            />
+            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" placeholder="Escribe tu nombre y apellidos para establecer contacto" />
             <InputError :message="form.errors.name" class="mt-2" />
         </div>
 
         <div class="mt-4">
             <InputLabel for="email" value="Correo electrónico" />
-            <TextInput 
-                id="email" 
-                v-model="form.email" 
-                type="email" 
-                class="mt-1 block w-full" 
-                placeholder="tu@correo.com" 
-            />
+            <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" placeholder="tu@correo.com" />
             <InputError :message="form.errors.email" class="mt-2" />
         </div>
 
@@ -279,7 +270,7 @@ const getIconText = (title) => {
         </div>
 
         <div class="mt-8 flex justify-end">
-            <SecondaryButton @click="closeModal">
+            <SecondaryButton type="button" @click="closeModal">
                 Cancelar
             </SecondaryButton>
 
@@ -287,11 +278,10 @@ const getIconText = (title) => {
                 class="ml-3"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
-                @click="sendMessage"
             >
                 Enviar Mensaje
             </PrimaryButton>
         </div>
-    </div>
+    </form>
 </Modal>
 </template>
