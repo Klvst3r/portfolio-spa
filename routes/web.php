@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Mail\ContactedMessage; //se importa la defincion del correo que hemos creado para poder usarlo en la ruta de prueba de correo
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -38,4 +39,15 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+});
+
+
+//Ruta de prueba de correo
+
+Route::get('test', function () {
+    // Aquí podemos usar el mismo código que en el ContactController para enviar un correo de prueba
+    /* $name = 'Test User';
+    $email = ' */
+
+    return new ContactedMessage('Test User', 'test@example.com', 'Este es un mensaje de prueba.');
 });
