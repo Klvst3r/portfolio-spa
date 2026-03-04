@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -21,6 +22,13 @@ Route::get('/', function () {
     //     // ... tus otras props
     // ]);
 });
+
+
+//Contacto
+Route::post('contact', [ContactController::class, 'contact'])->name('contact');
+//Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
+
+
 
 Route::middleware([
     'auth:sanctum',

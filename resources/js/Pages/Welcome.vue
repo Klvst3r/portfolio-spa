@@ -46,15 +46,16 @@ const closeModal = () => {
 
 
 const sendMessage = () => {
-    // Enviamos el formulario mediante POST a la ruta 'contact.send'
-    form.post(route('contact.send'), {
-        preserveScroll: true, // Evita que la página salte al inicio tras enviar
+    // Cambiamos 'contact.send' por 'contact' para que coincida con tu Route::post
+    form.post(route('contact'), {
+        preserveScroll: true,
         onSuccess: () => {
-            closeModal(); // Cerramos el modal si todo salió bien
+            closeModal();
+            // Podrías usar un toast en lugar de un alert para que sea más elegante
             alert('¡Mensaje enviado con éxito!');
         },
-        onError: () => {
-            console.log("Hubo errores en el formulario");
+        onError: (errors) => {
+            console.log("Errores de validación:", errors);
         }
     });
 };
