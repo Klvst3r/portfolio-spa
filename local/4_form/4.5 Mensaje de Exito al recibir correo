@@ -1,0 +1,828 @@
+En este punto estamo finalizando el formulario
+
+vlidamos información del formulario
+
+Para el mensaje electronico, vmos  sustituir el modal, desapareciendo el contenido y en lugar del contenido, vamos a mostrar un mensjae de exito.
+
+Adicionalemente se deshabilitarian los mensajes de contacto, 
+
+
+Cabio de estados,
+
+Para el modal estamos usando el modal siempre  vamos a gregar una condicion, cualquier vairable es igual a true, entonces sin se pusieron en contacto con nosotros entonces el modal 
+
+entonces vamos a poner en el modal un v-if 
+
+Pdria ir Adicionalemente
+
+<Modal :show="showingContactModal" @close="closeModal">
+
+        
+
+    <form @submit.prevent="sendMessage" class="p-6">
+
+
+entonces
+
+  <Modal :show="showingContactModal" @close="closeModal">
+
+        <div v-if="$page.props.flash.contacted"
+        ></div>
+        
+
+
+¡Es una idea excelente! Este enfoque mejora muchísimo la experiencia de usuario porque, en lugar de simplemente cerrar el modal, le das una confirmación visual inmediata y "limpia" dentro del mismo espacio donde estaba trabajando.
+
+Además, al deshabilitar el formulario una vez que ya se enviaron los datos, evitas envíos duplicados y mantienes la coherencia visual.
+
+Aquí tienes cómo estructurar esta lógica de cambio de estados en tu modal:
+1. El Controlador (Laravel)
+
+Primero, asegúrate de enviar una señal específica para este cambio de vista. Usaremos la clave contacted en la sesión:
+PHP
+
+public function store(Request $request)
+{
+    // ... validación y envío de log ...
+
+    return back()->with('contacted', true);
+}
+
+2. Estructura del Modal en Vue
+
+Usaremos un v-if y un v-else para intercambiar el formulario por el mensaje de éxito. Esto hace que el contenido del modal cambie sin que el modal se cierre bruscamente.
+HTML
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <div class="p-8"> <div v-if="$page.props.flash.contacted" class="text-center py-10">
+            <div class="mb-4 text-green-500 flex justify-center">
+                <svg class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">¡Mensaje Recibido!</h2>
+            <p class="text-gray-600 mb-6">
+                Gracias por ponerte en contacto. He recibido tu información en mis logs y te responderé muy pronto.
+            </p>
+            <PrimaryButton @click="closeModal" class="w-full justify-center">
+                Entendido
+            </PrimaryButton>
+        </div>
+
+        <form v-else @submit.prevent="sendMessage">
+            <h2 class="text-lg font-medium text-gray-900 mb-4">Enviar Mensaje</h2>
+            
+            <div class="mt-6 flex justify-end">
+                <SecondaryButton @click="closeModal"> Cancelar </SecondaryButton>
+                
+                <PrimaryButton
+                    type="submit"
+                    class="ml-3 inline-flex items-center" 
+                    :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
+                    :disabled="form.processing"
+                >
+                    <span v-if="form.processing" class="animate-spin mr-2 text-xl inline-block">&#9696;</span>
+                    <span>{{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}</span>
+                </PrimaryButton>
+            </div>
+        </form>
+
+    </div>
+</Modal>
+
+3. Consideraciones de UX
+
+    Persistencia: Si el usuario cierra el modal y lo vuelve a abrir, seguirá viendo el mensaje de éxito porque $page.props.flash.contacted persiste durante esa sesión de navegación. Esto es bueno porque le recuerda que ya cumplió la tarea.
+
+    Limpieza: Al cerrar el modal, puedes resetear el formulario como ya lo haces, pero el mensaje de éxito se mantendrá hasta que la página se refresque o navegues a otra sección.
+
+    Diseño: El mensaje de éxito centralizado con un icono grande da una sensación de alivio y finalización muy satisfactoria para el usuario.
+
+Resumen del Flujo:
+
+    Abre Modal: v-else muestra el formulario.
+
+    Envía: El botón muestra el spinner Unicode &#9696; y se bloquea.
+
+    Respuesta: Laravel envía contacted => true.
+
+    Cambio: Vue detecta el cambio en $page.props.flash.contacted, oculta el formulario y muestra el mensaje de éxito con el botón "Entendido".
+
+
+    asi entonces el formulario cambie de esto:
+
+    <Modal :show="showingContactModal" @close="closeModal">
+
+        <div v-if="$page.props.flash.contacted"
+        ></div>
+        
+
+    <form @submit.prevent="sendMessage" class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                @input="form.clearErrors('name')" 
+                class="mt-1 block w-full" 
+                placeholder="Escribe tu nombre y apellidos para establecer contacto" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                type="email" 
+                v-model="form.email" 
+                @input="form.clearErrors('email')" 
+                class="mt-1 block w-full" placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                @input="form.clearErrors('message')"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800 transition-colors duration-200"
+                :class="{ 'border-red-500': form.errors.message }"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton type="button" @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+             <PrimaryButton
+                type="submit"
+                class="ml-3 inline-flex items-center transition-all duration-200" 
+                :class="{ 
+                    'opacity-50 cursor-not-allowed': form.processing,
+                    'hover:bg-indigo-700': !form.processing 
+                }"
+                :disabled="form.processing"
+            >
+            <!-- <span 
+                    v-if="form.processing" 
+                    class="animate-spin mr-2 text-xl inline-block" 
+                    v-show="form.processing"
+                    aria-hidden="true"
+                >
+                    &#9696;
+                </span> -->
+                <svg 
+                    v-if="form.processing" 
+                    class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24"
+                >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+
+                <span class="font-medium">
+                    {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+                </span>
+            </PrimaryButton>        
+        </div>
+    </form>
+</Modal>
+
+
+a esto:
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <div v-if="$page.props.flash.contacted" class="p-10 text-center">
+        <div class="mb-6 flex justify-center">
+            <div class="bg-green-100 p-4 rounded-full">
+                <svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Gracias por escribir!</h2>
+        <p class="text-gray-600 mb-8">
+            Tu mensaje ha sido recibido correctamente. Me pondré en contacto contigo a la brevedad.
+        </p>
+
+        <PrimaryButton type="button" @click="closeModal" class="w-full justify-center">
+            Cerrar
+        </PrimaryButton>
+    </div>
+
+    <form v-else @submit.prevent="sendMessage" class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                @input="form.clearErrors('name')" 
+                class="mt-1 block w-full" 
+                placeholder="Escribe tu nombre y apellidos para establecer contacto" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                type="email" 
+                v-model="form.email" 
+                @input="form.clearErrors('email')" 
+                class="mt-1 block w-full" placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                @input="form.clearErrors('message')"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800 transition-colors duration-200"
+                :class="{ 'border-red-500': form.errors.message }"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton type="button" @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+             <PrimaryButton
+                type="submit"
+                class="ml-3 inline-flex items-center transition-all duration-200" 
+                :class="{ 
+                    'opacity-50 cursor-not-allowed': form.processing,
+                    'hover:bg-indigo-700': !form.processing 
+                }"
+                :disabled="form.processing"
+            >
+                <span v-if="form.processing" class="animate-spin mr-2 text-xl inline-block">&#9696;</span>
+
+                <span class="font-medium">
+                    {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+                </span>
+            </PrimaryButton>        
+        </div>
+    </form>
+</Modal>
+
+para la transicion tengo
+
+<style scoped>
+.linear {
+  transition-timing-function: linear !important;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -30px); /* El -50% mantiene el centrado */
+}
+</style>
+
+pero hay colisión,
+
+
+El estilo que tienes actualmente está diseñado para el mensaje flotante (el que aparece arriba al centro de la pantalla), por eso tiene el transform: translate(-50%, -30px). Si aplicas ese mismo estilo a la transición dentro del Modal, el formulario y el mensaje de éxito se van a desplazar de forma extraña hacia la izquierda porque el contenido del modal no necesita el -50% para centrarse (ya está centrado por el contenedor del modal).
+
+Para que ambos funcionen perfecto, lo ideal es separar las animaciones o usar una más genérica para el contenido del modal.
+Opción Recomendada: Dos transiciones distintas
+
+Podemos mantener tu estilo para el mensaje flotante (renombrándolo a message-fade) y crear uno simple para el contenido del modal (modal-fade).
+1. Ajuste en el HTML del Modal
+
+Usa un nombre diferente en el name de la transición del modal:
+HTML
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <transition name="modal-fade" mode="out-in">
+        <div v-if="$page.props.flash.contacted" key="success">
+            </div>
+        <form v-else @submit.prevent="sendMessage" key="form">
+            </form>
+    </transition>
+</Modal>
+
+
+2. Ajuste en el <style scoped>
+
+Así mantienes el efecto de "caída" para el aviso de arriba y un efecto de "desvanecimiento" limpio para el interior del modal:
+CSS
+
+<style scoped>
+.linear {
+  transition-timing-function: linear !important;
+}
+
+/* 1. Para el aviso flotante (el que ya tenías) */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -30px);
+}
+
+/* 2. Para el contenido interno del Modal (Nuevo) */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+</style>
+
+¿Por qué hacerlo así?
+
+    El aviso flotante: Necesita el -50% porque su posición es fixed y left: 50%.
+
+    El contenido del modal: Si le pones -50%, el formulario se "teletransportará" a la izquierda del modal justo cuando empiece la animación. Usar solo opacity hace que el cambio de "Formulario" a "Mensaje de éxito" sea elegante y suave.
+
+Con esto, el flujo visual en tu entorno de Debian será impecable. El usuario envía, el formulario se desvanece suavemente y aparece el agradecimiento en su lugar.
+
+
+para evitar la colision cambiamos de esto:
+
+  <Modal :show="showingContactModal" @close="closeModal">
+    <div v-if="$page.props.flash.contacted" class="p-10 text-center">
+        <div class="mb-6 flex justify-center">
+            <div class="bg-green-100 p-4 rounded-full">
+                <svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Gracias por escribir!</h2>
+        <p class="text-gray-600 mb-8">
+            Tu mensaje ha sido recibido correctamente. Me pondré en contacto contigo a la brevedad.
+        </p>
+
+        <PrimaryButton type="button" @click="closeModal" class="w-full justify-center">
+            Cerrar
+        </PrimaryButton>
+    </div>
+
+    <form v-else @submit.prevent="sendMessage" class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                @input="form.clearErrors('name')" 
+                class="mt-1 block w-full" 
+                placeholder="Escribe tu nombre y apellidos para establecer contacto" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                type="email" 
+                v-model="form.email" 
+                @input="form.clearErrors('email')" 
+                class="mt-1 block w-full" placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                @input="form.clearErrors('message')"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800 transition-colors duration-200"
+                :class="{ 'border-red-500': form.errors.message }"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton type="button" @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+             <PrimaryButton
+                type="submit"
+                class="ml-3 inline-flex items-center transition-all duration-200" 
+                :class="{ 
+                    'opacity-50 cursor-not-allowed': form.processing,
+                    'hover:bg-indigo-700': !form.processing 
+                }"
+                :disabled="form.processing"
+            >
+                <span v-if="form.processing" class="animate-spin mr-2 text-xl inline-block">&#9696;</span>
+
+                <span class="font-medium">
+                    {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+                </span>
+            </PrimaryButton>        
+        </div>
+    </form>
+</Modal>
+<transition name="fade">
+    <div 
+        v-if="flashSuccess" 
+        class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-2xl"
+    >
+        <div class="relative overflow-hidden bg-green-500 text-white px-8 py-5 rounded-xl shadow-2xl flex items-center justify-between border border-green-400/50 backdrop-blur-sm bg-opacity-95">
+            
+            <div class="absolute top-0 left-0 h-1 bg-green-300/50 w-full">
+                <div 
+                    class="h-full bg-white transition-all linear"
+                    :style="{ width: progressWidth + '%', transitionDuration: '5000ms' }"
+                ></div>
+            </div>
+
+            <div class="flex items-center space-x-4 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-semibold text-lg tracking-wide">{{ flashSuccess }}</span>
+            </div>
+            
+            <button @click="flashSuccess = null" class="ml-4 hover:bg-green-600/50 rounded-full p-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</transition>
+
+a esto
+
+<Modal :show="showingContactModal" @close="closeModal">
+    <transition name="modal-fade" mode="out-in">
+        
+        <div v-if="$page.props.flash.contacted" key="success" class="p-10 text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="bg-green-100 p-4 rounded-full">
+                    <svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Gracias por escribir!</h2>
+            <p class="text-gray-600 mb-8">Tu mensaje ha sido recibido correctamente. Me pondré en contacto contigo a la brevedad.</p>
+            <PrimaryButton type="button" @click="closeModal" class="w-full justify-center">
+                Cerrar
+            </PrimaryButton>
+        </div>
+
+        <form v-else @submit.prevent="sendMessage" class="p-6" key="form">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">Cuéntame sobre tu proyecto</h2>
+            
+            <div class="mt-6">
+                <InputLabel for="name" value="Nombre" />
+                <TextInput id="name" v-model="form.name" @input="form.clearErrors('name')" class="mt-1 block w-full" placeholder="Nombre y apellidos" />
+                <InputError :message="form.errors.name" class="mt-2" />
+            </div>
+
+            <div class="mt-4">
+                <InputLabel for="email" value="Correo electrónico" />
+                <TextInput id="email" type="email" v-model="form.email" @input="form.clearErrors('email')" class="mt-1 block w-full" placeholder="tu@correo.com" />
+                <InputError :message="form.errors.email" class="mt-2" />
+            </div>
+
+            <div class="mt-4">
+                <InputLabel for="message" value="Mensaje" />
+                <textarea id="message" v-model="form.message" @input="form.clearErrors('message')" rows="5" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800 transition-colors duration-200" :class="{ 'border-red-500': form.errors.message }" placeholder="¿En qué puedo ayudarte?"></textarea>
+                <InputError :message="form.errors.message" class="mt-2" />
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <SecondaryButton type="button" @click="closeModal">Cancelar</SecondaryButton>
+                <PrimaryButton type="submit" class="ml-3 inline-flex items-center transition-all duration-200" :class="{ 'opacity-50 cursor-not-allowed': form.processing, 'hover:bg-indigo-700': !form.processing }" :disabled="form.processing">
+                    <span v-if="form.processing" class="animate-spin mr-2 text-xl inline-block">&#9696;</span>
+                    <span class="font-medium">{{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}</span>
+                </PrimaryButton>        
+            </div>
+        </form>
+    </transition>
+</Modal>
+
+y los estilops
+
+<style scoped>
+.linear {
+  transition-timing-function: linear !important;
+}
+
+/* 1. Transición para el Aviso Flotante (con movimiento) */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -30px); /* Mantiene el centrado absoluto */
+}
+
+/* 2. Transición para el Modal (solo desvanecimiento suave) */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+</style>
+
+
+
+aparentemento no hay muchos cambios pero 
+
+Aislamiento: Al nombrar una fade y la otra modal-fade, Vue aplica reglas CSS distintas a cada una.
+
+mode="out-in": Es vital en el modal; hace que el formulario desaparezca primero y, una vez que se ha ido, aparezca el mensaje de éxito. Sin esto, ambos intentarían ocupar el espacio al mismo tiempo por un instante.
+
+key: Las propiedades key="success" y key="form" le dicen a Vue exactamente qué elementos están intercambiando posiciones.
+
+
+
+Por lo que queda mejora sto:
+
+
+ <Modal :show="showingContactModal" @close="closeModal">
+    <div v-if="$page.props.flash.contacted" class="p-10 text-center">
+        <div class="mb-6 flex justify-center">
+            <div class="bg-green-100 p-4 rounded-full">
+                <svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Gracias por escribir!</h2>
+        <p class="text-gray-600 mb-8">
+            Tu mensaje ha sido recibido correctamente. Me pondré en contacto contigo a la brevedad.
+        </p>
+
+        <PrimaryButton type="button" @click="closeModal" class="w-full justify-center">
+            Cerrar
+        </PrimaryButton>
+    </div>
+
+    <form v-else @submit.prevent="sendMessage" class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+            Cuéntame sobre tu proyecto
+        </h2>
+
+        <div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput 
+                id="name" 
+                v-model="form.name" 
+                @input="form.clearErrors('name')" 
+                class="mt-1 block w-full" 
+                placeholder="Escribe tu nombre y apellidos para establecer contacto" 
+            />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="email" value="Correo electrónico" />
+            <TextInput 
+                id="email" 
+                type="email" 
+                v-model="form.email" 
+                @input="form.clearErrors('email')" 
+                class="mt-1 block w-full" placeholder="tu@correo.com" 
+            />
+            <InputError :message="form.errors.email" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <InputLabel for="message" value="Mensaje" />
+            <textarea
+                id="message"
+                v-model="form.message"
+                @input="form.clearErrors('message')"
+                rows="5"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800 transition-colors duration-200"
+                :class="{ 'border-red-500': form.errors.message }"
+                placeholder="¿En qué puedo ayudarte?"
+            ></textarea>
+            <InputError :message="form.errors.message" class="mt-2" />
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <SecondaryButton type="button" @click="closeModal">
+                Cancelar
+            </SecondaryButton>
+
+             <PrimaryButton
+                type="submit"
+                class="ml-3 inline-flex items-center transition-all duration-200" 
+                :class="{ 
+                    'opacity-50 cursor-not-allowed': form.processing,
+                    'hover:bg-indigo-700': !form.processing 
+                }"
+                :disabled="form.processing"
+            >
+                <span v-if="form.processing" class="animate-spin mr-2 text-xl inline-block">&#9696;</span>
+
+                <span class="font-medium">
+                    {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+                </span>
+            </PrimaryButton>        
+        </div>
+    </form>
+</Modal>
+<transition name="fade">
+    <div 
+        v-if="flashSuccess" 
+        class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-2xl"
+    >
+        <div class="relative overflow-hidden bg-green-500 text-white px-8 py-5 rounded-xl shadow-2xl flex items-center justify-between border border-green-400/50 backdrop-blur-sm bg-opacity-95">
+            
+            <div class="absolute top-0 left-0 h-1 bg-green-300/50 w-full">
+                <div 
+                    class="h-full bg-white transition-all linear"
+                    :style="{ width: progressWidth + '%', transitionDuration: '5000ms' }"
+                ></div>
+            </div>
+
+            <div class="flex items-center space-x-4 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-semibold text-lg tracking-wide">{{ flashSuccess }}</span>
+            </div>
+            
+            <button @click="flashSuccess = null" class="ml-4 hover:bg-green-600/50 rounded-full p-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</transition>
+
+
+y en el Controlador
+return redirect()->back()->with('success', '¡Mensaje enviado con éxito!');
+
+ya no le movemos muchos
+queda mas porofesional y evita colisiones.
+
+
+Lo que si me gustaria es que una vez enviado el mensaje el boton del portafolio me gustaria que cambiara a gracias.
+
+depedneidno si se ha enviado la respuesta, entonces cambiamos diamicamente este componente y en lugar de que diga
+
+<Button 
+                    @click="openContactModal"
+                    class="bg-green-700 rounded font-bold text-sm text-gray-200 hover:bg-green-500 ml-2"
+                >
+                    Let's chat
+                </Button>
+
+
+{{ Let's chat }}
+
+son propias de JS y vamos a mostrar si el valor del formulario es cierto entonces nos contactaron entonces escribimos thanks y si no es cierto entonces, mostramos un let's chat. incluso cuando se ha recibido la respuesta el boten de enviar nuevamente se puede deshabilitar para evitar multiples respuestas en la misma ocacion cuando ya se ha enviado un mensaje por correo.
+
+
+
+¡Excelente idea! Es una forma muy inteligente de cerrar el ciclo. Al cambiar el botón principal del portafolio a "¡Gracias!", le confirmas al usuario que ya no es necesario volver a intentar, y mantienes la interfaz limpia.
+
+Para lograr esto, usaremos la propiedad flash de Inertia que ya estamos recibiendo desde Laravel.
+1. El Botón Dinámico en tu Portafolio
+
+Sustituiremos el texto estático por una condición de JavaScript. Además, usaremos :disabled para que, una vez enviado, el botón ya no abra el modal.
+HTML
+
+<button 
+    @click="openContactModal"
+    :disabled="$page.props.flash.success"
+    class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+    :class="[
+        $page.props.flash.success 
+            ? 'bg-gray-500 cursor-default px-6 py-2' 
+            : 'bg-green-700 hover:bg-green-500 px-4 py-2'
+    ]"
+>
+    {{ $page.props.flash.success ? '¡Gracias!' : "Let's chat" }}
+</button>
+
+2. ¿Qué mejoras estamos aplicando aquí?
+
+    Texto Reactivo: Usamos el operador ternario {{ condición ? 'si' : 'no' }}. Si existe un mensaje de éxito en la sesión (flash.success), el botón cambia automáticamente a "¡Gracias!".
+
+    Clases Dinámicas (:class): * Si ya nos contactaron, el botón se vuelve gris (bg-gray-500) y el cursor vuelve a ser el normal (cursor-default) para indicar que ya no es una acción pendiente.
+
+        Si no, mantiene su color verde y el efecto hover.
+
+    Bloqueo de Acción: Con :disabled="$page.props.flash.success", evitamos que el usuario pueda volver a abrir el modal de contacto si ya acaba de enviar un mensaje con éxito.
+
+3. Ajuste en el Controlador (Importante)
+
+Para que esto funcione perfectamente y el botón cambie, asegúrate de que tu controlador de Laravel siga enviando la clave success:
+PHP
+
+public function store(Request $request)
+{
+    // ... validación y lógica de envío ...
+
+    return redirect()->back()->with('success', '¡Mensaje enviado con éxito!');
+}
+
+4. Resumen del Flujo Final
+
+    El usuario ve el botón verde: Let's chat.
+
+    Abre el modal, escribe y envía. El botón del modal muestra el spinner Unicode &#9696;.
+
+    Laravel responde con el mensaje de éxito.
+
+    Resultado inmediato: * El modal se cierra.
+
+        Aparece el aviso flotante arriba con la barra de progreso de 5 segundos.
+
+        El botón principal del portafolio se transforma en gris y dice "¡Gracias!", quedando deshabilitado para evitar spam.
+
+
+cambiamos el bot de <Button 
+                    @click="openContactModal"
+                    class="bg-green-700 rounded font-bold text-sm text-gray-200 hover:bg-green-500 ml-2"
+                >
+                    Let's chat
+                </Button>
+
+a:
+
+<button 
+    @click="openContactModal"
+    :disabled="$page.props.flash.success"
+    class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+    :class="[
+        $page.props.flash.success 
+            ? 'bg-gray-500 cursor-default px-6 py-2' 
+            : 'bg-green-700 hover:bg-green-500 px-4 py-2'
+    ]"
+>
+    {{ $page.props.flash.success ? '¡Gracias!' : "Let's chat" }}
+</button>
+
+
+y este boton lo aplicamos a los otros dos botones ya que provienen del mismo portafolio y nos envian al mismo mensaje
+
+
+aplicamos la misma logica del boton a los otros dos botones dentro del portafolio por que se ha recibido mensaje y aplica para toda la pagina.
+
+Con esto ya tenhemos aplicado todas las funionalidades, para que se pongan en contacto no nosotros para enviar curriculum, eso es todo para la experiendia del usuario ,
+
+ahora vamos ap oner en practivca todo lo reviado y profundizaremos en el panel de administracion para el portafilio.
+
+De manera podramos agregar o eliminar los skills los proyects y demas con la interacción con la BD.
+
+
+fusionamos el proyecto principal co la funionalidad aplicada hasta ahora.
+

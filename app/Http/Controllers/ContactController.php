@@ -58,8 +58,14 @@ class ContactController extends Controller
 
         //Una vez que tenemos lo anterior, podremos estar enviando el mensaje y redirigiendo hacia la raiz del proyecto con un mensaje de éxito, que podríamos mostrar con un toast o algo similar en el frontend.
         //return Redirect::to('/')->with('success', '¡Mensaje enviado con éxito!');
-        return redirect()->back()->with('success', '¡Mensaje enviado con éxito!');
+        //return redirect()->back()->with('success', '¡Mensaje enviado con éxito!');
         //return redirect()->back();
         //return Redirect::to('/');
+
+        // Cambiamos la clave a contacted para que el modal sepa que debe "transformarse":
+        //return redirect()->back()->with('contacted', true);
+
+        //queda definitivamente
+        return redirect()->back()->with('success', '¡Mensaje enviado con éxito!');
     }
 }

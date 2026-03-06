@@ -204,12 +204,18 @@ const getIconText = (title) => {
         <div class="flex items-end border-b-2 border-gray-500 pb-2 w-fit">
             <p class="font-bold mr-5 text-gray-500 text-xl">
                 Want to know more about me?
-               <Button 
-                    @click="openContactModal"
-                    class="bg-green-700 rounded font-bold text-sm text-gray-200 hover:bg-green-500 ml-2"
-                >
-                    Let's chat
-                </Button>
+              <button 
+                @click="openContactModal"
+                :disabled="$page.props.flash.success"
+                class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+                :class="[
+                    $page.props.flash.success 
+                        ? 'bg-gray-500 cursor-default px-6 py-2' 
+                        : 'bg-green-700 hover:bg-green-500 px-4 py-2'
+                ]"
+            >
+                {{ $page.props.flash.success ? '¡Gracias!' : "Let's chat" }}
+            </button>
             </p>
         </div>
 
@@ -238,12 +244,20 @@ const getIconText = (title) => {
         </div>
 
         <div class="flex justify-center mt-12">
-            <Button
+            
+
+            <button 
                 @click="openContactModal"
-                class="bg-indigo-800 rounded font-bold text-sm text-gray-200 hover:bg-indigo-700 ml-2"
+                :disabled="$page.props.flash.success"
+                class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+                :class="[
+                    $page.props.flash.success 
+                        ? 'bg-gray-500 cursor-default px-6 py-2' 
+                        : 'bg-green-700 hover:bg-green-500 px-4 py-2'
+                ]"
             >
-                ¿Tienes un proyecto en mente?
-            </Button>
+                {{ $page.props.flash.success ? '¡Gracias!' : "¿Tienes un proyecto en mente?" }}
+            </button>
         </div>
     </Section>
     <Section class="bg-gray-600 text-gray-200 min-h-screen">
@@ -274,12 +288,19 @@ const getIconText = (title) => {
         </div>
 
         <div class="flex justify-center mt-16">
-            <Button
-            @click="openContactModal"
-                class="bg-purple-600 rounded font-bold text-sm text-gray-800 hover:bg-purple-800 px-10 py-3"
+           
+             <button 
+                @click="openContactModal"
+                :disabled="$page.props.flash.success"
+                class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+                :class="[
+                    $page.props.flash.success 
+                        ? 'bg-gray-500 cursor-default px-6 py-2' 
+                        : 'bg-green-700 hover:bg-green-500 px-4 py-2'
+                ]"
             >
-                Contratar para un proyecto similar
-            </Button>
+                {{ $page.props.flash.success ? '¡Gracias!' : "Contratar para un proyecto similar" }}
+            </button>
         </div>
     </Section>
 
@@ -313,8 +334,27 @@ const getIconText = (title) => {
         </div>
     </footer>
 
-  <Modal :show="showingContactModal" @close="closeModal">
-    <form @submit.prevent="sendMessage" class="p-6">
+ <Modal :show="showingContactModal" @close="closeModal">
+    <div v-if="$page.props.flash.contacted" class="p-10 text-center">
+        <div class="mb-6 flex justify-center">
+            <div class="bg-green-100 p-4 rounded-full">
+                <svg class="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">¡Gracias por escribir!</h2>
+        <p class="text-gray-600 mb-8">
+            Tu mensaje ha sido recibido correctamente. Me pondré en contacto contigo a la brevedad.
+        </p>
+
+        <PrimaryButton type="button" @click="closeModal" class="w-full justify-center">
+            Cerrar
+        </PrimaryButton>
+    </div>
+
+    <form v-else @submit.prevent="sendMessage" class="p-6">
         <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
             Cuéntame sobre tu proyecto
         </h2>
@@ -371,24 +411,7 @@ const getIconText = (title) => {
                 }"
                 :disabled="form.processing"
             >
-            <!-- <span 
-                    v-if="form.processing" 
-                    class="animate-spin mr-2 text-xl inline-block" 
-                    v-show="form.processing"
-                    aria-hidden="true"
-                >
-                    &#9696;
-                </span> -->
-                <svg 
-                    v-if="form.processing" 
-                    class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    fill="none" 
-                    viewBox="0 0 24 24"
-                >
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <span v-if="form.processing" class="animate-spin mr-2 text-xl inline-block">&#9696;</span>
 
                 <span class="font-medium">
                     {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
@@ -397,7 +420,6 @@ const getIconText = (title) => {
         </div>
     </form>
 </Modal>
-
 <transition name="fade">
     <div 
         v-if="flashSuccess" 
@@ -427,6 +449,7 @@ const getIconText = (title) => {
         </div>
     </div>
 </transition>
+
 </template>
 
 <style scoped>
@@ -434,14 +457,24 @@ const getIconText = (title) => {
   transition-timing-function: linear !important;
 }
 
+/* 1. Transición para el Aviso Flotante (con movimiento) */
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translate(-50%, -30px); /* El -50% mantiene el centrado */
+  transform: translate(-50%, -30px); /* Mantiene el centrado absoluto */
+}
+
+/* 2. Transición para el Modal (solo desvanecimiento suave) */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
 }
 </style>
