@@ -1,0 +1,1246 @@
+Vamos a validar el formulario de ocntacto, en el momento que trata de contactarse con nosotros, tal vez el usuario no hace algo bien, no nos pone,el correo electronico, el mensaje es muy corto.
+
+Entonces se requiere una validación para asegurar en mostrar los mensajes enviados.
+
+Vamos a araancar el proceso ya que es un trabajo en conjunto entre el frontend y el backend, el backend verifica y el front end le dice si todo ha hdo bien, muestra el mensaje.
+
+muesra los mensaje de error en los campos correspondientes.
+
+No se pued eenviar de nuevo.
+
+Mejorando la experiencia del usuario 
+
+Entonces en el controlador, en la accion de contact, tenemos una reglas con las cuales validamos la peticion 
+
+primero lo validamos por medio de un 
+    $request->validate([])
+
+Recibiend oun array con la serie de reglas.
+
+Podemos ponerlos en una variable aparte 
+
+Vamos a hacer primero la validación del correo electronico, es un campo requerido y debe ser un correo electronico valido, ademas tiene una caacteristica llamada filter, de que en efecto sea un correo y que pertezca a un dominio valido.
+
+si falla la validación nos muestra la ifnroacmion de error en el input del formulario nos mostrara el mensaje de error, tambien el componente inputErrors permitira la validación.
+
+ Input error
+
+
+ <script setup>
+defineProps({
+    message: String,
+});
+</script>
+
+<template>
+    <div v-show="message">
+        <p class="text-sm text-red-600">
+            {{ message }}
+        </p>
+    </div>
+</template>
+
+
+Se mostrara un mensaje definido en su interior, el mensaje es un propiedad, si se recibe un mesage, del formulario de inertia tiene un error en el atributo, y con texto pequeño con texto rojo.
+
+Debajo del formulario se hace el llamado al componente de error.
+
+entonces en el componente Welcome.vue
+
+Necesitamos la propiedad de mesagge
+
+
+<InputError :message="form.errors.name" class="mt-2" />
+
+quedando nuestro boton asi:
+
+<div class="mt-6">
+            <InputLabel for="name" value="Nombre" />
+            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" placeholder="Escribe tu nombre y apellidos para establecer contacto" />
+            <InputError :message="form.errors.name" class="mt-2" />
+        </div>
+
+
+Que va a tener message el formulario, en caso de tener un error se tiene una propiedad llamada erros y esta relacionado con el campo en concreto, entonces lo vamos a acceder, que coincide con los elementos que estan definidos mas adelante mas abajo, entonces lo podemos hacer para que en caso del message, ponemos el error. Con esto estamos modelando el error, con este componente se debe importar.
+
+import InputError from "@/Components/InputError.vue";
+
+Lo ponemos como componente del sistema.
+
+lo vamos a utilizar y lo definimos como pomponentes de nuestra vista
+
+Pero en el caso de Composition API ya no necesitamos importarlo en los props sino que solo lo importtamos con el componente de esta manera:
+
+import InputError from "@/Components/InputError.vue";
+
+
+Hasta aca esta bien
+
+Capturando el mensaje de éxito en Vue
+
+Como el controlador devuelve redirect()->back()->with('success', '...'), Laravel pone ese mensaje en la sesión. Para leerlo desde Inertia en el componente Welcome.vue (o donde tengas el formulario), necesitas acceder a los Shared Props.
+
+Inertia suele compartir los mensajes de "flash" automáticamente si se configuraron configuraste en el HandleInertiaRequests.php (middleware).
+
+
+e manera genberal cuando queremos capturar el mensaje de exito para el mensaje de sesión, y leerlo desde inertia en welcome el cilco tradicional es:
+
+Para mostrarlo en tu componente:
+JavaScript
+
+<script setup>
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+
+// Creamos una propiedad computada para reaccionar al mensaje de éxito
+const successMessage = computed(() => page.props.flash.success);
+</script>
+
+<template>
+    <div v-if="successMessage" class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 shadow-sm transition-all">
+        {{ successMessage }}
+    </div>
+
+    <form @submit.prevent="submit">
+        <div class="mt-6">
+            <button 
+                type="submit" 
+                :disabled="form.processing"
+                class="px-4 py-2 bg-indigo-600 text-white rounded disabled:opacity-50"
+            >
+                {{ form.processing ? 'Enviando...' : 'Enviar' }}
+            </button>
+        </div>
+    </form>
+</template>
+
+3. El ciclo completo de UX
+
+Para que la experiencia sea fluida, recuerda que en tu función submit del frontend debes manejar el éxito para limpiar el formulario:
+JavaScript
+
+const submit = () => {
+    form.post(route('contact.post'), { // Asegúrate que el nombre de la ruta sea correcto
+        preserveScroll: true,
+        onSuccess: () => {
+            form.reset(); // Borra los campos después de enviar con éxito
+        },
+    });
+};
+
+Verificación Final
+
+    Validación: El backend detiene la ejecución si falta el email o el mensaje es corto y devuelve los errores a form.errors.
+
+    Seguridad: El botón se deshabilita con form.processing para evitar spam.
+
+    Feedback: El usuario recibe un mensaje visual de "¡Mensaje enviado con éxito!" que viene desde el controlador.
+
+
+
+------adaltando esto a nuestro proyecto:
+
+atentiendo el punto 2 sobre la captura de mensaje de exito en vue, y ya que el controlador devuelve:
+return redirect()->back()->with('success', '¡Mensaje enviado con éxito!');
+queremos leerlos desde inertia en el componente welcome,
+yo tengo el middleware 
+app/Http/Middleware/HandleInertiaRequests.php
+asi:
+no he definido nada aun.
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Http\Request;
+use Inertia\Middleware;
+
+class HandleInertiaRequests extends Middleware
+{
+    /**
+     * The root template that's loaded on the first page visit.
+     *
+     * @see https://inertiajs.com/server-side-setup#root-template
+     *
+     * @var string
+     */
+    protected $rootView = 'app';
+
+    /**
+     * Determines the current asset version.
+     *
+     * @see https://inertiajs.com/asset-versioning
+     */
+    public function version(Request $request): ?string
+    {
+        return parent::version($request);
+    }
+
+    /**
+     * Define the props that are shared by default.
+     *
+     * @see https://inertiajs.com/shared-data
+     *
+     * @return array<string, mixed>
+     */
+    public function share(Request $request): array
+    {
+        return [
+            ...parent::share($request),
+            //
+        ];
+    }
+}
+
+para que en la funcion submit dele frontend se maneje el manejo de exito para limpier el formualrio en esta parte:
+const submit = () => {
+    form.post(route('contact.post'), { // Asegúrate que el nombre de la ruta sea correcto
+        preserveScroll: true,
+        onSuccess: () => {
+            form.reset(); // Borra los campos después de enviar con éxito
+        },
+    });
+};
+
+debe ser aplicado aca en Welcome:
+const sendMessage = () => {
+    // Cambiamos 'contact.send' por 'contact' para que coincida con tu Route::post
+    form.post(route('contact'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeModal();
+            // Podrías usar un toast en lugar de un alert para que sea más elegante
+            alert('¡Mensaje enviado con éxito!');
+        },
+        onError: (errors) => {
+            console.log("Errores de validación:", errors);
+        }
+    });
+};
+
+
+Aplicando esto a nuestro proyecto---
+
+
+-------------------------------
+
+
+Para que el mensaje de éxito que envías desde el controlador (with('success', ...)) sea accesible en tu componente Welcome.vue, primero debemos "puentearlo" a través del Middleware.
+
+Esto es lo que hace que la magia de Inertia funcione: convierte las variables de sesión de Laravel en props de Vue.
+1. Configuración del Middleware
+
+Modifica tu archivo app/Http/Middleware/HandleInertiaRequests.php. Vamos a definir una clave flash dentro del método share:
+PHP
+
+public function share(Request $request): array
+{
+    return [
+        ...parent::share($request),
+        // Compartir los mensajes flash con el frontend
+        'flash' => [
+            'success' => fn () => $request->session()->get('success'),
+            'error' => fn () => $request->session()->get('error'),
+        ],
+    ];
+}
+
+    Nota: Usamos una función anónima (fn () => ...) para que Laravel solo ejecute esa sesión cuando sea estrictamente necesario, optimizando el rendimiento.
+
+nuestro codigo:app/Http/Middleware/HandleInertiaRequests.php.
+----
+ public function share(Request $request): array
+    {
+        return [
+            ...parent::share($request),
+            // Compartir los mensajes flash con el frontend
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
+            ],
+        ];
+    }
+---
+
+2. Captura en el Frontend (Welcome.vue)
+
+Ahora que el middleware "comparte" el dato, puedes leerlo en tu componente. Aunque en tu onSuccess ya tienes un alert, lo ideal es mostrar un mensaje dentro del HTML para una mejor experiencia de usuario (UX).
+
+Así quedaría tu lógica en el componente:
+JavaScript
+
+<script setup>
+import { computed } from 'vue';
+import { usePage, useForm } from '@inertiajs/vue3';
+
+const page = usePage();
+
+// Esta variable será reactiva. Si hay un mensaje en la sesión, aparecerá aquí.
+const flashSuccess = computed(() => page.props.flash.success);
+
+const form = useForm({
+    name: '',
+    email: '',
+    message: '',
+});
+
+const sendMessage = () => {
+    form.post(route('contact'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Cerramos el modal si es necesario
+            if (typeof closeModal === 'function') closeModal();
+            
+            // Limpiamos los campos
+            form.reset();
+            
+            // El mensaje aparecerá automáticamente gracias a flashSuccess
+        },
+        onError: (errors) => {
+            console.log("Errores detectados:", errors);
+        }
+    });
+};
+</script>
+
+<template>
+    <transition name="fade">
+        <div v-if="flashSuccess" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">{{ flashSuccess }}</span>
+        </div>
+    </transition>
+
+    </template>
+
+
+En nuestro caso cambiamos de:
+
+const sendMessage = () => {
+    // Cambiamos 'contact.send' por 'contact' para que coincida con tu Route::post
+    form.post(route('contact'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeModal();
+            // Podrías usar un toast en lugar de un alert para que sea más elegante
+            alert('¡Mensaje enviado con éxito!');
+        },
+        onError: (errors) => {
+            console.log("Errores de validación:", errors);
+        }
+    });
+};
+
+a este codigo:
+
+const sendMessage = () => {
+    form.post(route('contact'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Cerramos el modal si es necesario
+            if (typeof closeModal === 'function') closeModal();
+            
+            // Limpiamos los campos
+            form.reset();
+            
+            // El mensaje aparecerá automáticamente gracias a flashSuccess
+        },
+        onError: (errors) => {
+            console.log("Errores detectados:", errors);
+        }
+    });
+};
+
+
+3. Ajuste en sendMessage
+
+Tu función sendMessage está bien encaminada. Al usar form.reset(), aseguras que si el usuario quiere enviar otro mensaje más tarde, los campos estén limpios.
+
+Un detalle importante: Como estás usando form.post, Inertia ya sabe que si el servidor responde con un error de validación (422), debe llenar form.errors automáticamente. Por eso, el onError que pusiste es excelente para depurar en consola, pero el usuario ya verá los errores gracias a tus componentes <InputError :message="form.errors.field" />.
+
+
+
+1. La lógica en el <script setup>
+
+Necesitamos importar computed y watch de Vue para reaccionar cuando Inertia reciba el mensaje de éxito desde Laravel.
+JavaScript
+
+import { ref, computed, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const flashSuccess = ref(null);
+let timeoutId = null;
+
+// Observamos los cambios en los props de flash
+watch(
+    () => page.props.flash.success,
+    (newValue) => {
+        if (newValue) {
+            flashSuccess.value = newValue;
+
+            // Limpiar cualquier temporizador previo si el usuario envía varios mensajes
+            if (timeoutId) clearTimeout(timeoutId);
+
+            // El mensaje desaparecerá tras 5 segundos
+            timeoutId = setTimeout(() => {
+                flashSuccess.value = null;
+            }, 5000);
+        }
+    },
+    { immediate: true }
+);
+
+2. El Componente Visual (Template)
+
+Para evitar que el mensaje "empuje" tu contenido hacia abajo, lo posicionaremos de forma absoluta o fija. Coloca este bloque preferiblemente justo antes de que cierres el contenedor principal de tu sección o al final del template.
+HTML
+
+<transition name="fade">
+    <div 
+        v-if="flashSuccess" 
+        class="fixed top-20 right-5 z-50 max-w-md w-full sm:w-auto"
+    >
+        <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-xl flex items-center space-x-3 border border-green-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="Ref: M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="font-medium">{{ flashSuccess }}</span>
+        </div>
+    </div>
+</transition>
+
+3. El Efecto "Fade" (CSS)
+
+Para que no desaparezca de golpe, añade estas clases de transición al final de tu archivo. Esto utiliza el sistema de transiciones nativo de Vue.
+CSS
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
+
+¿Cómo funciona este flujo?
+
+    Activación: Cuando tu controlador de Laravel hace el return back()->with('success', '¡Mensaje enviado!'), Inertia actualiza automáticamente el objeto page.props.
+
+    Reacción: El watch detecta ese cambio, asigna el texto a nuestra variable local flashSuccess (lo que hace que el v-if sea verdadero) y arranca el cronómetro.
+
+    Visualización: El mensaje aparece en la esquina superior derecha, por encima de todo el contenido, gracias a fixed y z-50.
+
+    Cierre Limpio: A los 5 segundos, el timeout limpia la variable y la transición de CSS se encarga de que se desvanezca suavemente hacia arriba.
+
+
+Colocacioin del mensaje de exito:
+----------------------------------
+
+Aquí tienes el código integrado para tu archivo Welcome.vue (o el componente donde manejes el formulario de contacto):
+1. La lógica en el <script setup>
+
+Necesitamos importar computed y watch de Vue para reaccionar cuando Inertia reciba el mensaje de éxito desde Laravel.
+JavaScript
+
+import { ref, computed, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const flashSuccess = ref(null);
+let timeoutId = null;
+
+// Observamos los cambios en los props de flash
+watch(
+    () => page.props.flash.success,
+    (newValue) => {
+        if (newValue) {
+            flashSuccess.value = newValue;
+
+            // Limpiar cualquier temporizador previo si el usuario envía varios mensajes
+            if (timeoutId) clearTimeout(timeoutId);
+
+            // El mensaje desaparecerá tras 5 segundos
+            timeoutId = setTimeout(() => {
+                flashSuccess.value = null;
+            }, 5000);
+        }
+    },
+    { immediate: true }
+);
+
+2. El Componente Visual (Template)
+
+Para evitar que el mensaje "empuje" tu contenido hacia abajo, lo posicionaremos de forma absoluta o fija. Coloca este bloque preferiblemente justo antes de que cierres el contenedor principal de tu sección o al final del template.
+HTML
+
+<transition name="fade">
+    <div 
+        v-if="flashSuccess" 
+        class="fixed top-20 right-5 z-50 max-w-md w-full sm:w-auto"
+    >
+        <div class="bg-green-500 text-white px-6 py-4 rounded-lg shadow-xl flex items-center space-x-3 border border-green-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="Ref: M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="font-medium">{{ flashSuccess }}</span>
+        </div>
+    </div>
+</transition>
+
+3. El Efecto "Fade" (CSS)
+
+Para que no desaparezca de golpe, añade estas clases de transición al final de tu archivo. Esto utiliza el sistema de transiciones nativo de Vue.
+CSS
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
+
+¿Cómo funciona este flujo?
+
+    Activación: Cuando tu controlador de Laravel hace el return back()->with('success', '¡Mensaje enviado!'), Inertia actualiza automáticamente el objeto page.props.
+
+    Reacción: El watch detecta ese cambio, asigna el texto a nuestra variable local flashSuccess (lo que hace que el v-if sea verdadero) y arranca el cronómetro.
+
+    Visualización: El mensaje aparece en la esquina superior derecha, por encima de todo el contenido, gracias a fixed y z-50.
+
+    Cierre Limpio: A los 5 segundos, el timeout limpia la variable y la transición de CSS se encarga de que se desvanezca suavemente hacia arriba.
+
+
+Prueba de envio:
+-----------------
+
+1. Configuración del .env
+
+Para que no intente conectar a un servidor SMTP real y simplemente escriba en el archivo de texto, tu archivo .env debe tener:
+Code snippet
+
+MAIL_MAILER=log
+MAIL_FROM_ADDRESS="hola@klvst3r.me"
+MAIL_FROM_NAME="${APP_NAME}"
+
+2. El Controlador (Laravel)
+
+Asegúrate de que después de disparar el envío del correo, estés enviando la sesión de éxito de esta manera:
+PHP
+
+public function store(Request $request)
+{
+    // ... validación y lógica de envío ...
+
+    return back()->with('success', '¡Gracias! Tu mensaje ha sido enviado correctamente.');
+}
+
+
+
+Es importante ir mirando el flujo 
+
+Verificación en tiempo real
+
+Para ver si el flujo ocurre correctamente, te recomiendo abrir una terminal y dejar corriendo el siguiente comando en la carpeta de tu proyecto. Así verás el correo "llegar" al instante en que des clic al botón:
+Bash
+
+tail -f storage/logs/laravel.log
+
+Lo que deberías observar:
+
+    En la terminal: Verás aparecer el cuerpo del correo en texto plano dentro del log.
+
+    En el navegador: El modal de contacto debería cerrarse, y en la esquina superior derecha (gracias al código fixed top-20 right-5) aparecerá el recuadro verde con el texto que definiste en el controlador.
+
+    A los 5 segundos: El mensaje se desvanecerá hacia arriba suavemente.
+
+Tip Pro: Si ves que el mensaje de éxito no aparece, revisa en las Vue DevTools que el objeto page.props.flash.success realmente esté recibiendo el string desde Laravel. A veces, si hay un error de validación, el flujo se detiene antes de llegar al with('success', ...).
+
+
+
+Entendido, vamos a ajustar el posicionamiento para que el mensaje sea el protagonista. Para centrarlo horizontalmente y darle más presencia (anchura), cambiaremos la clase right-5 por una combinación de left-1/2 y un traslate para que quede perfectamente alineado al centro.
+
+Aquí tienes el bloque del template actualizado con esas mejoras de diseño:
+1. Template Ajustado (Centrado y Ancho)
+
+He modificado las clases de Tailwind para que el mensaje sea más ancho en pantallas grandes y se mantenga centrado:
+HTML
+
+<transition name="fade">
+    <div 
+        v-if="flashSuccess" 
+        class="fixed top-10 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-2xl"
+    >
+        <div class="bg-green-500 text-white px-8 py-4 rounded-xl shadow-2xl flex items-center justify-between border border-green-400/50 backdrop-blur-sm bg-opacity-95">
+            <div class="flex items-center space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-semibold text-lg tracking-wide">{{ flashSuccess }}</span>
+            </div>
+            
+            <button @click="flashSuccess = null" class="ml-4 hover:bg-green-600 rounded-full p-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</transition>
+
+2. Cambios clave realizados:
+
+    left-1/2 -translate-x-1/2: Esta es la fórmula mágica de Tailwind para centrar elementos con fixed o absolute.
+
+    w-[90%] max-w-2xl: Ahora el mensaje ocupa casi todo el ancho en móviles, pero en escritorio se detiene en un tamaño "2xl" (unos 672px), lo que le da mucha más jerarquía.
+
+    z-[100]: Subimos el índice Z para asegurar que esté por encima de cualquier otro elemento de navegación.
+
+    top-10: Lo bajamos un poco más del borde superior para que respire.
+
+    shadow-2xl: Una sombra más profunda para que realmente parezca que "flota" sobre tu portafolio.
+
+
+    la segunda propuesta semi final queda:
+
+    <transition name="fade">
+    <div 
+        v-if="flashSuccess" 
+        class="fixed top-10 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-2xl"
+    >
+        <div class="bg-green-500 text-white px-8 py-4 rounded-xl shadow-2xl flex items-center justify-between border border-green-400/50 backdrop-blur-sm bg-opacity-95">
+            <div class="flex items-center space-x-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-semibold text-lg tracking-wide">{{ flashSuccess }}</span>
+            </div>
+            
+            <button @click="flashSuccess = null" class="ml-4 hover:bg-green-600 rounded-full p-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</transition>
+</template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -20px); /* Mantiene el centrado mientras sube/baja */
+}
+</style>
+
+
+y la final queda:
+
+ Gemini said
+
+¡Excelente idea! La barra de progreso le da un toque muy dinámico y reduce la ansiedad del usuario porque sabe exactamente cuándo desaparecerá el aviso.
+
+Para bajarlo un poco más, ajustaremos la clase a top-20 o top-24. Para la barra, usaremos un div con una transición de CSS que reduzca su ancho de 100% a 0%.
+
+Aquí tienes el código completo y actualizado:
+1. Template con la Barra de Progreso
+
+He añadido un contenedor para la barra justo en la parte superior del mensaje.
+HTML
+
+<transition name="fade">
+    <div 
+        v-if="flashSuccess" 
+        class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-2xl"
+    >
+        <div class="relative overflow-hidden bg-green-500 text-white px-8 py-5 rounded-xl shadow-2xl flex items-center justify-between border border-green-400/50 backdrop-blur-sm bg-opacity-95">
+            
+            <div class="absolute top-0 left-0 h-1 bg-green-300/50 w-full">
+                <div 
+                    class="h-full bg-white transition-all linear"
+                    :style="{ width: progressWidth + '%', transitionDuration: '5000ms' }"
+                ></div>
+            </div>
+
+            <div class="flex items-center space-x-4 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-semibold text-lg tracking-wide">{{ flashSuccess }}</span>
+            </div>
+            
+            <button @click="flashSuccess = null" class="ml-4 hover:bg-green-600/50 rounded-full p-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</transition>
+
+2. Lógica en <script setup>
+
+Añadimos nextTick y una variable reactiva para controlar el ancho de la barra.
+JavaScript
+
+import { ref, watch, nextTick } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const flashSuccess = ref(null);
+const progressWidth = ref(100); // Empezamos al 100%
+let timeoutId = null;
+
+watch(
+    () => page.props.flash.success,
+    async (newValue) => {
+        if (newValue) {
+            flashSuccess.value = newValue;
+            progressWidth.value = 100; // Resetear barra
+
+            // Forzamos a Vue a esperar que el DOM se renderice antes de iniciar la animación
+            await nextTick();
+            
+            // Iniciamos la reducción de la barra casi de inmediato
+            setTimeout(() => {
+                progressWidth.value = 0;
+            }, 50);
+
+            if (timeoutId) clearTimeout(timeoutId);
+
+            timeoutId = setTimeout(() => {
+                flashSuccess.value = null;
+            }, 5000);
+        }
+    },
+    { immediate: true }
+);
+
+3. CSS para el movimiento suave
+
+Ajustamos el transform para que respete el centrado horizontal y la caída desde arriba (top-24).
+CSS
+
+<style scoped>
+.linear {
+  transition-timing-function: linear !important;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -30px); /* El -50% mantiene el centrado */
+}
+</style>
+
+¿Por qué lo hicimos así?
+
+    nextTick(): Es vital para que Vue primero dibuje el mensaje con la barra al 100% y luego, al cambiarla a 0%, el navegador ejecute la transición de 5 segundos suavemente.
+
+    transition-timing-function: linear: La barra debe vaciarse de forma constante, no acelerar ni frenar, para que sea un indicador de tiempo real preciso.
+
+    top-24: Ahora queda lo suficientemente abajo para no estorbar el menú superior (Login/Register), pero lo suficientemente alto para ser lo primero que se vea.
+
+
+
+    Cambio del flash
+
+    // Observamos los cambios en los props de flash
+watch(
+    () => page.props.flash.success,
+    (newValue) => {
+        if (newValue) {
+            flashSuccess.value = newValue;
+
+            // Limpiar cualquier temporizador previo si el usuario envía varios mensajes
+            if (timeoutId) clearTimeout(timeoutId);
+
+            // El mensaje desaparecerá tras 5 segundos
+            timeoutId = setTimeout(() => {
+                flashSuccess.value = null;
+            }, 5000);
+        }
+    },
+    { immediate: true }
+);
+
+a esto:
+
+watch(
+    () => page.props.flash.success,
+    async (newValue) => {
+        if (newValue) {
+            flashSuccess.value = newValue;
+            progressWidth.value = 100; // Resetear barra
+
+            // Forzamos a Vue a esperar que el DOM se renderice antes de iniciar la animación
+            await nextTick();
+            
+            // Iniciamos la reducción de la barra casi de inmediato
+            setTimeout(() => {
+                progressWidth.value = 0;
+            }, 50);
+
+            if (timeoutId) clearTimeout(timeoutId);
+
+            timeoutId = setTimeout(() => {
+                flashSuccess.value = null;
+            }, 5000);
+        }
+    },
+    { immediate: true }
+);
+
+
+
+
+Cambio de boton al enviare
+------------
+
+En desarrollo local con Debian y enviando a logs, la respuesta es casi instantánea (milisegundos), pero cuando subas tu portafolio a producción (en DigitalOcean o Google Cloud como planeas), el envío de un correo real a través de un servidor SMTP puede tardar de 2 a 5 segundos.
+
+Sin un estado de "Cargando", el usuario podría pensar que el botón no funciona, darle clic varias veces y terminar enviándote 5 correos iguales.
+
+Como usas Inertia.js, implementar esto es sumamente sencillo porque el objeto form ya rastrea si la petición está en curso.
+
+Aquí tienes cómo ajustar tu botón dentro del modal en Welcome.vue:
+1. El Botón Dinámico (Template)
+
+Vamos a usar la propiedad form.processing para deshabilitar el botón y mostrar un pequeño cambio visual (un spinner o simplemente un texto diferente).
+HTML
+
+<button 
+    type="submit" 
+    :disabled="form.processing"
+    class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+>
+    <template v-if="form.processing">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Enviando...
+    </template>
+    
+    <template v-else>
+        Enviar Mensaje
+    </template>
+</button>
+
+2. ¿Por qué esto es una buena práctica?
+
+    disabled="form.processing": Evita el "doble envío". Una vez que el usuario hace clic, el botón se bloquea automáticamente hasta que el servidor responde.
+
+    disabled:opacity-50: Visualmente le indica al usuario que la acción está bloqueada.
+
+    animate-spin: El pequeño círculo girando (spinner) le da esa sensación de que "algo está pasando detrás de escenas".
+
+El Flujo Completo ahora sería:
+
+    El usuario hace clic en Enviar.
+
+    El botón se pone gris y aparece el Spinner (Estado de Carga).
+
+    Laravel procesa el correo (y lo escribe en el log).
+
+    Inertia recibe la respuesta, el botón vuelve a la normalidad, el modal se cierra y... ¡BAM! Aparece tu aviso verde con la barrita de tiempo que acabamos de crear.
+
+Se sugiere:
+
+<button 
+    type="submit" 
+    :disabled="form.processing"
+    class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+>
+    <template v-if="form.processing">
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Enviando...
+    </template>
+    
+    <template v-else>
+        Enviar Mensaje
+    </template>
+</button>
+
+pero yo utilizo el componente 
+
+PrimaryButton
+
+Como ya estás usando el componente PrimaryButton (que es el estándar que viene con Breeze/Jetstream), podemos inyectar la misma lógica visual dentro de él sin perder su estilo original.
+
+La ventaja de usar el código del spinner dentro de tu PrimaryButton es que mantienes la coherencia visual de tu portafolio mientras añades ese feedback profesional.
+
+Aquí tienes cómo integrarlo:
+El código para tu componente
+
+Simplemente coloca el v-if dentro de las etiquetas de tu componente actual:
+HTML
+
+<PrimaryButton
+    type="submit"
+    class="ml-3 inline-flex items-center" 
+    :class="{ 'opacity-75': form.processing }"
+    :disabled="form.processing"
+>
+    <svg 
+        v-if="form.processing" 
+        class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
+        xmlns="http://www.w3.org/2000/svg" 
+        fill="none" 
+        viewBox="0 0 24 24"
+    >
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+
+    <span>
+        {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+    </span>
+</PrimaryButton>
+
+¿Qué mejoras aplicamos aquí?
+
+    inline-flex items-center: Añadí estas clases en la propiedad class para asegurar que el spinner y el texto queden perfectamente alineados horizontalmente.
+
+    Refinamiento de Opacidad: Cambié opacity-25 por opacity-75. La opacidad 25 es muy tenue y hace que el botón casi desaparezca; con 75 se nota bloqueado pero aún es legible.
+
+    Operador Ternario: En lugar de usar dos <template>, usamos una expresión simple {{ ... ? ... : ... }} dentro de un <span>. Es más limpio para etiquetas cortas.
+
+    Tamaño del Spinner: Lo ajusté a h-4 w-4 para que encaje mejor con el tamaño de fuente estándar de los componentes de Breeze.
+
+
+    cambiamos de
+     <PrimaryButton
+                type="submit"
+                class="ml-3"
+                :class="{ 'opacity-25': form.processing }"
+                :disabled="form.processing"
+            >
+                Enviar Mensaje
+            </PrimaryButton>
+
+hacia:
+
+<PrimaryButton
+    type="submit"
+    class="ml-3 inline-flex items-center" 
+    :class="{ 'opacity-75': form.processing }"
+    :disabled="form.processing"
+>
+    <svg 
+        v-if="form.processing" 
+        class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
+        xmlns="http://www.w3.org/2000/svg" 
+        fill="none" 
+        viewBox="0 0 24 24"
+    >
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+
+    <span>
+        {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+    </span>
+</PrimaryButton>
+
+
+Siguiente paso recomendado
+
+Ya que el usuario está interactuando con el formulario, una gran mejora sería limpiar los errores de validación mientras el usuario escribe. Por ejemplo, si el email dio error y el usuario empieza a corregirlo, el mensaje de error debería desaparecer.
+
+
+Esta es una de las mejores formas de mejorar la "puntería" de tu UI. No hay nada más molesto para un usuario que corregir un campo y que el mensaje de error rojo siga ahí hasta que vuelva a intentar enviar el formulario.
+
+Con Inertia, tienes dos formas de lograr esto usando el objeto form.
+1. La forma manual: form.clearErrors()
+
+Puedes invocar esta función en el evento @input de tus campos. Esto le dice a Inertia: "Oye, el usuario ya está tocando este campo, así que borra el error asociado".
+
+Aquí tienes cómo aplicarlo a tus inputs en el modal:
+HTML
+
+<div>
+    <InputLabel for="name" value="Nombre" />
+    <TextInput 
+        id="name" 
+        v-model="form.name" 
+        @input="form.clearErrors('name')" 
+        class="mt-1 block w-full" 
+    />
+    <InputError :message="form.errors.name" class="mt-2" />
+</div>
+
+<div class="mt-4">
+    <InputLabel for="email" value="Email" />
+    <TextInput 
+        id="email" 
+        type="email" 
+        v-model="form.email" 
+        @input="form.clearErrors('email')" 
+        class="mt-1 block w-full" 
+    />
+    <InputError :message="form.errors.email" class="mt-2" />
+</div>
+
+2. ¿Cómo funciona?
+
+    @input: Se dispara cada vez que el usuario presiona una tecla.
+
+    form.clearErrors('campo'): Elimina específicamente el error de ese campo en el objeto form.errors.
+
+    Resultado: El componente <InputError> desaparece instantáneamente porque su prop :message pasa a ser null.
+
+3. Bonus: Limpiar todos los errores al cerrar el modal
+
+Como estás trabajando con un modal, es muy probable que si el usuario lo cierra con errores y lo vuelve a abrir, los mensajes rojos sigan ahí. Para evitar esto, puedes limpiar todo cuando se oculte el modal:
+
+En tu <script setup>, donde manejas el cierre del modal (o usando un watch sobre la visibilidad del modal):
+JavaScript
+
+const closeModal = () => {
+    modalVisible.value = false; // O como manejes tu visibilidad
+    form.reset();               // Limpia los datos
+    form.clearErrors();         // Limpia todos los mensajes de error
+};
+
+Resumen del flujo de validación dinámica:
+
+    Error: El usuario envía el formulario vacío y Laravel responde con errores.
+
+    Feedback: Los mensajes rojos aparecen bajo los inputs.
+
+    Corrección: En cuanto el usuario pulsa una tecla en el campo "Email", form.clearErrors('email') se ejecuta y el mensaje rojo desaparece de inmediato.
+
+    Éxito: Al corregir todo, aparece tu increíble mensaje verde con barra de progreso.
+
+
+Cambiamos los botones de:
+
+<TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" placeholder="Escribe tu nombre y apellidos para establecer contacto" />
+
+<TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" placeholder="tu@correo.com" />
+
+
+
+¡Tienes toda la razón! Con el textarea el concepto es exactamente el mismo, pero es incluso más importante porque es donde el usuario suele escribir más contenido y donde más frustración causa ver un mensaje de error persistente.
+
+Para el textarea, simplemente añadimos el mismo escuchador de eventos @input. Aquí tienes cómo quedaría integrado:
+HTML
+
+<div class="mt-4">
+    <InputLabel for="message" value="Mensaje" />
+    <textarea
+        id="message"
+        v-model="form.message"
+        @input="form.clearErrors('message')"
+        rows="5"
+        class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800 transition-colors duration-200"
+        :class="{ 'border-red-500': form.errors.message }"
+        placeholder="¿En qué puedo ayudarte?"
+    ></textarea>
+    
+    <InputError :message="form.errors.message" class="mt-2" />
+</div>
+
+Detalles que marcan la diferencia:
+
+    Feedback Visual en el Borde: He añadido una clase condicional :class="{ 'border-red-500': form.errors.message }". Esto hará que el borde del cuadro de texto se ponga rojo si hay un error, y gracias al @input, volverá a su color normal en cuanto el usuario empiece a escribir.
+
+    Transición Suave: La clase transition-colors duration-200 ayuda a que el cambio del borde rojo al normal no sea brusco.
+
+    Consistencia: Al usar form.clearErrors('message'), mantienes la misma lógica que en los TextInput, haciendo que toda la experiencia del formulario sea predecible y fluida.
+
+Una última recomendación para tu Portafolio:
+
+Ya que estás usando Laravel + Inertia, si alguna vez sientes que el objeto form se vuelve muy pesado de manejar manualmente campo por campo, recuerda que puedes usar un watch profundo sobre el objeto form.data, aunque para un formulario de contacto de 3 o 4 campos, la solución de @input que acabamos de poner es la más eficiente en términos de rendimiento.
+
+¡Con esto tu formulario ya tiene nivel de producción!
+ por ultimo quisiera que los mensajes de error:
+
+The name field is required.
+
+The email field is required.
+
+The message field is required.
+
+
+
+
+Asi que personalizamos nuestra validación en espalol:
+
+ $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|email:filter',
+            'message' => 'required|min:10',
+        ]);
+
+a esto:
+$request->validate([
+        'name'    => 'required|string|max:255',
+        'email'   => 'required|email',
+        'message' => 'required|min:10',
+    ], [
+        // Mensajes personalizados
+        'name.required'    => 'Por favor, dime tu nombre para saber con quién hablo.',
+        'email.required'   => 'Necesito tu correo electrónico para poder responderte.',
+        'email.email'      => 'Vaya, parece que este correo no es válido.',
+        'message.required' => 'No olvides escribir tu mensaje o duda.',
+        'message.min'      => 'Cuéntame un poco más, el mensaje es demasiado corto.',
+    ]);
+
+
+
+. Tip Pro: Traducción Global (Opcional)
+
+Si en el futuro tu proyecto crece y tienes muchos formularios, no querrás escribir los mensajes en cada controlador. Para traducir todo Laravel al español de una vez:
+
+    Cambia el idioma en config/app.php: 'locale' => 'es',.
+
+    Laravel buscará los archivos en lang/es/validation.php.
+
+    Como estás en tu lab de Debian, puedes instalar un paquete de traducciones rápidas con:
+    Bash
+
+    composer require laravel-lang/common --dev
+    php artisan lang:add es
+
+¡Con esto ya tienes un flujo impecable!
+
+    Formulario con validación en español.
+
+    Botón con spinner y bloqueo (UX).
+
+    Limpieza de errores en tiempo real mientras escribes.
+
+    Mensaje de éxito centrado, con sombra y barra de progreso.
+
+Otra caratecteristica que podriamos implementar es que mientas se esta enviando el boton se deshabilite                
+
+
+¡Exacto, Raúl! Esa es la regla de oro de la experiencia de usuario (UX) en formularios. Deshabilitar el botón no solo evita que el usuario envíe el mismo mensaje varias veces por accidente (doble clic), sino que también le da esa confirmación visual de que "el sistema ya está trabajando en su petición".
+
+Como ya tienes el PrimaryButton y estás usando el objeto form de Inertia, implementarlo es una sola línea de código.
+1. Implementación en tu botón
+
+Solo tienes que añadir el atributo :disabled vinculado a la propiedad processing de tu formulario:
+HTML
+
+<PrimaryButton
+    type="submit"
+    class="ml-3"
+    :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
+    :disabled="form.processing"
+>
+    <template v-if="form.processing">
+        Enviando...
+    </template>
+    <template v-else>
+        Enviar Mensaje
+    </template>
+</PrimaryButton>
+
+2. ¿Por qué es tan importante esto?
+
+    Evita el "Spam" accidental: Si el servidor de correo tarda 3 segundos en responder, un usuario impaciente podría dar clic 5 veces. Al deshabilitarlo al primer clic, garantizas que solo se procese una petición.
+
+    Cambio de Cursor: Al añadir la clase cursor-not-allowed de Tailwind, el puntero del mouse cambia a un círculo tachado, indicando claramente que el botón ya no es interactivo.
+
+    Sincronización Total: Lo mejor de Inertia es que form.processing se vuelve true automáticamente en cuanto se dispara el form.post y vuelve a false en cuanto llega la respuesta (ya sea éxito o error). No tienes que gestionar el estado manualmente con isLoading = true/false.
+
+Resumen de tu flujo final de "Botón Inteligente":
+
+    Estado Reposo: Botón azul, cursor tipo "puntero", texto "Enviar Mensaje".
+
+    Estado Enviando (Clic): * El botón se bloquea (:disabled="true").
+
+        La opacidad baja al 50%.
+
+        El cursor cambia a "bloqueado".
+
+        Aparece el spinner y el texto cambia a "Enviando...".
+
+    Estado Final:
+
+        Si hay error: El botón se reactiva automáticamente para que el usuario corrija.
+
+        Si hay éxito: El modal se cierra y aparece tu mensaje verde centrado con la barrita de progreso.
+
+de esto 
+   <PrimaryButton
+                type="submit"
+                class="ml-3 inline-flex items-center" 
+                :class="{ 'opacity-75': form.processing }"
+                :disabled="form.processing"
+            >
+                <svg 
+                    v-if="form.processing" 
+                    class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24"
+                >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+
+                <span>
+                    {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+                </span>
+            </PrimaryButton>
+a esto:        
+
+<PrimaryButton
+    type="submit"
+    class="ml-3 inline-flex items-center transition-all duration-200" 
+    :class="{ 
+        'opacity-50 cursor-not-allowed': form.processing,
+        'hover:bg-indigo-700': !form.processing 
+    }"
+    :disabled="form.processing"
+>
+    <svg 
+        v-if="form.processing" 
+        class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" 
+        xmlns="http://www.w3.org/2000/svg" 
+        fill="none" 
+        viewBox="0 0 24 24"
+    >
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+
+    <span class="font-medium">
+        {{ form.processing ? 'Enviando...' : 'Enviar Mensaje' }}
+    </span>
+</PrimaryButton>        
+
+Esto da un estado mas animado con el contacto con el usuario.
+
+Lo que seguiria es mostrar un mensjae de exito para cuando se recibe el mensaje ya lo tenemos implementado solo hay posiblidades de mejorar.
+
+

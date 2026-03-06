@@ -19,11 +19,21 @@ class ContactController extends Controller
         //dd($request->all());
         //Aquí podrías agregar validación de los datos recibidos, por ejemplo:
 
+        //Laravel permite agruparlas. Si quieres que sea aún más estricto (verificando que el dominio tenga registros DNS reales), puedes usar:
+        //'email' => 'required|email:rfc,dns'
+
         // 1. Es vital validar antes de enviar, para evitar que lleguen nulos al Mail
         $request->validate([
-            'name' => 'required',
-            'email' => 'required|email',
-            'message' => 'required',
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|email',
+            'message' => 'required|min:10',
+        ], [
+            // Mensajes personalizados
+            'name.required'    => 'Por favor, escribe tu nombre para saber a quien contestar correctamente.',
+            'email.required'   => 'Es necesario tu correo electrónico para poder responderle.',
+            'email.email'      => 'Vaya, parece que este correo no es válido.',
+            'message.required' => 'No olvide escribir su mensaje o duda.',
+            'message.min'      => 'Cuentenos un poco más, el mensaje es demasiado corto.',
         ]);
 
 
