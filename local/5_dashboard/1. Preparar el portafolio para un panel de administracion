@@ -1,0 +1,100 @@
+Preparar el portafolio para tener un panel de administracion
+
+Hasta este punto ya se han explorado muchas capacidades muchas caracteristicas de vilt, ya estamos mas familiarizados con ineertiajs, con los componentes de jestream.
+
+Hemos utilizado TailwindCSS, ahora se repetira los mismo llevandolo un pcoo mas alla para tener funiconalidades mas avanzadas, basicamente vamos a tenes un panel de 
+administración, donde se podra gestionar los proyectos, las habilidades.
+
+Necesitamos entonces un panel de admisnistración, jetstream facilita mucho el inicio de sesión, el uso de registro de usuarios, asi que se preparara el uso correcto
+de ese panel de administración,
+
+Para ello se prepararan una serie de rutas, vamos a registrrar esta series de opciones, y despues se implementaran, las funionalidades correspondientes.
+
+Vamos primero a deshabilitar el registro de usuarios, ya que no cualquiera viene y registra y agregar un usuario administrador.
+
+sino que solo seremos nosotros quienes tengamos acceso a esta funcionalidad.
+
+Para ello vamos a editar el archivo de rutas, en este caso routes/web.php, y vamos a comentar la ruta de registro de usuarios.
+
+Route::middleware(['auth', 'verified'])... 
+
+Si ya tenemos nuestra cuenta de usuario, podemos iniciar sesión, y si no, podemos crear una.
+Para de esta manera no cualquiera pueda acceder al backend del portafolio, solo usuarios autorizados.
+
+Una vez que tengamos acceso al panel de administración, se prepararan las rutas para la gestión de proyectos, habilidades, etc.
+
+Vamos a ir a la configuración de config, para la configuración de fortify, recordemos que fortify es el paquete sobre el cual funciona laravel jestream, el cual tiene un paquete de fucnionalidades
+que podremos deshablitar o habilitar.
+
+Al final del archivo, vamos a agregar un comentario, para deshabilitar el registro de usuarios.
+
+// Deshabilitar registro de usuarios
+Route::middleware(['auth', 'verified'])... 
+
+
+
+config/fortify.php
+
+Tenemos:
+
+ 'features' => [
+        Features::registration(),
+
+registration, si simplemente comentamos la linea, ya no tendremos la ruta de registro de usuarios.
+
+
+con esto estaremos incluyendo o no, esa capacidad, quiere decir que tendremos la precaución de arrancar nuestro servidor 
+
+podremos ir al navegador
+
+npm run watch
+
+
+tenremos el portafolio con caracteristicas, pero el elemento de register ya no esta. Si habilkitamos aparecera el enlace de register, eso es lo que estamos haciendo.
+
+De moento no vamos a permitir que el usuario se pueda registrar, solo nosotros tendremos acceso a esta funcionalidad.
+
+Vamos a mantener comentado, y si intentamos accesar por url ya no estara disponible en el sistema.
+
+Ahora vamos a agregar las rutas para el panel de administración, para ello vamos a crear un archivo en routes/admin.php, y vamos a agregar las rutas para el panel de administración.
+
+Route::middleware(['auth', 'verified'])... 
+
+
+Como vamos ahora a registrar el usuario.
+
+Hay dos formas, una es volver a descomentar la linea y volver a comentar.
+
+una forma mas elegante es hacerlo desde la consola.
+
+Vamos a hacer 
+
+    $ php artisan tinker
+
+Con el factory de user hacemos
+
+    >>> User::factory()->create(['name' => 'Admin', 'email' => 'admin@email.com', 'password' => bcript'desarrollo']);
+
+>>> Por defecto los factory de user asignan un password que es password, nuevamente si la queremos cambiar lo hacemos como hicimos anteriormente.
+
+Pero recordemos de password solo lo mostraremos no lo vamos a ejecutar como tal cone l helper de bcript para se encripte la contraseña.
+
+
+Eso es todo si se quiere usar la constraseña
+
+Salimos y verificamos que se puede iniciar sesion con el login, y que no se puede registrar un nuevo usuario.
+
+Ya podemos iniciar sesion habiendo deshabilitado el registro de usuarios desde el proyecto y con uso de fortify.
+
+Ahora vamos a tener que ordenar las rutas, y preparar las rutas para nuestro sistema,
+
+Lo que sigue es registrar un nuevo servicio, para ello vamos a crear un archivo en routes/admin.php, y vamos a agregar las rutas para el panel de administración.
+
+Asi que vamos a crear un nuevo archivo de rutas llamada dashboard
+
+Podremos duplicar el de web.php
+
+llamado dashboard.php
+
+removiendo algunas de las rutas que no se estan iniciando quedando:
+
