@@ -1,0 +1,546 @@
+Del punto anterior dejamos a nuestro proyecto para tener un dashboard un panel de administración para gestionar los skills y los projects.
+
+Solo se ha preparado el terreno, se separaron las rutas, se registraron, tenemos protegido mediante login para el dashboard. Todo esta protegido y asegurado.
+
+Ahora tenemos la situación que cuando presionan skills o projects en el panel de administración. Se dice que esa accion no existe no se ha implementado tanto los controladores para skills como para projects. Estan completamente vacios, en esta ocación veremos skills y mas adelante projects.
+
+Ya tenemos que podemos utilizar, el metodo que genera error y es el que se va a implementar es justamente.
+
+
+Antes de ello al ir al proyecto tenemos unos errores:
+
+
+bien, descargando los cambios en otro equipo debian, con este proyecto, y arrancarlo me indica algunos errores:
+
+[Vue warn]: Unhandled error during execution of watcher getter   at <Welcome errors=
+Object {  }
+ jetstream=
+Object { canCreateTeams: false, canManageTwoFactorAuthentication: true, canUpdatePassword: true, canUpdateProfileInformation: true, hasEmailVerification: false, flash: [], hasAccountDeletionFeatures: true, hasApiFeatures: false, hasTeamFeatures: false, hasTermsAndPrivacyPolicyFeature: false, … }
+ auth=
+Object { user: null }
+  ... >   at <Inertia initialPage=
+Object { component: "Welcome", props: {…}, url: "/", version: "c30a725be6aac53e0a36b37cb95c7cf8", clearHistory: false, encryptHistory: false }
+ initialComponent=
+Object { __name: "Welcome", props: {…}, setup: setup(__props), __hmrId: "6e0fb345", render: _sfc_render(_ctx, _cache, $props, $setup, $data, $options)
+, __scopeId: "data-v-6e0fb345", __file: "/home/klvst3r/dev/laravel/portfolio-spa/resources/js/Pages/Welcome.vue", inheritAttrs: false, … }
+ resolveComponent=fn<resolveComponent>  ... >   at <App> runtime-core.esm-bundler.js:51:13
+[Vue warn]: Unhandled error during execution of setup function   at <Welcome errors=
+Object {  }
+ jetstream=
+Object { canCreateTeams: false, canManageTwoFactorAuthentication: true, canUpdatePassword: true, canUpdateProfileInformation: true, hasEmailVerification: false, flash: [], hasAccountDeletionFeatures: true, hasApiFeatures: false, hasTeamFeatures: false, hasTermsAndPrivacyPolicyFeature: false, … }
+ auth=
+Object { user: null }
+  ... >   at <Inertia initialPage=
+Object { component: "Welcome", props: {…}, url: "/", version: "c30a725be6aac53e0a36b37cb95c7cf8", clearHistory: false, encryptHistory: false }
+ initialComponent=
+Object { __name: "Welcome", props: {…}, setup: setup(__props), __hmrId: "6e0fb345", render: _sfc_render(_ctx, _cache, $props, $setup, $data, $options)
+, __scopeId: "data-v-6e0fb345", __file: "/home/klvst3r/dev/laravel/portfolio-spa/resources/js/Pages/Welcome.vue", inheritAttrs: false, … }
+ resolveComponent=fn<resolveComponent>  ... >   at <App> runtime-core.esm-bundler.js:51:13
+[Vue warn]: Unhandled error during execution of watcher getter   at <Welcome errors=
+Object {  }
+ jetstream=
+Object { canCreateTeams: false, canManageTwoFactorAuthentication: true, canUpdatePassword: true, canUpdateProfileInformation: true, hasEmailVerification: false, flash: [], hasAccountDeletionFeatures: true, hasApiFeatures: false, hasTeamFeatures: false, hasTermsAndPrivacyPolicyFeature: false, … }
+ auth=
+Object { user: null }
+  ... >   at <Inertia initialPage=
+Object { component: "Welcome", props: {…}, url: "/", version: "c30a725be6aac53e0a36b37cb95c7cf8", clearHistory: false, encryptHistory: false }
+ initialComponent=
+Object { __name: "Welcome", props: {…}, setup: setup(__props), __hmrId: "6e0fb345", render: _sfc_render(_ctx, _cache, $props, $setup, $data, $options)
+, __scopeId: "data-v-6e0fb345", __file: "/home/klvst3r/dev/laravel/portfolio-spa/resources/js/Pages/Welcome.vue", inheritAttrs: false, … }
+ resolveComponent=fn<resolveComponent>  ... >   at <App> runtime-core.esm-bundler.js:51:13
+[Vue warn]: Unhandled error during execution of setup function   at <Welcome errors=
+Object {  }
+ jetstream=
+Object { canCreateTeams: false, canManageTwoFactorAuthentication: true, canUpdatePassword: true, canUpdateProfileInformation: true, hasEmailVerification: false, flash: [], hasAccountDeletionFeatures: true, hasApiFeatures: false, hasTeamFeatures: false, hasTermsAndPrivacyPolicyFeature: false, … }
+ auth=
+Object { user: null }
+  ... >   at <Inertia initialPage=
+Object { component: "Welcome", props: {…}, url: "/", version: "c30a725be6aac53e0a36b37cb95c7cf8", clearHistory: false, encryptHistory: false }
+ initialComponent=
+Object { __name: "Welcome", props: {…}, setup: setup(__props), __hmrId: "6e0fb345", render: _sfc_render(_ctx, _cache, $props, $setup, $data, $options)
+, __scopeId: "data-v-6e0fb345", __file: "/home/klvst3r/dev/laravel/portfolio-spa/resources/js/Pages/Welcome.vue", inheritAttrs: false, … }
+ resolveComponent=fn<resolveComponent>  ... >   at <App> runtime-core.esm-bundler.js:51:13
+[Vue warn]: Unhandled error during execution of component update   at <Inertia initialPage=
+Object { component: "Welcome", props: {…}, url: "/", version: "c30a725be6aac53e0a36b37cb95c7cf8", clearHistory: false, encryptHistory: false }
+ initialComponent=
+Object { __name: "Welcome", props: {…}, setup: setup(__props), __hmrId: "6e0fb345", render: _sfc_render(_ctx, _cache, $props, $setup, $data, $options)
+, __scopeId: "data-v-6e0fb345", __file: "/home/klvst3r/dev/laravel/portfolio-spa/resources/js/Pages/Welcome.vue", inheritAttrs: false, … }
+ resolveComponent=fn<resolveComponent>  ... >   at <App> runtime-core.esm-bundler.js:51:13
+
+
+Uncaught (in promise) TypeError: can't access property "success", page.props.flash is undefined
+    setup Welcome.vue:53
+    callWithErrorHandling runtime-core.esm-bundler.js:199
+    callWithAsyncErrorHandling runtime-core.esm-bundler.js:206
+    call runtime-core.esm-bundler.js:880
+    getter reactivity.esm-bundler.js:1835
+    run reactivity.esm-bundler.js:237
+    job reactivity.esm-bundler.js:1884
+    watch reactivity.esm-bundler.js:1934
+    doWatch runtime-core.esm-bundler.js:908
+    watch2 runtime-core.esm-bundler.js:841
+    setup Welcome.vue:52
+    callWithErrorHandling runtime-core.esm-bundler.js:199
+    setupStatefulComponent runtime-core.esm-bundler.js:8040
+    setupComponent runtime-core.esm-bundler.js:8002
+    mountComponent runtime-core.esm-bundler.js:5939
+    processComponent runtime-core.esm-bundler.js:5905
+    patch runtime-core.esm-bundler.js:5403
+    componentUpdateFn runtime-core.esm-bundler.js:6051
+    run reactivity.esm-bundler.js:237
+    setupRenderEffect runtime-core.esm-bundler.js:6179
+    mountComponent runtime-core.esm-bundler.js:5953
+    processComponent runtime-core.esm-bundler.js:5905
+    patch runtime-core.esm-bundler.js:5403
+    componentUpdateFn runtime-core.esm-bundler.js:6051
+    run reactivity.esm-bundler.js:237
+    setupRenderEffect runtime-core.esm-bundler.js:6179
+    mountComponent runtime-core.esm-bundler.js:5953
+    processComponent runtime-core.esm-bundler.js:5905
+    patch runtime-core.esm-bundler.js:5403
+    render2 runtime-core.esm-bundler.js:6718
+    mount runtime-core.esm-bundler.js:4179
+    mount runtime-dom.esm-bundler.js:1826
+    setup app.js:19
+    vueApp createInertiaApp.ts:95
+    promise callback*createInertiaApp createInertiaApp.ts:74
+    <anonymous> app.js:11
+Welcome.vue:53:11
+
+
+Uncaught (in promise) TypeError: can't access property "success", page.props.flash is undefined
+    setup Welcome.vue:53
+    callWithErrorHandling runtime-core.esm-bundler.js:199
+    callWithAsyncErrorHandling runtime-core.esm-bundler.js:206
+    call runtime-core.esm-bundler.js:880
+    getter reactivity.esm-bundler.js:1835
+    run reactivity.esm-bundler.js:237
+    job reactivity.esm-bundler.js:1884
+    watch reactivity.esm-bundler.js:1934
+    doWatch runtime-core.esm-bundler.js:908
+    watch2 runtime-core.esm-bundler.js:841
+    setup Welcome.vue:52
+    callWithErrorHandling runtime-core.esm-bundler.js:199
+    setupStatefulComponent runtime-core.esm-bundler.js:8040
+    setupComponent runtime-core.esm-bundler.js:8002
+    mountComponent runtime-core.esm-bundler.js:5939
+    processComponent runtime-core.esm-bundler.js:5905
+    patch runtime-core.esm-bundler.js:5403
+    componentUpdateFn runtime-core.esm-bundler.js:6051
+    run reactivity.esm-bundler.js:237
+    runIfDirty reactivity.esm-bundler.js:275
+    callWithErrorHandling runtime-core.esm-bundler.js:199
+    flushJobs runtime-core.esm-bundler.js:408
+    promise callback*queueFlush runtime-core.esm-bundler.js:322
+    queueJob runtime-core.esm-bundler.js:317
+    scheduler runtime-core.esm-bundler.js:6173
+    trigger reactivity.esm-bundler.js:265
+    endBatch reactivity.esm-bundler.js:323
+    notify reactivity.esm-bundler.js:614
+    trigger reactivity.esm-bundler.js:588
+    set value reactivity.esm-bundler.js:1512
+    swapComponent app.ts:83
+    doSwap page.ts:226
+    swap page.ts:229
+    set page.ts:127
+    promise callback*set/< page.ts:95
+    promise callback*set page.ts:77
+    handleDefault initialVisit.ts:96
+    handle initialVisit.ts:16
+    handle initialVisit.ts:16
+    init router.ts:76
+    setup app.ts:78
+    callWithErrorHandling runtime-core.esm-bundler.js:199
+    setupStatefulComponent runtime-core.esm-bundler.js:8040
+    setupComponent runtime-core.esm-bundler.js:8002
+    mountComponent runtime-core.esm-bundler.js:5939
+    processComponent runtime-core.esm-bundler.js:5905
+    patch runtime-core.esm-bundler.js:5403
+    componentUpdateFn runtime-core.esm-bundler.js:6051
+    run reactivity.esm-bundler.js:237
+    setupRenderEffect runtime-core.esm-bundler.js:6179
+    mountComponent runtime-core.esm-bundler.js:5953
+    processComponent runtime-core.esm-bundler.js:5905
+    patch runtime-core.esm-bundler.js:5403
+    render2 runtime-core.esm-bundler.js:6718
+    mount runtime-core.esm-bundler.js:4179
+    mount runtime-dom.esm-bundler.js:1826
+    setup app.js:19
+    vueApp createInertiaApp.ts:95
+    promise callback*createInertiaApp createInertiaApp.ts:74
+    <anonymous> app.js:11
+Welcome.vue:53:11
+Iterate on your code faster with the new multi-line editor mode. Use Enter to add new lines and Ctrl+Enter to run.
+
+
+
+
+ Gemini said
+
+Este error es un clásico al mover proyectos de Inertia entre equipos. El mensaje page.props.flash is undefined significa que tu componente Vue está intentando leer mensajes de "éxito" o "error" desde el servidor, pero el servidor no se los está enviando.
+
+Esto ocurre porque en el nuevo equipo (Debian), el middleware encargado de compartir esos datos con Inertia no está configurado o no se ha actualizado.
+1. La solución en el Backend
+
+Abre app/Http/Middleware/HandleInertiaRequests.php y asegúrate de que el método share incluya la clave flash. Si no existe, agrégala así:
+PHP
+
+public function share(Request $request): array
+{
+    return array_merge(parent::share($request), [
+        'auth' => [
+            'user' => $request->user(),
+        ],
+        // Agrega esta sección para los mensajes flash
+        'flash' => [
+            'success' => fn () => $request->session()->get('success'),
+            'error' => fn () => $request->session()->get('error'),
+        ],
+        'ziggy' => fn () => [
+            ...(new Ziggy)->toArray(),
+            'location' => $request->url(),
+        ],
+    ]);
+}
+
+2. La solución en el Frontend (Welcome.vue)
+
+En la línea 53 de tu Welcome.vue, tienes un watch o un código que accede a page.props.flash.success. El error ocurre porque flash es undefined antes de que el servidor responda.
+
+Para hacerlo "a prueba de errores", usa el encadenamiento opcional (?.) en tu script:
+JavaScript
+
+// Busca donde tengas esto y cámbialo:
+// Antes: page.props.flash.success
+// Después:
+page.props.flash?.success
+
+3. Sincronización del entorno en Debian
+
+Al ser un equipo nuevo, asegúrate de haber ejecutado estos comandos para que Laravel e Inertia estén en sintonía:
+
+    Limpiar caché de rutas: php artisan route:clear
+
+    Limpiar caché de configuración: php artisan config:clear
+
+    Compilar assets: npm run dev
+
+¿Por qué pasó esto?
+
+Es muy probable que en tu equipo anterior tuvieras una versión del archivo HandleInertiaRequests.php que sí compartía los datos flash, y al descargar el proyecto en Debian, alguna diferencia en el git merge o una falta de configuración en el .env (como el SESSION_DRIVER) esté causando que la sesión no se comparta correctamente con Vue.
+1
+
+​
+
+Bien regresando al panel de administración y acudiendo al metodo index de Skill nos encontramos con
+
+
+vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php:46
+
+Call to undefined method App\Http\Controllers\SkillController::index()
+
+
+
+Es justamente por que no tenemos ese metodo en el controlador, vamos atendiendo:
+
+
+El metodo index dentro de la notación de los controladores o rutas de recursos es el que permite listar por completo los componentes los skills, arrancamos con ello.
+
+Vamos al controlador ya que el metodo esta vacio.
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class SkillController extends Controller
+{
+    public function index()
+    {
+        return Inertia::render('Skills/All', [
+            'skills' => Skill::all(),
+        ]);
+    }
+}
+
+
+Tenemos a SkillController agregams el primer metodo que se va a llamar Index, que no recibe nada perso si retorna algo, debe retornar una renderización de una vista con Inertia. Asi entonces usamos Inertia, con un llamado a render, recordemos que en la ruta, del dashboard.
+
+Inertia Render indicamos cual es la vista que queremos renderizar, queremos renderizar algo que esta dentro de una carpeta que esta en Skills y que se va a llamar All.
+
+Es decir todos los Skills que vamos a listar, para poder mostrar la lista de skills, tenemos que enviar la lista de skills, como la enviamos.
+
+Tenemos que pasarla, como parametro, el segundo parametro recibe justamente la serie de variables o componentes que queremos compartir ahi, y en el indice vams a identificar esa variable, al ser muy consistete se va a llamar lista de las mismas y vamos a llamar resolviendo con skill all.
+
+nos aseguramos de importar la definicion de skills con el modelo.
+
+use App\Models\Skill;
+
+Que tenemos desde nuestros modelos y asi estamos compartiendo una lista de skills con esta vista que esta renderizando nuestro componente de inertiajs,
+
+
+Queremos crear esta vista llamada Skills/All
+
+
+Ahora dentro de resources vamos a crear un nuevo archivo llamado Skills/All.vue
+
+
+El codigo de la vista esta en el proyecto
+https://github.com/JuanDMeGon/Portafolio-SPA-con-Laravel-Vue.js-Intertia.js-y-Tailwind/blob/40328731494aa9b4f285d78e29b5c5a04e6b09ae/resources/js/Pages/Skills/All.vue
+
+
+
+
+Podremos pegar el contenido en la vista, en escencia los componentes ya se han tratado anyteriormente, no se ha puesto nada relacionado con JS, pr que esta es la parte nteresante, vamoa a gregarla
+
+En la prte del encabezado tenemos el nombre de nuestro compoente que se llama Skills, o el titulo de alseccion,
+
+El div tiene padding con bordes definidos.Margenes a la izquierda y la derecha, para poner e el centro el contenido, para resoluciones pequeñas, un pading de 6, ero en grandes tendra un padding mayor. Para moviles estara en tamaño automartica.
+
+Ahora dentro de condicionales de vue estamos indicando si el tamaño es mayor que cero, basicamente tenemos skils, y mostraremos una tabla un color y una serie de listas.
+
+Detro del body por cada skill se mostrara un afila, mostrando el nombre del skill el color y la sacciones edit y delete.
+
+
+Se tiene un span con bordes redondeados, con un amuestra de ese color para el skill, en esta serie de compnentes de JS, escribiremos una propiedad que se llama, Skills, podremos obtener el tamaño cuyo valor proviene del controlador que tiene en us interior un objeto,
+
+Mas abajo tenemos que de que si no sucede, o skills tiene un tamaño mayor que cero, basicamente mostramos que no hay skills todavia y crearemos uno.
+
+Asi que tendemos un boton para crear skills, de momento no se tiene pero se agregara mas adelante.
+
+
+Asi funcionara y es como luciria basicamente.
+
+Estructurando la forma de que se muestre la información.
+
+Tenemos la tabla,
+
+Asimismo tenemos a Button para tener la parte de edit y delete que de momento no hacen nada, son acciones vacias, y se implementaran enu n case posterior.
+
+En la parte del Script que es la parte importante, tenemos dos elementos principaless, el button y que es el AppLayout, son etiquets ṕersonalizdas y tenemos que importarlas en nuestra definiciones.
+
+import
+
+ y exportamos la definición, componentes props, necestamos dos
+ componentes y prop que son los propiedades que estamos utilizando.
+
+ tenemos un objeto con dos propiedades
+ AppLayoutButton
+
+
+ y las props
+    con un objeto de Js llamada Skills
+
+Ahora vamos l boton de skills, imprtante en la vista de index definir la importación de inertia
+
+Tenemos la definicion de Skills refrescamos y verificamos errores, tenemos un error por que no encuenytra Skills/All.vue
+
+
+El problema es de ubicación, basicamente todo lo que sea pages de nuestro proyecto o vistas regulares deben estar dentro de pages.
+
+Pero la vista debea estar dentro de pages.
+
+
+Tenemos la lista de skills, y debera mostrarse la lista que es un componente y taiwind lo reocnoce, con su nombre y los botones edit y delete,
+
+
+Tenendo esto vamos a comprar algo que pasa y es que cuando la lista de skills es vacia, podemos ahcer
+
+
+en la vista
+
+'skills' => collect();
+
+para tener lita vacia de skills
+
+Para verificar el mensaje de error, mostrandonos un mensjae para crear un skill
+
+De momento no tenemos skills.
+
+
+
+Revisaremos el codigo.
+
+
+Para la depuración nuesto componente inical estaba asi, con algunos errors.
+
+<template>
+    <app-layout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Skills
+            </h2>
+        </template>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <table v-if="skills.length > 0" class="w-full">
+                    <thead class="border-b-2 border-gray-300 text-indigo-600">
+                        <tr>
+                            <th class="px-6 py-3 text-left">Name</th>
+                            <th class="px-6 py-3 text-left">Color</th>
+                            <th class="px-6 py-3 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody v-for="skill in skills">
+                        <tr
+                            class="text-sm text-indigo-900 border-b border-gray-400"
+                        >
+                            <td class="px-6 py-4">
+                                {{ skill.name }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <p>
+                                    <span
+                                        class="mr-5 p-4 rounded"
+                                        :class="skill.color"
+                                    ></span>
+                                    {{ skill.color }}
+                                </p>
+                            </td>
+                            <td class="px-6 py-4">
+                                <jet-button
+                                    class="border border-indigo-500 text-indigo-500 bg-indigo-50 hover:bg-indigo-100 mr-2"
+                                >
+                                    Edit
+                                </jet-button>
+                                <jet-button
+                                    class="border border-red-500 text-red-500 bg-red-50 hover:bg-red-100 ml-2"
+                                >
+                                    Delete
+                                </jet-button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div
+                    v-else
+                    class="bg-red-100 border border-red-400 p-3 rounded-lg text-red-800"
+                >
+                    There are no skills yet. Let's create one :)
+                </div>
+            </div>
+        </div>
+    </app-layout>
+</template>
+
+<script>
+import AppLayout from "@/Layouts/AppLayout";
+import JetButton from "@/Jetstream/Button";
+
+
+export default {
+    components: {
+        AppLayout,
+        JetButton,
+    },
+    props: {
+        skills: Object,
+    },
+};
+</script>
+
+
+
+
+cambiamos como referencia su trabajaramos con optioni api de la siguiente maera:
+<script>
+// El AppLayout suele estar en Layouts
+import AppLayout from "@/Layouts/AppLayout.vue";
+
+// Jetstream ahora coloca sus componentes base en la carpeta Components
+// El botón estándar de Jetstream se llama 'PrimaryButton' o simplemente 'Button'
+import JetButton from "@/Components/PrimaryButton.vue";
+
+export default {
+    components: {
+        AppLayout,
+        JetButton,
+    },
+    props: {
+        skills: Array, // Cambié Object por Array porque es una lista
+    },
+};
+</script>
+
+
+per estamos utilizando el estandar de estrcutura d eocmponetes de ve js mas reciente a marzo de 2026 por lo que usaremos composition api. por ello tendremos la siguieteestructrua
+
+
+resources/js/Pages/Skills/All.vue (Composition API)
+<script setup>
+import AppLayout from "@/Layouts/AppLayout.vue";
+import JetButton from "@/Components/Button.vue"; // Usando el que ya te funcionó en Welcome
+import { Link } from "@inertiajs/vue3";
+
+defineProps({
+    skills: Array,
+});
+</script>
+
+<template>
+    <AppLayout title="Skills">
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Skills
+            </h2>
+        </template>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div v-if="skills.length > 0" class="bg-white overflow-hidden shadow-xl rounded-lg p-6">
+                    <table class="w-full">
+                        <thead class="border-b-2 border-gray-300 text-indigo-600">
+                            <tr>
+                                <th class="px-6 py-3 text-left">Name</th>
+                                <th class="px-6 py-3 text-left">Color</th>
+                                <th class="px-6 py-3 text-left text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="skill in skills" :key="skill.id"
+                                class="text-sm text-indigo-900 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 font-medium">
+                                    {{ skill.name }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center">
+                                        <span class="mr-3 h-4 w-4 rounded-full border border-gray-200" :style="{ backgroundColor: skill.color }"></span>
+                                        <span class="text-xs text-gray-500 uppercase font-mono">{{ skill.color }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <JetButton class="bg-indigo-50 !text-indigo-600 hover:bg-indigo-100 border-indigo-200 mr-2">
+                                        Edit
+                                    </JetButton>
+                                    <JetButton class="bg-red-50 !text-red-600 hover:bg-red-100 border-red-200">
+                                        Delete
+                                    </JetButton>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div v-else class="bg-red-50 border border-red-200 p-6 rounded-lg text-red-700 text-center">
+                    <p class="font-medium">There are no skills yet.</p>
+                    <p class="text-sm mt-1">Let's create one to get started! :)</p>
+                </div>
+            </div>
+        </div>
+    </AppLayout>
+</template>
+
+
+Detalles técnicos de la refactorización:
+
+    script setup: Eliminamos el export default y los objetos components. Al importar AppLayout y JetButton, ya están disponibles automáticamente en el template.
+
+    defineProps: Es el macro de Composition API para recibir los datos del controlador. He marcado skills como Array.
+
+    :key="skill.id": Muy importante en el v-for para que Vue pueda rastrear cada elemento de la tabla.
+
+    Uso de :style para el color: Si skill.color guarda un valor hexadecimal (ej. #ffffff), Tailwind no lo reconocerá como una clase. Por eso usé :style="{ backgroundColor: skill.color }" para que el círculo muestre el color real guardado en la DB.
+
+    Vite Compatibility: Se agregaron las extensiones .vue en los imports para evitar el error de "Failed to resolve" que tenías.

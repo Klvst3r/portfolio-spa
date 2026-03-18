@@ -2,7 +2,7 @@ Preparar el portafolio para tener un panel de administracion
 
 Hasta este punto ya se han explorado muchas capacidades muchas caracteristicas de vilt, ya estamos mas familiarizados con ineertiajs, con los componentes de jestream.
 
-Hemos utilizado TailwindCSS, ahora se repetira los mismo llevandolo un pcoo mas alla para tener funiconalidades mas avanzadas, basicamente vamos a tenes un panel de 
+Hemos utilizado TailwindCSS, ahora se repetira los mismo llevandolo un pcoo mas alla para tener funiconalidades mas avanzadas, basicamente vamos a tenes un panel de
 administración, donde se podra gestionar los proyectos, las habilidades.
 
 Necesitamos entonces un panel de admisnistración, jetstream facilita mucho el inicio de sesión, el uso de registro de usuarios, asi que se preparara el uso correcto
@@ -16,7 +16,7 @@ sino que solo seremos nosotros quienes tengamos acceso a esta funcionalidad.
 
 Para ello vamos a editar el archivo de rutas, en este caso routes/web.php, y vamos a comentar la ruta de registro de usuarios.
 
-Route::middleware(['auth', 'verified'])... 
+Route::middleware(['auth', 'verified'])...
 
 Si ya tenemos nuestra cuenta de usuario, podemos iniciar sesión, y si no, podemos crear una.
 Para de esta manera no cualquiera pueda acceder al backend del portafolio, solo usuarios autorizados.
@@ -29,7 +29,7 @@ que podremos deshablitar o habilitar.
 Al final del archivo, vamos a agregar un comentario, para deshabilitar el registro de usuarios.
 
 // Deshabilitar registro de usuarios
-Route::middleware(['auth', 'verified'])... 
+Route::middleware(['auth', 'verified'])...
 
 
 
@@ -43,7 +43,7 @@ Tenemos:
 registration, si simplemente comentamos la linea, ya no tendremos la ruta de registro de usuarios.
 
 
-con esto estaremos incluyendo o no, esa capacidad, quiere decir que tendremos la precaución de arrancar nuestro servidor 
+con esto estaremos incluyendo o no, esa capacidad, quiere decir que tendremos la precaución de arrancar nuestro servidor
 
 podremos ir al navegador
 
@@ -58,7 +58,7 @@ Vamos a mantener comentado, y si intentamos accesar por url ya no estara disponi
 
 Ahora vamos a agregar las rutas para el panel de administración, para ello vamos a crear un archivo en routes/admin.php, y vamos a agregar las rutas para el panel de administración.
 
-Route::middleware(['auth', 'verified'])... 
+Route::middleware(['auth', 'verified'])...
 
 
 Como vamos ahora a registrar el usuario.
@@ -67,7 +67,7 @@ Hay dos formas, una es volver a descomentar la linea y volver a comentar.
 
 una forma mas elegante es hacerlo desde la consola.
 
-Vamos a hacer 
+Vamos a hacer
 
     $ php artisan tinker
 
@@ -99,9 +99,9 @@ llamado dashboard.php
 removiendo algunas de las rutas que no se estan iniciando quedando:
 
 
-En la rutas para la app, y para la web podemos crear duplicar el de web,php y llamaremos dashboard.php y removeremos las rutas dejando la de dashboad, 
+En la rutas para la app, y para la web podemos crear duplicar el de web,php y llamaremos dashboard.php y removeremos las rutas dejando la de dashboad,
 
-Vamos a mantener la ruta del dashboard 
+Vamos a mantener la ruta del dashboard
 
 Route::middleware([
     'auth:sanctum',
@@ -208,7 +208,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    
+
     // Esta será la ruta raíz: /dashboard
     Route::get('/', function () {
         return Inertia::render('Dashboard');
@@ -393,7 +393,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })->create();
 
-a la lista del middleware ademas del de web, vamos a gregar el de auth para que todas las rutas que pertenezcan, a dashboard requieran de un usuario autenticado, que inicia sesion, en el panel de administración y eso lo hacemos con un prefix llamado dashboard, 
+a la lista del middleware ademas del de web, vamos a gregar el de auth para que todas las rutas que pertenezcan, a dashboard requieran de un usuario autenticado, que inicia sesion, en el panel de administración y eso lo hacemos con un prefix llamado dashboard,
 
 
 l mover la autenticación directamente al bootstrap/app.php, aseguras que todo el archivo routes/dashboard.php esté protegido desde la raíz, haciendo tu código más robusto y menos propenso a errores (como olvidar un middleware en una ruta nueva).
@@ -480,8 +480,8 @@ Encontramos
 
 php artisan route:list
 
-  GET|HEAD        / .............................................................................................................................................. 
-  GET|HEAD        api/user ....................................................................................................................................... 
+  GET|HEAD        / ..............................................................................................................................................
+  GET|HEAD        api/user .......................................................................................................................................
   POST            contact .................................................................................................... contact › ContactController@contact
   GET|HEAD        dashboard ...................................................................................................................... dashboard.index
   GET|HEAD        dashboard/projects .......................................................................... dashboard.projects.index › ProjectController@index
@@ -501,10 +501,10 @@ php artisan route:list
   GET|HEAD        reset-password/{token} ......................................................... password.reset › Laravel\Fortify › NewPasswordController@create
   GET|HEAD        sanctum/csrf-cookie .......................................................... sanctum.csrf-cookie › Laravel\Sanctum › CsrfCookieController@show
   GET|HEAD        storage/{path} ................................................................................................................... storage.local
-  GET|HEAD        test ........................................................................................................................................... 
+  GET|HEAD        test ...........................................................................................................................................
   GET|HEAD        two-factor-challenge ............................................................................................................... two-factor.login › Laravel\Fortify › TwoFactorAuthenticatedSessionController@create
   POST            two-factor-challenge .................................. two-factor.login.store › Laravel\Fortify › TwoFactorAuthenticatedSessionController@store
-  GET|HEAD        up ............................................................................................................................................. 
+  GET|HEAD        up .............................................................................................................................................
   DELETE          user .................................................................. current-user.destroy › Laravel\Jetstream › CurrentUserController@destroy
   GET|HEAD        user/confirm-password .................................................. password.confirm › Laravel\Fortify › ConfirmablePasswordController@show
   POST            user/confirm-password ........................................... password.confirm.store › Laravel\Fortify › ConfirmablePasswordController@store
@@ -539,14 +539,14 @@ Tendremos todo lo relacionado con skills y projects
 
   Podremos ver que todos inician con dashboard/ projects para crear, actualilzar, eliminar, lo mismo para los skils, lo mismo para dashboard que es la parte principal, entonces ya separamos las rutas para nuestro panel de administarción, ya se prepararon la serie de acciones que se van a utilizar la parte para administrar y generar tanto a los projects como a los skills, y ya solo falta un pequeño detalle, es arrancar con la apariencia del dashboard,
 
-  por que actualmente lo que vemos es 
+  por que actualmente lo que vemos es
 
 
 Ahora para probar nuestro usuario vamos a crear un usuario de prueba con sqlite
 
 $ php artisan tinker
 
->>> User::factory()->create(['name' => 'Admin', 'email' => 'admin@email.com', 'password' => bcrypt('desarrollo')]);
+>>> User::factory()->create(['name' => 'Admin', 'email' => 'admin@portafolio.com', 'password' => bcrypt('desarrollo')]);
 
 
 Hay un error en consola:
@@ -634,7 +634,7 @@ PHP
 // En lugar de renderizar 'Dashboard' (que usa AppLayout)
 // renderiza algo simple sin layout para probar:
 Route::get('/', function () {
-    return "Hola, las rutas funcionan"; 
+    return "Hola, las rutas funcionan";
 });
 
 Si el mensaje de "Hola..." aparece, entonces el problema está definitivamente dentro de resources/js/Pages/Dashboard.vue o su AppLayout.
@@ -821,7 +821,7 @@ PHP
 // Esta ruta DEBE llamarse 'dashboard' para que AppLayout.vue no falle
 Route::get('/', function () {
     return Inertia::render('Dashboard');
-})->name('dashboard'); 
+})->name('dashboard');
 
 // Para los recursos, puedes ponerle el nombre manualmente o usar el grupo
 Route::resource('skills', SkillController::class)->except(['create', 'show', 'edit'])->names('dashboard.skills');
@@ -870,26 +870,26 @@ y dentro el componente welcome vamos a remover de hecho podremos quitarlo de la 
 
 y vamos a mantener nuestra lsta de elementos como sigue:
 
-y con ello tendremos nuestros dos elementos, 
+y con ello tendremos nuestros dos elementos,
 
 Vamos a visualizar correctamente la vista
 
 
 
 <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">                
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl rounded-lg p-6 border-b border-gray-200 text-xl">
                     <!-- <Welcome /> -->
                      <p class="mb-5 font-semibold text-gray-700">Your Resources</p>
                      <ul class="space-y-4">
                         <li class="flex items-center">
                     <div class="bg-gray-400 h-2 w-2 rounded-full mr-3"></div>
-                            <Link 
+                            <Link
                             :href="route('skills.index')"
                             class="hover:text-gray-800 mt-2 text-sm text-indigo-500 border-b border-gray-400">Skills</Link></li>
                         <li class="flex items-center">
                     <div class="bg-gray-400 h-2 w-2 rounded-full mr-3"></div>
-                            <Link 
+                            <Link
                             :href="route('projects.index')"
                             class="hover:text-gray-800 mt-2 text-sm text-indigo-500 border-b border-gray-400">Projects</Link></li>
                      </ul>
