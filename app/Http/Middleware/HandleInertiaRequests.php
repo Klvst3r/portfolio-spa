@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
+use Tighten\Ziggy\Ziggy;
+
 class HandleInertiaRequests extends Middleware
 {
     /**
@@ -35,13 +37,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
-            ...parent::share($request),
-            // Compartir los mensajes flash con el frontend
-            'flash' => [
-                'success' => fn() => $request->session()->get('success'),
-                'error' => fn() => $request->session()->get('error'),
+        return array_merge(parent::share($request), [
+            'auth' => [
+                'user' => $request->user(),
             ],
-        ];
+            // Si se usa Ziggy para las rutas en Vue se debe importar aquí para que esté disponible en el cliente
+            'ziggy' => fn() => [
+                ...(new Ziggy)->toArray(),
+                'location' => $request->url(),
+            ],
+        ]);
     }
 }

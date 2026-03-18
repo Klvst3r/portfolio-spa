@@ -98,3 +98,841 @@ llamado dashboard.php
 
 removiendo algunas de las rutas que no se estan iniciando quedando:
 
+
+En la rutas para la app, y para la web podemos crear duplicar el de web,php y llamaremos dashboard.php y removeremos las rutas dejando la de dashboad, 
+
+Vamos a mantener la ruta del dashboard 
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+});
+
+
+y vamos a gregar
+
+
+Route::resource();
+
+
+Los Skills y los Projects
+
+Route::resource('skills', SkillController::class);
+
+Route::resource('projects', ProjectController::class);
+
+
+Vamos a sagurar solo unas rutas en especifico por que se van a utilizar las rutas de recursos (INDEX, CREATE, SHOW, STORE, UPDATE, EDIT, DESTORY)
+
+
+Ahora vamos a utilizar crear, y luego editar, de manera que tengamos todo dentro del dashboard, cuando el usuario, quitamos create, show, para los detalles, y los de edit donde no vamos a mostrar el formulario para editar.
+
+Vamos a poder crear, actualizar y eliminar, todo desde una vista del componente.
+
+Ahora que ya tenemos todo, podremos indicar que todas mis rutas, arrancan con el dashboard
+
+
+Seria
+
+DashboardSkills DashboardProject y escencialmente el Dashboard que seria la raiz, cuando qutemos el archivo de rutas, podemos indicar que la raiz o el prefijo de todas estas rutas del dashboard, es justamente dahboard
+
+Retomando el tema de inertia, es el dashboard que se ha venido implementando, y que escencialmente lo da Laravel Jetstream, entonces vamos a registrar la ruta.
+
+Vamos a app/Prpviders
+
+Vamos acceder
+
+app/Providers/RouteServiceProvider.php
+
+Que se encarga basicamente de las rutas, ya que tenemos las de web y vamos a registrar las del dashboard.
+
+Asi que hacemos:
+
+
+El detalle es que, a partir de Laravel 11, el archivo RouteServiceProvider.php ya no se crea por defecto. Laravel ha simplificado la estructura y ahora la configuración de las rutas se centraliza en bootstrap/app.php.
+
+No te preocupes, esto es mucho más limpio. Aquí tienes los pasos para registrar tu nuevo archivo routes/dashboard.php manteniendo las cookies, la protección CSRF y el prefijo que buscas.
+1. Registrar el archivo en bootstrap/app.php
+
+Abre el archivo bootstrap/app.php y utiliza el método then: para cargar tu archivo de rutas personalizado. Así es como debe quedar para que herede el middleware web (necesario para sesiones y CSRF):
+PHP
+
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route; // Importante añadir esto
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+        // Aquí es donde registramos el dashboard
+        then: function () {
+            Route::middleware('web')
+                ->prefix('dashboard') // Todas tus rutas empezarán con /dashboard
+                ->name('dashboard.') // Los nombres de rutas serán dashboard.skills, etc.
+                ->group(base_path('routes/dashboard.php'));
+        },
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+        //
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })->create();
+
+2. Configurar routes/dashboard.php
+
+Ahora crea el archivo routes/dashboard.php. Como ya aplicamos el prefijo y el middleware en el paso anterior, aquí el código queda muy limpio.
+
+Siguiendo tu lógica de usar componentes de Inertia y limitar los métodos del recurso (quitando create, show y edit para manejar todo en la vista principal mediante modales, por ejemplo):
+PHP
+
+<?php
+
+use App\Http\Controllers\SkillController;
+use App\Http\Controllers\ProjectController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    
+    // Esta será la ruta raíz: /dashboard
+    Route::get('/', function () {
+        return Inertia::render('Dashboard');
+    })->name('index'); // El nombre completo será dashboard.index
+
+    // Recursos: Solo index, store, update y destroy
+    // Acceso: /dashboard/skills y /dashboard/projects
+    Route::resource('skills', SkillController::class)->except(['create', 'show', 'edit']);
+    Route::resource('projects', ProjectController::class)->except(['create', 'show', 'edit']);
+});
+
+¿Por qué hacerlo así?
+
+    Sin RouteServiceProvider: Te adaptas al estándar moderno de Laravel 11/12.
+
+    Encapsulamiento: Al usar except(['create', 'show', 'edit']), le dices a Laravel que no genere esas rutas, lo cual es perfecto si vas a usar modales en tu Dashboard para crear o editar, manteniendo al usuario en la misma página.
+
+    Nombres de rutas: Al usar ->name('dashboard.') en el proveedor, tus rutas de recursos se llamarán automáticamente dashboard.skills.index, dashboard.projects.store, etc., manteniendo una estructura profesional.
+
+    entonces Para integrar tu nuevo archivo de rutas respetando la estructura de Laravel 11, debemos usar el método then: dentro de withRouting. Esto permite registrar grupos de rutas adicionales con prefijos y nombres específicos sin necesidad del antiguo RouteServiceProvider.
+
+Aquí tienes tu archivo actualizado. He añadido el use Illuminate\Support\Facades\Route; que es indispensable para que funcione:
+bootstrap/app.php
+PHP
+
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route; // <--- Agregamos esta importación
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+        // Registramos el archivo de rutas del dashboard
+        then: function () {
+            Route::middleware('web')
+                ->prefix('dashboard')
+                ->name('dashboard.')
+                ->group(base_path('routes/dashboard.php'));
+        },
+    )
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        //
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        //
+    })->create();
+
+Notas clave del cambio:
+
+    Middleware 'web': Es fundamental incluirlo en el then: para que tus rutas de dashboard.php tengan acceso a la sesión, las cookies y la protección CSRF, permitiendo que Inertia funcione correctamente.
+
+    Prefijo y Nombre: Al usar ->prefix('dashboard') y ->name('dashboard.'), todas las rutas dentro de ese archivo se verán así:
+
+        URL: /dashboard/skills
+
+        Nombre de ruta (en Vue/Inertia): route('dashboard.skills.index')
+
+    Limpieza: Ya no necesitas duplicar el middleware de Jetstream/Sanctum en cada ruta individual dentro de dashboard.php si decides aplicarlo globalmente en ese grupo, aunque dejarlo dentro del archivo de rutas (como planeabas) también es una buena práctica para mayor claridad visual.
+
+
+    Para la rutas dashboard:
+
+    entonces de esto
+<?php
+
+
+//Habilidades y proyectos
+use App\Http\Controllers\SkillController;
+use App\Http\Controllers\ProjectController;
+
+use App\Mail\ContactedMessage; //se importa la defincion del correo que hemos creado para poder usarlo en la ruta de prueba de correo
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Models\Skill;
+use App\Models\Project;
+
+
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+});
+
+
+
+Route::resource('skills', SkillController::class);
+
+Route::resource('projects', ProjectController::class);
+
+
+quedaria mejor asi:
+
+<?php
+
+use App\Http\Controllers\SkillController;
+use App\Http\Controllers\ProjectController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    
+    // Esta será la ruta raíz: /dashboard
+    Route::get('/', function () {
+        return Inertia::render('Dashboard');
+    })->name('index'); // El nombre completo será dashboard.index
+
+    // Recursos: Solo index, store, update y destroy
+    // Acceso: /dashboard/skills y /dashboard/projects
+    Route::resource('skills', SkillController::class)->except(['create', 'show', 'edit']);
+    Route::resource('projects', ProjectController::class)->except(['create', 'show', 'edit']);
+});
+
+
+Esa estructura es mucho más limpia y profesional. Al mover todo a routes/dashboard.php y usar el prefijo que configuramos en bootstrap/app.php, tu código queda perfectamente organizado.
+Puntos clave de por qué este cambio es mejor:
+
+    Ruta Raíz del Dashboard: Al definir Route::get('/', ...) dentro de este archivo, y gracias al prefijo dashboard que pusimos en el Provider, la URL real será simplemente /dashboard. El nombre interno será dashboard.index.
+
+    Seguridad por Defecto: Al meter los Route::resource dentro del grupo de middleware auth:sanctum, garantizas que nadie pueda ver o modificar tus habilidades y proyectos sin estar autenticado.
+
+    Filosofía SPA (Single Page Application): Al usar except(['create', 'show', 'edit']), estás declarando que tu aplicación no necesita cargar páginas nuevas para esos formularios. Todo sucederá en la vista principal (index) mediante modales de Vue, lo cual hace la interfaz mucho más rápida y fluida.
+
+Así se verían tus rutas ahora (puedes verificarlo con php artisan route:list):
+
+Método,URL,Nombre de Ruta,Acción en Controlador
+GET,/dashboard,dashboard.index,(Cierra el componente Dashboard)
+GET,/dashboard/skills,dashboard.skills.index,SkillController@index
+POST,/dashboard/skills,dashboard.skills.store,SkillController@store
+PUT,/dashboard/skills/{skill},dashboard.skills.update,SkillController@update
+DELETE,/dashboard/skills/{skill},dashboard.skills.destroy,SkillController@destroy
+
+Un pequeño detalle visual
+
+Como ahora el nombre de la ruta principal es dashboard.index, recuerda actualizar cualquier enlace en tu menú de navegación de Jetstream (probablemente en NavigationMenu.vue) que antes apuntaba simplemente a dashboard.
+
+
+en la parte del app.php deonde tenemos:
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
+        health: '/up',
+        // Registramos el archivo de rutas del dashboard
+        then: function () {
+            Route::middleware('web')
+                ->prefix('dashboard')
+                ->name('dashboard.')
+                ->group(base_path('routes/dashboard.php'));
+        },
+    )
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        //
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        //
+    })->create();
+
+a la lista del middleware ademas del de web, vamos a gregar el de auth para que todas las rutas que pertenezcan, a dashboard requieran de un usuario autenticado, que inicia sesion, en el panel de administración y eso lo hacemos con un prefix llamado dashboard, 
+
+
+l mover la autenticación directamente al bootstrap/app.php, aseguras que todo el archivo routes/dashboard.php esté protegido desde la raíz, haciendo tu código más robusto y menos propenso a errores (como olvidar un middleware en una ruta nueva).
+
+Aquí tienes cómo aplicar el middleware auth (y opcionalmente los de Jetstream para mayor seguridad) en la definición del grupo:
+bootstrap/app.php Actualizado
+PHP
+
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Route;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
+        health: '/up',
+        then: function () {
+            // Aplicamos web + auth + sanctum para máxima seguridad
+            Route::middleware([
+                'web',
+                'auth:sanctum',
+                config('jetstream.auth_session'),
+                'verified',
+            ])
+                ->prefix('dashboard')
+                ->name('dashboard.')
+                ->group(base_path('routes/dashboard.php'));
+        },
+    )
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+            \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        //
+    })->create();
+
+¿Cómo simplifica esto tu archivo de rutas?
+
+Ahora que la protección está en el "motor" de la aplicación (app.php), tu archivo routes/dashboard.php queda extremadamente limpio. Ya no necesitas envolver nada en un Route::middleware()->group(...).
+
+Tu routes/dashboard.php ahora se vería así de sencillo:
+PHP
+
+<?php
+
+use App\Http\Controllers\SkillController;
+use App\Http\Controllers\ProjectController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+// No necesitas middleware aquí, ¡ya viene aplicado desde app.php!
+
+// URL: /dashboard -> nombre: dashboard.index
+Route::get('/', function () {
+    return Inertia::render('Dashboard');
+})->name('index');
+
+// Recursos: /dashboard/skills y /dashboard/projects
+Route::resource('skills', SkillController::class)->except(['create', 'show', 'edit']);
+Route::resource('projects', ProjectController::class)->except(['create', 'show', 'edit']);
+
+Beneficios de este enfoque:
+
+    Seguridad Centralizada: Si intentas acceder a /dashboard/skills sin haber iniciado sesión, Laravel te redirigirá automáticamente al login antes siquiera de leer el archivo de rutas.
+
+    Menos Código: Evitas repetir la configuración de Jetstream/Sanctum en múltiples archivos.
+
+    Claridad: El archivo de rutas se enfoca únicamente en definir qué controladores responden a qué URLs.
+
+
+    Podremos veriicar esto con
+        $ php artisan route:list
+
+
+Encontramos
+
+php artisan route:list
+
+  GET|HEAD        / .............................................................................................................................................. 
+  GET|HEAD        api/user ....................................................................................................................................... 
+  POST            contact .................................................................................................... contact › ContactController@contact
+  GET|HEAD        dashboard ...................................................................................................................... dashboard.index
+  GET|HEAD        dashboard/projects .......................................................................... dashboard.projects.index › ProjectController@index
+  POST            dashboard/projects .......................................................................... dashboard.projects.store › ProjectController@store
+  PUT|PATCH       dashboard/projects/{project} .............................................................. dashboard.projects.update › ProjectController@update
+  DELETE          dashboard/projects/{project} ............................................................ dashboard.projects.destroy › ProjectController@destroy
+  GET|HEAD        dashboard/skills ................................................................................ dashboard.skills.index › SkillController@index
+  POST            dashboard/skills ................................................................................ dashboard.skills.store › SkillController@store
+  PUT|PATCH       dashboard/skills/{skill} ...................................................................... dashboard.skills.update › SkillController@update
+  DELETE          dashboard/skills/{skill} .................................................................... dashboard.skills.destroy › SkillController@destroy
+  GET|HEAD        forgot-password ........................................................ password.request › Laravel\Fortify › PasswordResetLinkController@create
+  POST            forgot-password ........................................................... password.email › Laravel\Fortify › PasswordResetLinkController@store
+  GET|HEAD        login .......................................................................... login › Laravel\Fortify › AuthenticatedSessionController@create
+  POST            login ..................................................................... login.store › Laravel\Fortify › AuthenticatedSessionController@store
+  POST            logout ....................................................................... logout › Laravel\Fortify › AuthenticatedSessionController@destroy
+  POST            reset-password ................................................................. password.update › Laravel\Fortify › NewPasswordController@store
+  GET|HEAD        reset-password/{token} ......................................................... password.reset › Laravel\Fortify › NewPasswordController@create
+  GET|HEAD        sanctum/csrf-cookie .......................................................... sanctum.csrf-cookie › Laravel\Sanctum › CsrfCookieController@show
+  GET|HEAD        storage/{path} ................................................................................................................... storage.local
+  GET|HEAD        test ........................................................................................................................................... 
+  GET|HEAD        two-factor-challenge ............................................................................................................... two-factor.login › Laravel\Fortify › TwoFactorAuthenticatedSessionController@create
+  POST            two-factor-challenge .................................. two-factor.login.store › Laravel\Fortify › TwoFactorAuthenticatedSessionController@store
+  GET|HEAD        up ............................................................................................................................................. 
+  DELETE          user .................................................................. current-user.destroy › Laravel\Jetstream › CurrentUserController@destroy
+  GET|HEAD        user/confirm-password .................................................. password.confirm › Laravel\Fortify › ConfirmablePasswordController@show
+  POST            user/confirm-password ........................................... password.confirm.store › Laravel\Fortify › ConfirmablePasswordController@store
+  GET|HEAD        user/confirmed-password-status ................................ password.confirmation › Laravel\Fortify › ConfirmedPasswordStatusController@show
+  POST            user/confirmed-two-factor-authentication ............... two-factor.confirm › Laravel\Fortify › ConfirmedTwoFactorAuthenticationController@store
+  DELETE          user/other-browser-sessions ........................ other-browser-sessions.destroy › Laravel\Jetstream › OtherBrowserSessionsController@destroy
+  PUT             user/password ............................................................... user-password.update › Laravel\Fortify › PasswordController@update
+  GET|HEAD        user/profile ..................................................................... profile.show › Laravel\Jetstream › UserProfileController@show
+  PUT             user/profile-information ............................... user-profile-information.update › Laravel\Fortify › ProfileInformationController@update
+  DELETE          user/profile-photo ............................................. current-user-photo.destroy › Laravel\Jetstream › ProfilePhotoController@destroy
+  POST            user/two-factor-authentication ................................... two-factor.enable › Laravel\Fortify › TwoFactorAuthenticationController@store
+  DELETE          user/two-factor-authentication ................................ two-factor.disable › Laravel\Fortify › TwoFactorAuthenticationController@destroy
+  GET|HEAD        user/two-factor-qr-code .................................................. two-factor.qr-code › Laravel\Fortify › TwoFactorQrCodeController@show
+  GET|HEAD        user/two-factor-recovery-codes ...................................... two-factor.recovery-codes › Laravel\Fortify › RecoveryCodeController@index
+  POST            user/two-factor-recovery-codes ........................... two-factor.regenerate-recovery-codes › Laravel\Fortify › RecoveryCodeController@store
+  GET|HEAD        user/two-factor-secret-key ......................................... two-factor.secret-key › Laravel\Fortify › TwoFactorSecretKeyController@show
+
+
+Tendremos todo lo relacionado con skills y projects
+
+ GET|HEAD        dashboard ...................................................................................................................... dashboard.index
+  GET|HEAD        dashboard/projects .......................................................................... dashboard.projects.index › ProjectController@index
+  POST            dashboard/projects .......................................................................... dashboard.projects.store › ProjectController@store
+  PUT|PATCH       dashboard/projects/{project} .............................................................. dashboard.projects.update › ProjectController@update
+  DELETE          dashboard/projects/{project} ............................................................ dashboard.projects.destroy › ProjectController@destroy
+  GET|HEAD        dashboard/skills ................................................................................ dashboard.skills.index › SkillController@index
+  POST            dashboard/skills ................................................................................ dashboard.skills.store › SkillController@store
+  PUT|PATCH       dashboard/skills/{skill} ...................................................................... dashboard.skills.update › SkillController@update
+  DELETE          dashboard/skills/{skill} .................................................................... dashboard.skills.destroy › SkillController@destroy
+  GET|HEAD        forgot-password ........................................................ password.request › Laravel\Fortify › PasswordResetLinkController@create
+
+
+  Podremos ver que todos inician con dashboard/ projects para crear, actualilzar, eliminar, lo mismo para los skils, lo mismo para dashboard que es la parte principal, entonces ya separamos las rutas para nuestro panel de administarción, ya se prepararon la serie de acciones que se van a utilizar la parte para administrar y generar tanto a los projects como a los skills, y ya solo falta un pequeño detalle, es arrancar con la apariencia del dashboard,
+
+  por que actualmente lo que vemos es 
+
+
+Ahora para probar nuestro usuario vamos a crear un usuario de prueba con sqlite
+
+$ php artisan tinker
+
+>>> User::factory()->create(['name' => 'Admin', 'email' => 'admin@email.com', 'password' => bcrypt('desarrollo')]);
+
+
+Hay un error en consola:
+
+y aunque ya pude tener acceso al dashboard, este no se muestra aca algunos errores en consola: vamos a ir dandole solución.
+
+[Vue warn]: Unhandled error during execution of render function 
+  at <AppLayout title="Dashboard" > 
+  at <Dashboard errors= 
+Object {  }
+ jetstream= 
+Object { canCreateTeams: false, canManageTwoFactorAuthentication: true, canUpdatePassword: true, canUpdateProfileInformation: true, hasEmailVerification: false, flash: [], hasAccountDeletionFeatures: true, hasApiFeatures: false, hasTeamFeatures: false, hasTermsAndPrivacyPolicyFeature: false, … }
+ auth= 
+Object { user: {…} }
+  ... > 
+  at <Inertia initialPage= 
+Object { component: "Dashboard", props: {…}, url: "/dashboard", version: "91f04edfc583c8fef9fa69ed3ada61da", clearHistory: false, encryptHistory: false }
+ initialComponent= 
+Object { __name: "Dashboard", setup: setup(__props), __hmrId: "8e8f4dea", render: _sfc_render(_ctx, _cache, $props, $setup, $data, $options), __file: "/home/klvst3r/dev/laravel/portfolio-spa/resources/js/Pages/Dashboard.vue", inheritAttrs: false, … }
+ resolveComponent=fn<resolveComponent>  ... > 
+  at <App> runtime-core.esm-bundler.js:51:13
+
+Ese error de Unhandled error during execution of render function dentro de AppLayout suele ocurrir porque el componente está intentando acceder a una propiedad que no existe o que viene null, especialmente ahora que estamos personalizando el Dashboard y las rutas.
+
+Como estás usando Laravel Jetstream, el AppLayout.vue depende de que ciertas piezas de información (como el usuario y los permisos) estén presentes en las "Shared Props" de Inertia.
+
+Aquí tienes los puntos clave para diagnosticar y solucionar esto:
+1. Verifica HandleInertiaRequests.php
+
+Asegúrate de que el middleware de Inertia esté pasando la información del usuario correctamente. Abre app/Http/Middleware/HandleInertiaRequests.php y revisa el método share:
+PHP
+
+public function share(Request $request): array
+{
+    return array_merge(parent::share($request), [
+        'auth' => [
+            'user' => $request->user(),
+        ],
+        // Si usas Ziggy para las rutas en Vue (muy probable)
+        'ziggy' => fn () => [
+            ...(new Ziggy)->toArray(),
+            'location' => $request->url(),
+        ],
+    ]);
+}
+
+2. El problema común: El Menú de Navegación
+
+El AppLayout de Jetstream suele fallar si:
+
+    Intentas renderizar un avatar y el usuario no tiene habilitada la función de fotos de perfil.
+
+    Hay un enlace a una ruta que ya no existe (como cuando movimos dashboard a dashboard.index).
+
+Revisa tu archivo resources/js/Layouts/AppLayout.vue (o donde esté tu menú). Si tienes un enlace como este:
+Code snippet
+
+<NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+
+<NavLink :href="route('dashboard.index')" :active="route().current('dashboard.index')">
+
+3. Debug en la Consola del Navegador
+
+Para encontrar la línea exacta del error en Vue, haz lo siguiente:
+
+    Abre las herramientas de desarrollador (F12).
+
+    Ve a la pestaña Console.
+
+    Busca el error y haz clic en la flechita para desplegar el Stack Trace. Normalmente verás una referencia a un componente específico de Jetstream (como NavigationMenu.vue o DropdownLink.vue) que está fallando al leer una propiedad.
+
+4. Limpia la caché de rutas
+
+Como modificamos el bootstrap/app.php y el nombre de las rutas, es vital que Laravel refresque el mapa de rutas:
+Bash
+
+php artisan route:clear
+php artisan cache:clear
+
+Una prueba rápida
+
+Para descartar si el error es de tu lógica nueva o del Layout de Jetstream, intenta cambiar temporalmente el render en routes/dashboard.php:
+PHP
+
+// En lugar de renderizar 'Dashboard' (que usa AppLayout)
+// renderiza algo simple sin layout para probar:
+Route::get('/', function () {
+    return "Hola, las rutas funcionan"; 
+});
+
+Si el mensaje de "Hola..." aparece, entonces el problema está definitivamente dentro de resources/js/Pages/Dashboard.vue o su AppLayout.
+
+
+Verificando
+
+app/Http/Middleware/HandleInertiaRequests.php
+---
+
+public function share(Request $request): array
+    {
+        return [
+            ...parent::share($request),
+            // Compartir los mensajes flash con el frontend
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
+            ],
+        ];
+    }
+
+
+
+
+en resources/js/Layouts/AppLayout.vue, cambiamos
+
+
+<NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+
+hacia por que ahora por las rutas sera el nombre correcto dashboard.index
+
+<NavLink :href="route('dashboard.index')" :active="route().current('dashboard.index')">
+
+
+Limpiendo las rutas y Refrescando
+
+ahora se muestra un solo error:
+
+
+Error
+app/Http/Middleware/HandleInertiaRequests.php:44
+
+Class "App\Http\Middleware\Ziggy" not found
+
+
+Este error es muy común al migrar a la estructura de Laravel 11. Ocurre porque el archivo HandleInertiaRequests.php está intentando instanciar la clase Ziggy directamente, pero no encuentra el "import" correcto o la clase no está en el namespace que PHP espera.
+La Solución
+
+Sigue estos pasos para corregir el archivo app/Http/Middleware/HandleInertiaRequests.php:
+1. Corregir el Import (Use)
+
+Asegúrate de que en la parte superior del archivo tengas la importación correcta de la clase Ziggy.
+2. Actualizar el método share
+
+Modifica la sección de ziggy para que use la clase correctamente. Aquí tienes el código completo y corregido:
+PHP
+
+<?php
+
+namespace App\Http\Middleware;
+
+use Illuminate\Http\Request;
+use Inertia\Middleware;
+use Tighten\Ziggy\Ziggy; // <--- ASEGÚRATE DE QUE ESTA LÍNEA ESTÉ AQUÍ
+
+class HandleInertiaRequests extends Middleware
+{
+    // ... (resto del código)
+
+    public function share(Request $request): array
+    {
+        return array_merge(parent::share($request), [
+            'auth' => [
+                'user' => $request->user(),
+            ],
+            // Corrección aquí:
+            'ziggy' => fn () => [
+                ...(new Ziggy)->toArray(),
+                'location' => $request->url(),
+            ],
+        ]);
+    }
+}
+
+¿Por qué falló?
+
+El error Class "App\Http\Middleware\Ziggy" not found indica que PHP buscó la clase Ziggy dentro de la carpeta de Middlewares porque no le indicaste dónde estaba realmente. Al agregar use Tighten\Ziggy\Ziggy;, le dices que la busque en el paquete que instalaste vía Composer.
+Si el error persiste...
+
+Si después de agregar el use te dice que el paquete no existe, es posible que falte la instalación de Ziggy (aunque Jetstream suele traerlo). Ejecuta esto en tu terminal por si acaso:
+Bash
+
+composer require tighten/ziggy
+
+Y finalmente, como estamos moviendo muchas piezas de las rutas, limpia la caché de nuevo:
+Bash
+
+php artisan route:clear
+php artisan config:clear
+
+¿Con esto ya carga el Dashboard correctamente? Si ya carga, podemos empezar a trabajar en el SkillController para que el listado de habilidades aparezca en tu nueva ruta.
+
+El paquete tiene un nombre ligeramente distinto. El comando correcto es tightenco/ziggy (con "co" al final).
+
+Sin embargo, antes de instalar nada, es muy probable que ya lo tengas instalado porque Laravel Jetstream lo incluye por defecto. El error que viste anteriormente (Class "App\Http\Middleware\Ziggy" not found) no suele ser por falta del paquete, sino por el Namespace (la dirección de la clase).
+
+Aquí tienes la solución definitiva:
+1. Corregir el archivo sin instalar nada aún
+
+Abre app/Http/Middleware/HandleInertiaRequests.php y asegúrate de que la importación sea exactamente esta:
+PHP
+
+use Tighten\Ziggy\Ziggy; // <--- Verifica que NO diga Tightenco aquí, es Tighten
+
+2. Si realmente necesitas instalarlo
+
+Si tras corregir el use sigues teniendo problemas, usa el nombre de paquete correcto:
+Bash
+
+composer require tightenco/ziggy
+
+¿Por qué el error de "Package Not Found"?
+
+    Nombre del paquete (Composer): tightenco/ziggy
+
+    Namespace (PHP): Tighten\Ziggy\Ziggy
+
+Es una de esas curiosidades de las librerías donde el nombre de la empresa en el repositorio (tightenco) es ligeramente distinto al que se usa en el código (Tighten).
+Paso final tras la corrección:
+
+Una vez que el archivo HandleInertiaRequests.php tenga el use correcto, ejecuta esto para limpiar cualquier rastro de rutas viejas:
+Bash
+
+php artisan route:clear
+php artisan config:clear
+npm run dev
+
+¿Con esto ya lograste ver el Dashboard sin errores de PHP?
+
+
+¡Ya lo tenemos! El culpable es este error específico en tu consola:
+
+    Uncaught (in promise) Error: Ziggy error: route 'dashboard' is not in the route list.
+
+Lo que está pasando es lo siguiente: Laravel Jetstream, en sus componentes de Vue (como el menú de navegación), trae por defecto enlaces que apuntan a la ruta llamada 'dashboard'.
+
+Como nosotros cambiamos el nombre en bootstrap/app.php a ->name('dashboard.') y en el archivo de rutas pusimos ->name('index'), la ruta ahora se llama dashboard.index, pero el componente AppLayout.vue de Jetstream sigue buscando una ruta llamada exactamente dashboard. Al no encontrarla, Ziggy "explota" y detiene el renderizado de Vue.
+La Solución: Corregir el nombre de la ruta
+
+Tienes dos caminos, pero el más rápido para que tu Dashboard vuelva a la vida ahora mismo es ajustar tu archivo de rutas para que coincida con lo que Jetstream espera:
+Opción A: Ajustar routes/dashboard.php (Recomendada)
+
+Modifica el nombre de la ruta raíz para que se llame simplemente dashboard.
+PHP
+
+// routes/dashboard.php
+
+Route::get('/', function () {
+    return Inertia::render('Dashboard');
+})->name('dashboard'); // <--- Quita el 'index' y deja solo 'dashboard'
+
+OJO: Si en bootstrap/app.php dejaste el ->name('dashboard.') (con punto), la ruta se llamará dashboard.dashboard. Para que funcione con Jetstream sin tocar el código de Vue, lo ideal es que en bootstrap/app.php dejes el prefijo pero no el nombre de grupo para esa ruta específica, o simplemente ajustar el archivo de rutas así:
+La configuración definitiva para que no choque con Jetstream:
+
+1. En bootstrap/app.php:
+Mantén el prefijo pero quita el ->name('dashboard.') si quieres que las rutas sean más sencillas, o déjalo así para los recursos:
+PHP
+
+// bootstrap/app.php
+then: function () {
+    Route::middleware(['web', 'auth:sanctum', config('jetstream.auth_session'), 'verified'])
+        ->prefix('dashboard')
+        // Si quitas el ->name('dashboard.') aquí, evitarás el "dashboard.dashboard"
+        ->group(base_path('routes/dashboard.php'));
+},
+
+2. En routes/dashboard.php:
+Asegúrate de que la ruta principal se llame exactamente igual a como venía originalmente en Jetstream:
+PHP
+
+// routes/dashboard.php
+
+// Esta ruta DEBE llamarse 'dashboard' para que AppLayout.vue no falle
+Route::get('/', function () {
+    return Inertia::render('Dashboard');
+})->name('dashboard'); 
+
+// Para los recursos, puedes ponerle el nombre manualmente o usar el grupo
+Route::resource('skills', SkillController::class)->except(['create', 'show', 'edit'])->names('dashboard.skills');
+Route::resource('projects', ProjectController::class)->except(['create', 'show', 'edit'])->names('dashboard.projects');
+
+
+en el archivo
+
+resources/js/Layouts/AppLayout.vue
+
+dejamos el nombre de la ruta asi:
+
+ <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                    Dashboard
+                                </NavLink>
+                            </div>
+
+
+Paso Final: Limpiar caché
+
+Después de cambiar nombres de rutas, Ziggy y Laravel necesitan enterarse del cambio:
+Bash
+
+php artisan route:clear
+php artisan route:cache
+npm run dev
+
+¿Por qué esto soluciona el error?
+Al entrar a AppLayout.vue, hay una línea que dice :active="route().current('dashboard')". Si la ruta 'dashboard' no existe en el mapa de rutas que Laravel le envía a Ziggy, Vue lanza el error que viste y la pantalla se queda en blanco o con errores de renderizado.
+
+
+ahora tenemos acceso a nuestro dashboard con Laravel Jetstream
+
+no es lo que queremos y para ello vamos a usar el espacio en blanco para poner nuestros propios en laces desde la vista de dashboard.
+
+resources/js/Pages/Dashboard.vue
+
+
+tenemos el componente que es en blanco
+<div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+                    <Welcome />
+                </div>
+
+y dentro el componente welcome vamos a remover de hecho podremos quitarlo de la definicion de componentesa utilizar,
+
+y vamos a mantener nuestra lsta de elementos como sigue:
+
+y con ello tendremos nuestros dos elementos, 
+
+Vamos a visualizar correctamente la vista
+
+
+
+<div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">                
+                <div class="bg-white overflow-hidden shadow-xl rounded-lg p-6 border-b border-gray-200 text-xl">
+                    <!-- <Welcome /> -->
+                     <p class="mb-5 font-semibold text-gray-700">Your Resources</p>
+                     <ul class="space-y-4">
+                        <li class="flex items-center">
+                    <div class="bg-gray-400 h-2 w-2 rounded-full mr-3"></div>
+                            <Link 
+                            :href="route('skills.index')"
+                            class="hover:text-gray-800 mt-2 text-sm text-indigo-500 border-b border-gray-400">Skills</Link></li>
+                        <li class="flex items-center">
+                    <div class="bg-gray-400 h-2 w-2 rounded-full mr-3"></div>
+                            <Link 
+                            :href="route('projects.index')"
+                            class="hover:text-gray-800 mt-2 text-sm text-indigo-500 border-b border-gray-400">Projects</Link></li>
+                     </ul>
+                </div>
+            </div>
+        </div>
+
+Al final dejamos sin el prefijo dashboard.
+Al final, la lógica de Laravel es que si no defines un nombre de grupo (->name('dashboard.')) en el app.php o en el archivo de rutas, los recursos mantienen sus nombres naturales: skills.index y projects.index.
+
+A veces nos enredamos queriendo ponerle prefijos a todo, pero "menos es más" y dejar los nombres estándar de los recursos hace que el código sea más legible y fácil de mantener.
+Lo que hemos logrado:
+
+    Estructura Limpia: El Dashboard ya carga sin errores de renderizado.
+
+    Rutas Protegidas: Todo bajo /dashboard requiere autenticación gracias al middleware en app.php.
+
+    Interfaz de Usuario: Ya tienes tus accesos directos con el estilo de puntos (dots) que querías y una navegación funcional.
+
+¿Qué sigue en el "Roadmap" de tu portafolio?
+
+Ahora que los enlaces apuntan a skills.index y projects.index, si haces clic en ellos probablemente obtengas una página en blanco o un error porque los controladores aún no están enviando nada.
+
+¿Te gustaría que preparemos el SkillController? Podríamos hacer que el método index:
+
+    Consulte todas tus Skills de la base de datos usando el modelo.
+
+    Las envíe a un nuevo componente de Inertia (por ejemplo, Skills/Index.vue).
+
+    Preparemos la tabla para listarlas y el botón para abrir el modal de creación.
+
+
+Por ahora aunque tenemos los lonk no existen esos metodos, lo que veremos posiblemente sera un error, pararemos con el rpoceso de los skils a continuación.
+
+El problema quisas sea:
+
+
+Error
+vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php:46
+
+Call to undefined method App\Http\Controllers\SkillController::index()
+LARAVEL 12.49.0
+PHP 8.2.30
+UNHANDLED
+
+
