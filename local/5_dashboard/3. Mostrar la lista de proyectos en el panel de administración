@@ -1,0 +1,1304 @@
+En el proceso anterior resolvimos al no tener la implemantacion de la accion de index, aun asi se implemento la tabla donde mostrabamos la lista de skills.
+
+Vamoa  proceder de la misma manera en el caso de projects, tenemos la misma situacion que el index no existe el metodo y la implementación de acciones para este componente.
+
+lo que se hacer es es hacer el copiar el metod index de skils pero ahora para projects, adaptandolo a projects.
+
+Esta parte en especifico.
+
+public function index()
+    {
+        return Inertia::render('Skills/All', [
+            'skills' => Skill::all(),
+        ]);
+    }
+
+
+
+
+Es este punto ya tenemos el metodo index
+ public function index()
+    {
+        return Inertia::render('Projects/All', [
+            'projects' => Project::all(),
+        ]);
+    }
+
+Pero fallaria al no tener la vista. => Project/All
+Asi que el mismo caso que para Skill, copiamos pero ahora ya no tenemos codigo preparado si no que adaptaremos lo de skills hacia projects.
+
+ Para daptarla manualmente para las caracteristicas y necesidades de los projects
+
+
+Modificamos inicialmente la loingitud de la tabla si hay contenido, despues en la tabla modificamos los titulos de cada elemento, modificamos las columnas, y para el caso de color y el icono estos elementos son dinamicos por loq ue se modificara su estructura del spam
+
+
+            <td class="px-6 py-4" :class="project.color">
+                <component>
+                    :is="componentName(index)"
+                </component>
+            </td>
+
+E el interior tendemos la etieuqte dinamica que es escencialmente, un componente y ese componente recibira un nombre de manera dinamica a trves de la funcionalidad, tenemos que es :is = a lo que nos retorne una funcion que es
+
+componentName
+
+y necesitamos el index, que significa que al no ser un string si no se trata d eun valor numerico, y entonces necesitamos dentro de unuestro ciclo for el indice por loque tendremos que cambiar la estructura de nuestro ciclo for para que reciba el index y asi podamos acceder a el y poder retornar el componente que queremos mostrar en cada momento.
+
+de esto:
+
+<tbody v-for="project in projects">
+
+a esto
+
+<tbody v-for="(index, project) in projects">
+
+
+Para que en este punto, vuejs no solo nos este indicando no solo el projectto en si que esta recorriendo sino tambien el indice que se encuneytra dentro de esa colección..
+
+Enviando el indice y ya mas abajo, estan el boton de edit y delete tal cual los tenemos en la vista de skills.
+
+Hay algunas cosas por agregar pero ya sabemos como funicona el componentName.
+
+Arrancaremos ahora con el appLayout en la zona de scripts.
+
+Ahora solo cambia nuestro erraglo recibido que sera de projects
+defineProps({
+    projects: Array,
+});
+
+ara poder definir el componente projects de manera dinamica, ya no tenemos skills sino projects que sigue siendo un objeto y vamos a centranos en el metodo que resuelve el nombre del componente, no tenemos que volver a escribir el nombre dentro del componente Welcome.vue en la parte donde estan los scripts y ahi en la lista de metodos tenemos a componentName
+
+
+Correcciones a los componentes:
+-----------
+
+
+Veo que ya tienes la lógica de los iconos dinámicos y la estructura base en tu componente Welcome.vue. Sin embargo, para que el listado de proyectos funcione correctamente y sea consistente con lo que hiciste en Skills, hay un par de detalles técnicos que debemos ajustar, especialmente en la forma en que recorres los datos y cómo manejas los componentes dinámicos.
+
+Aquí tienes las correcciones y mejoras para tu componente Welcome.vue y un ajuste necesario en Projects/All.vue.
+1. Ajuste en Welcome.vue (Script)
+
+En tu código, ya tienes getIcon, lo cual está perfecto. Solo asegúrate de que la propiedad del modelo en la base de datos se llame efectivamente icon_name.
+JavaScript
+
+// Asegúrate de tener este array para los colores de respaldo si el proyecto no tiene uno definido
+const projectColors = [
+    "bg-red-500",
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-purple-500",
+];
+
+const getIcon = (iconName) => {
+    // Heroicons en @heroicons/vue vienen como "AcademicCapIcon"
+    // Si en tu BD guardas "AcademicCap", esto lo convierte correctamente
+    const name = `${iconName || "Briefcase"}Icon`;
+    return SolidIcons[name] || SolidIcons.BriefcaseIcon; // Fallback a un maletín
+};
+
+2. Ajuste en Welcome.vue (Template)
+
+En el v-for de proyectos, asegúrate de pasar las props correctamente al componente <Project />. Si tu componente Project.vue espera un slot para el icono, lo estamos haciendo bien con el <component :is="..." />.
+HTML
+
+<div v-for="(project, index) in projects" :key="project.id">
+    <Project
+        :title="project.title"
+        :description="project.description"
+        :color="project.color || projectColors[index % projectColors.length]"
+    >
+        <template #icon>
+            <component
+                :is="getIcon(project.icon_name)"
+                class="h-8 w-8 text-white"
+            />
+        </template>
+    </Project>
+</div>
+
+3. Corrección Crítica en Projects/All.vue
+
+He notado un error común de sintaxis en tu tabla de Projects/All.vue. En Vue, el v-for tiene un orden específico: (item, index) in items. Tú lo tienes al revés: (index, project).
+
+Cambia esto:
+HTML
+
+<tbody v-for="(index, project) in projects">
+    <component :is="componentName(index)"></component>
+</tbody>
+
+Por esto (CORRECTO):
+HTML
+
+<tbody v-if="projects.length > 0">
+    <tr v-for="(project, index) in projects" :key="project.id" class="text-sm text-indigo-900 border-b border-gray-400">
+        <td class="px-6 py-4">{{ project.title }}</td>
+        <td class="px-6 py-4">{{ project.description }}</td>
+        <td class="px-6 py-4">
+            <span class="mr-2 p-2 rounded" :class="project.color"></span>
+            {{ project.color }}
+        </td>
+        <td class="px-6 py-4">
+            <component :is="getIcon(project.icon_name)" class="h-6 w-6" :class="project.color.replace('bg-', 'text-')" />
+        </td>
+        <td class="px-6 py-4">
+            </td>
+    </tr>
+</tbody>
+
+4. Recomendación para los Iconos en el Listado
+
+Para que Projects/All.vue pueda renderizar los iconos igual que Welcome.vue, recuerda importar los iconos allí también:
+JavaScript
+
+// En Projects/All.vue
+import * as SolidIcons from "@heroicons/vue/24/solid";
+
+const getIcon = (iconName) => {
+    const name = `${iconName || "Briefcase"}Icon`;
+    return SolidIcons[name] || SolidIcons.BriefcaseIcon;
+};
+
+Resumen de cambios realizados:
+
+    Orden del v-for: Corregido de (index, project) a (project, index).
+
+    Ubicación del v-for: Movido de <tbody> a <tr> para generar una tabla semánticamente correcta.
+
+    Componentes dinámicos: Se integró la lógica de SolidIcons para que el nombre que viene de la base de datos se convierta en un componente real de Vue.
+
+    Fallback de colores: Se añadió una lógica simple para que, si un proyecto no tiene color en la DB, use uno del array por defecto.
+
+
+Para Welcome se sugieren ajustes en el script y en la parte del template:
+
+para el paso 2. asjuste de Welcome en la parte del template me sugieres cambiar esto:
+<div v-for="(project, index) in projects" :key="project.id">
+                <Project
+                    :title="project.title"
+                    :description="project.description"
+                    :color="project.color"
+                >
+                    <!-- <span class="text-3xl font-black text-white">
+                    {{ getIconText(project.title) }}
+                </span> -->
+                    <!-- <BeakerIcon></BeakerIcon> -->
+                    <component
+                        :is="getIcon(project.icon_name)"
+                        class="h-8 w-8 text-white"
+                    />
+
+                    <!-- <span class="ml-2">{{ project.title }}</span> -->
+                </Project>
+            </div>
+por esto:
+<div v-for="(project, index) in projects" :key="project.id">
+    <Project
+        :title="project.title"
+        :description="project.description"
+        :color="project.color || projectColors[index % projectColors.length]"
+    >
+        <template #icon>
+            <component
+                :is="getIcon(project.icon_name)"
+                class="h-8 w-8 text-white"
+            />
+        </template>
+    </Project>
+</div>
+
+a sugerencia de cambio tiene dos objetivos principales: limpieza de código y robustez visual.
+
+Aquí te explico por qué ese cambio es mejor:
+1. El uso de template #icon (Slots Nombrados)
+
+En el primer bloque de código, estás pasando el componente del icono como un "hijo" genérico (default slot). Al usar <template #icon>, le estás diciendo específicamente al componente Project.vue: "Oye, coloca este icono exactamente donde definí el espacio llamado 'icon'".
+
+Esto evita que el icono flote en cualquier parte y asegura que se renderice con los estilos que hayas definido dentro de Project.vue para esa sección.
+2. El Fallback de Colores
+
+La línea :color="project.color || projectColors[index % projectColors.length]" es un "seguro de vida" para tu diseño:
+
+    Si el proyecto tiene color: Usa project.color (el de la base de datos).
+
+    Si el proyecto NO tiene color (null): Usa el array projectColors que definimos en el script. El uso del operador módulo % hace que si tienes 10 proyectos pero solo 5 colores, los colores se repitan cíclicamente (0, 1, 2, 3, 4, 0, 1...), evitando errores de "undefined".
+
+¿Cómo debería verse tu Project.vue para recibir esto?
+
+Para que el cambio que te sugerí funcione perfectamente, asegúrate de que tu componente resources/js/Components/Project.vue tenga una estructura similar a esta:
+HTML
+
+<template>
+    <div :class="color" class="p-6 rounded-lg shadow-md flex items-center">
+        <div class="flex-shrink-0 mr-4">
+            <slot name="icon" />
+        </div>
+
+        <div>
+            <h3 class="text-xl font-bold text-white">{{ title }}</h3>
+            <p class="text-white opacity-90">{{ description }}</p>
+        </div>
+    </div>
+</template>
+
+<script setup>
+defineProps({
+    title: String,
+    description: String,
+    color: String
+});
+</script>
+
+Un pequeño detalle en Welcome.vue
+
+Solo asegúrate de que el array projectColors esté declarado en el <script setup> de Welcome.vue, ya que lo estás intentando usar en el template:
+JavaScript
+
+const projectColors = [
+    "bg-red-500",
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-purple-500",
+];
+
+hubo modificaciones generales pero quedo bien estrcutrado, para tener la fotogrfia clara dejo aca los dos componentes trabjaados para Projects.
+
+
+quedo asi mis componentes, primero mi vista, por que la logica del controlador ya quedo superada:
+
+
+resources/js/Pages/Projects/All.vue
+------
+<script setup>
+import AppLayout from "@/Layouts/AppLayout.vue";
+import JetButton from "@/Components/Button.vue"; // Usando el que ya te funcionó en Welcome
+import { Link } from "@inertiajs/vue3";
+
+// importacion de iconos
+import * as SolidIcons from "@heroicons/vue/24/solid";
+
+const getIcon = (iconName) => {
+    const name = `${iconName || "Briefcase"}Icon`;
+    return SolidIcons[name] || SolidIcons.BriefcaseIcon;
+};
+
+//Se define el objeto de Projects
+defineProps({
+    projects: Array,
+});
+</script>
+
+<template>
+    <app-layout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Projects
+            </h2>
+        </template>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <table v-if="projects.length > 0" class="w-full">
+                    <thead class="border-b-2 border-gray-300 text-indigo-600">
+                        <tr>
+                            <th class="px-6 py-3 text-left">Title</th>
+                            <th class="px-6 py-3 text-left">Description</th>
+                            <th class="px-6 py-3 text-left">Color</th>
+                            <th class="px-6 py-3 text-left">Icon</th>
+                            <th class="px-6 py-3 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody v-if="projects.length > 0">
+                        <tr
+                            v-for="(project, index) in projects"
+                            :key="project.id"
+                            class="text-sm text-indigo-900 border-b border-gray-400"
+                        >
+                            <td class="px-6 py-4">
+                                {{ project.title }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {{ project.description }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span
+                                    class="mr-2 p-2 rounded"
+                                    :class="project.color"
+                                ></span>
+                                {{ project.color }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <component
+                                    :is="getIcon(project.icon_name)"
+                                    class="h-6 w-6"
+                                    :class="
+                                        project.color.replace('bg-', 'text-')
+                                    "
+                                />
+                            </td>
+                            <td class="px-6 py-4">
+                                <JetButton
+                                    class="bg-indigo-600 text-white hover:bg-indigo-700 focus:ring-indigo-500 mr-2"
+                                >
+                                    Edit
+                                </JetButton>
+
+                                <JetButton
+                                    class="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 ml-2"
+                                >
+                                    Delete
+                                </JetButton>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div
+                    v-else
+                    class="bg-red-100 border border-red-400 p-3 rounded-lg text-red-800"
+                >
+                    There are no skills yet. Let's create one :)
+                </div>
+            </div>
+        </div>
+    </app-layout>
+</template>
+
+y para el componente Welcome ya teniamos gracia s ti un camino preparado, ya solo faltaba colocar algunos elementos fatantes y corregir desde tu perspectiva la forma de como mostrar los iconos. esto se ve excelente:
+------------
+
+
+<script setup>
+import { ref } from "vue";
+import { Head, Link } from "@inertiajs/vue3";
+import ApplicationMark from "@/Components/ApplicationMark.vue";
+import Button from "@/Components/Button.vue";
+import Section from "@/Components/Section.vue";
+import Skill from "@/Components/Skill.vue";
+import Project from "@/Components/Project.vue";
+//import { BeakerIcon } from "@heroicons/vue/24/solid";
+//import { defineAsyncComponent } from "vue";
+
+// Importamos todos los iconos de Heroicons Solid
+import * as SolidIcons from "@heroicons/vue/24/solid";
+
+//Importamos Componentes del modal y los input
+
+import Modal from "@/Components/Modal.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import TextInput from "@/Components/TextInput.vue";
+import InputError from "@/Components/InputError.vue";
+import SecondaryButton from "@/Components/SecondaryButton.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import { useForm } from "@inertiajs/vue3";
+
+//Importando componentes para capurar mensaje de exito necesitamos computed y watch para reaccionar a los cambios en la sesión
+
+import { computed, watch } from "vue";
+
+//Para la barri de transicion
+import { nextTick } from "vue";
+
+import { usePage } from "@inertiajs/vue3";
+
+const page = usePage();
+
+// Esta variable será reactiva. Si hay un mensaje en la sesión, aparecerá aquí.
+//const flashSuccess = computed(() => page.props.flash.success);
+const flashSuccess = ref(null);
+let timeoutId = null;
+
+//barra
+const progressWidth = ref(100); // Empezamos al 100%
+
+// Observamos los cambios en los props de flash
+watch(
+    //() => page.props.flash.success,
+    //Usamos un encadenamiento opcional => ?
+    () => page.props.flash?.success,
+    async (newValue) => {
+        if (newValue) {
+            flashSuccess.value = newValue;
+            progressWidth.value = 100; // Resetear barra
+
+            // Forzamos a Vue a esperar que el DOM se renderice antes de iniciar la animación
+            await nextTick();
+
+            // Iniciamos la reducción de la barra casi de inmediato
+            setTimeout(() => {
+                progressWidth.value = 0;
+            }, 50);
+
+            if (timeoutId) clearTimeout(timeoutId);
+
+            timeoutId = setTimeout(() => {
+                flashSuccess.value = null;
+            }, 3000);
+        }
+    },
+    { immediate: true },
+);
+
+///Demas funciones para el modal
+
+// Estado para abrir/cerrar el modal
+const showingContactModal = ref(false);
+
+// Formulario reactivo con Inertia
+const form = useForm({
+    name: "",
+    email: "",
+    message: "",
+});
+
+const openContactModal = () => {
+    showingContactModal.value = true;
+};
+
+const closeModal = () => {
+    showingContactModal.value = false;
+    form.clearErrors(); // Elimina los mensajes de error previos
+    form.reset(); // Regresa los campos a su estado inicial (vacíos)
+};
+
+const sendMessage = () => {
+    form.post(route("contact"), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Cerramos el modal si es necesario
+            if (typeof closeModal === "function") closeModal();
+
+            // Limpiamos los campos
+            form.reset();
+
+            // El mensaje aparecerá automáticamente gracias a flashSuccess
+        },
+        onError: (errors) => {
+            console.log("Errores detectados:", errors);
+        },
+    });
+};
+
+// 1. Definimos las propiedades correctamente
+const props = defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+    skills: Array,
+    projects: Array,
+});
+
+//El codigo de abajo se modifica a esto
+const getIcon = (iconName) => {
+    // Heroicons en @heroicons/vue vienen como "AcademicCapIcon"
+    // Si en tu BD guardas "AcademicCap", esto lo convierte correctamente
+    const name = `${iconName || "Briefcase"}Icon`;
+    return SolidIcons[name] || SolidIcons.BriefcaseIcon; // Fallback a un maletín
+};
+
+// 2. Convertimos el antiguo "method" en una función normal
+// Nota: En script setup no usamos "this", usamos la constante "props"
+// const getIcon = (iconName) => {
+//     // Si iconName es "Beaker", buscamos "BeakerIcon" en el objeto SolidIcons
+//     const name = `${iconName || "QuestionMarkCircle"}Icon`; // Agregamos un fallback inicial
+//     return SolidIcons[name] || SolidIcons.QuestionMarkCircleIcon; // Icono por defecto si no existe
+// };
+
+// Nos asegurams de tener este array para los colores de respaldo si el proyecto no tiene uno definido
+const projectColors = [
+    "bg-red-500",
+    "bg-blue-500",
+    "bg-green-500",
+    "bg-yellow-500",
+    "bg-purple-500",
+];
+
+const getIconText = (title) => {
+    return title ? title.charAt(0).toUpperCase() : "?";
+};
+</script>
+<template>
+    <Head title="Portafolio" />
+
+    <div
+        class="grid grid-cols-2 text-right py-10 px-72 bg-gray-800 text-gray-300"
+    >
+        <!-- <div>
+            <jet-application-mark class="h-12 w-auto"></jet-application-mark>
+        </div> -->
+
+        <ApplicationMark class="h-20 w-auto" />
+
+        <div v-if="canLogin">
+            <Link
+                v-if="$page.props.user"
+                :href="route('dashboard')"
+                class="text-sm underline"
+            >
+                Dashboard
+            </Link>
+
+            <template v-else>
+                <Link :href="route('login')" class="text-base underline">
+                    Log in
+                </Link>
+
+                <Link
+                    v-if="canRegister"
+                    :href="route('register')"
+                    class="text-base underline place-self-end ml-4"
+                >
+                    Register
+                </Link>
+            </template>
+        </div>
+    </div>
+
+    <!-- <transition name="fade">
+        <div v-if="flashSuccess" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span class="block sm:inline">{{ flashSuccess }}</span>
+        </div>
+    </transition> -->
+    <!-- Pasamos esto al final -->
+
+    <Section class="bg-gray-800 pt-16 h-screen px-72">
+        <div class="h-2/3 flex flex-wrap content-between border-gray-600 pb-36">
+            <p
+                class="border-b-2 font-bold border-gray-400 pb-3 text-2xl text-gray-300 uppercase"
+            >
+                Hola Jefe, esto es Inertia!. I'm software engineer and I would
+                like to work with you
+            </p>
+        </div>
+
+        <div class="flex items-end border-b-2 border-gray-500 pb-2 w-fit">
+            <p class="font-bold mr-5 text-gray-500 text-xl">
+                Want to know more about me?
+                <button
+                    @click="openContactModal"
+                    :disabled="$page.props.flash.success"
+                    class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+                    :class="[
+                        $page.props.flash.success
+                            ? 'bg-gray-500 cursor-default px-6 py-2'
+                            : 'bg-green-700 hover:bg-green-500 px-4 py-2',
+                    ]"
+                >
+                    {{ $page.props.flash.success ? "¡Gracias!" : "Let's chat" }}
+                </button>
+            </p>
+        </div>
+
+        <div class="animate-pulse mt-3 text-gray-300 text-center text-7xl">
+            <a href="#skills">&#8675;</a>
+        </div>
+    </Section>
+
+    <Section
+        id="skills"
+        class="bg-gray-200 text-gray-800 min-h-screen px-72 py-20"
+    >
+        <h2 class="text-6xl font-bold pt-3 mb-12">Skills</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10 pl-16">
+            <div v-for="(skill, index) in skills" :key="skill.id">
+                <Skill
+                    :background="
+                        skill.color || skillColors[index % skillColors.length]
+                    "
+                >
+                    <template #icon>{{ skill.name.substring(0, 2) }}</template>
+                    <template #name>{{ skill.name }}</template>
+                </Skill>
+            </div>
+        </div>
+
+        <div class="flex justify-center mt-12">
+            <button
+                @click="openContactModal"
+                :disabled="$page.props.flash.success"
+                class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+                :class="[
+                    $page.props.flash.success
+                        ? 'bg-gray-500 cursor-default px-6 py-2'
+                        : 'bg-green-700 hover:bg-green-500 px-4 py-2',
+                ]"
+            >
+                {{
+                    $page.props.flash.success
+                        ? "¡Gracias!"
+                        : "¿Tienes un proyecto en mente?"
+                }}
+            </button>
+        </div>
+    </Section>
+    <Section class="bg-gray-600 text-gray-200 min-h-screen">
+        <div class="px-72 pt-16 mb-10">
+            <h2 class="text-5xl font-bold">Projects</h2>
+        </div>
+
+        <div class="space-y-7 px-7">
+            <div v-for="(project, index) in projects" :key="project.id">
+                <Project
+                    :title="project.title"
+                    :description="project.description"
+                    :color="
+                        project.color ||
+                        projectColors[index % projectColors.length]
+                    "
+                >
+                    <template #icon>
+                        <component
+                            :is="getIcon(project.icon_name)"
+                            class="h-8 w-8 text-white"
+                        />
+                    </template>
+                </Project>
+            </div>
+        </div>
+
+        <div class="flex justify-center mt-16">
+            <button
+                @click="openContactModal"
+                :disabled="$page.props.flash.success"
+                class="rounded font-bold text-sm text-gray-200 ml-2 transition-all duration-300"
+                :class="[
+                    $page.props.flash.success
+                        ? 'bg-gray-500 cursor-default px-6 py-2'
+                        : 'bg-green-700 hover:bg-green-500 px-4 py-2',
+                ]"
+            >
+                {{
+                    $page.props.flash.success
+                        ? "¡Gracias!"
+                        : "Contratar para un proyecto similar"
+                }}
+            </button>
+        </div>
+    </Section>
+
+    <footer class="flex justify-between bg-gray-800 text-gray-200 text-xl">
+        <p>&copy; 2026. All rights reserved.- Made with ❤️ by Klvst3r</p>
+        <div class="flex justify-evenly item-center">
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >Github</Link
+            >
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >X</Link
+            >
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >Stackoverflow</Link
+            >
+            <Link
+                class="border-b pb-1 px-2 hover:text-gray-50"
+                href="#"
+                target="_blank"
+                >Linkedin</Link
+            >
+        </div>
+    </footer>
+
+    <Modal :show="showingContactModal" @close="closeModal">
+        <div v-if="$page.props.flash.contacted" class="p-10 text-center">
+            <div class="mb-6 flex justify-center">
+                <div class="bg-green-100 p-4 rounded-full">
+                    <svg
+                        class="h-12 w-12 text-green-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
+                    </svg>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
+                ¡Gracias por escribir!
+            </h2>
+            <p class="text-gray-600 mb-8">
+                Tu mensaje ha sido recibido correctamente. Me pondré en contacto
+                contigo a la brevedad.
+            </p>
+
+            <PrimaryButton
+                type="button"
+                @click="closeModal"
+                class="w-full justify-center"
+            >
+                Cerrar
+            </PrimaryButton>
+        </div>
+
+        <form v-else @submit.prevent="sendMessage" class="p-6">
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">
+                Cuéntame sobre tu proyecto
+            </h2>
+
+            <div class="mt-6">
+                <InputLabel for="name" value="Nombre" />
+                <TextInput
+                    id="name"
+                    v-model="form.name"
+                    @input="form.clearErrors('name')"
+                    class="mt-1 block w-full"
+                    placeholder="Escribe tu nombre y apellidos para establecer contacto"
+                />
+                <InputError :message="form.errors.name" class="mt-2" />
+            </div>
+
+            <div class="mt-4">
+                <InputLabel for="email" value="Correo electrónico" />
+                <TextInput
+                    id="email"
+                    type="email"
+                    v-model="form.email"
+                    @input="form.clearErrors('email')"
+                    class="mt-1 block w-full"
+                    placeholder="tu@correo.com"
+                />
+                <InputError :message="form.errors.email" class="mt-2" />
+            </div>
+
+            <div class="mt-4">
+                <InputLabel for="message" value="Mensaje" />
+                <textarea
+                    id="message"
+                    v-model="form.message"
+                    @input="form.clearErrors('message')"
+                    rows="5"
+                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-gray-800 transition-colors duration-200"
+                    :class="{ 'border-red-500': form.errors.message }"
+                    placeholder="¿En qué puedo ayudarte?"
+                ></textarea>
+                <InputError :message="form.errors.message" class="mt-2" />
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <SecondaryButton type="button" @click="closeModal">
+                    Cancelar
+                </SecondaryButton>
+
+                <PrimaryButton
+                    type="submit"
+                    class="ml-3 inline-flex items-center transition-all duration-200"
+                    :class="{
+                        'opacity-50 cursor-not-allowed': form.processing,
+                        'hover:bg-indigo-700': !form.processing,
+                    }"
+                    :disabled="form.processing"
+                >
+                    <span
+                        v-if="form.processing"
+                        class="animate-spin mr-2 text-xl inline-block"
+                        >&#9696;</span
+                    >
+
+                    <span class="font-medium">
+                        {{ form.processing ? "Enviando..." : "Enviar Mensaje" }}
+                    </span>
+                </PrimaryButton>
+            </div>
+        </form>
+    </Modal>
+    <transition name="fade">
+        <div
+            v-if="flashSuccess"
+            class="fixed top-24 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-2xl"
+        >
+            <div
+                class="relative overflow-hidden bg-green-500 text-white px-8 py-5 rounded-xl shadow-2xl flex items-center justify-between border border-green-400/50 backdrop-blur-sm bg-opacity-95"
+            >
+                <div class="absolute top-0 left-0 h-1 bg-green-300/50 w-full">
+                    <div
+                        class="h-full bg-white transition-all linear"
+                        :style="{
+                            width: progressWidth + '%',
+                            transitionDuration: '5000ms',
+                        }"
+                    ></div>
+                </div>
+
+                <div class="flex items-center space-x-4 mt-1">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-7 w-7 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <span class="font-semibold text-lg tracking-wide">{{
+                        flashSuccess
+                    }}</span>
+                </div>
+
+                <button
+                    @click="flashSuccess = null"
+                    class="ml-4 hover:bg-green-600/50 rounded-full p-1 transition-colors"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </transition>
+</template>
+
+<style scoped>
+.linear {
+    transition-timing-function: linear !important;
+}
+
+/* 1. Transición para el Aviso Flotante (con movimiento) */
+.fade-enter-active,
+.fade-leave-active {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+    transform: translate(-50%, -30px); /* Mantiene el centrado absoluto */
+}
+
+/* 2. Transición para el Modal (solo desvanecimiento suave) */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+    opacity: 0;
+}
+</style>
+
+
+
+Vamos agarrando el hilo a la reactividad y a cómo fluyen los datos entre componentes. Ver el código así de limpio y bien estructurado es una excelente señal. Ya no solo estás copiando, estás construyendo, y ese es el punto donde realmente se aprende.
+
+Tu implementación de Welcome.vue con los slots nombrados (#icon) y la lógica de fallback de colores es exactamente lo que se busca en un desarrollo profesional: resiliencia. Si mañana borras un color en la base de datos, tu sitio no se rompe, simplemente se adapta.
+
+Esto es la importante y es el resumend e funcinalidad generales
+---------
+
+Lo que has logrado dominar hoy:
+
+    Props dinámicas: Cómo pasar arreglos de objetos (projects) desde el controlador hasta las vistas.
+
+    Directivas de Vue (v-for, v-if): Manejo de listas y estados condicionales (como el aviso de "No hay proyectos").
+
+    Componentes Dinámicos: El uso de <component :is="..." /> para renderizar iconos de Heroicons basándote en un string de la base de datos.
+
+    Slots: La técnica de inyectar contenido específico en partes designadas de un componente hijo.
+
+
+----------
+
+
+Un pequeño consejo de JS (Objetos y Funciones)
+
+Mencionaste que te falta entender un poco más la declaración de objetos. En script setup, cuando haces:
+JavaScript
+
+const getIcon = (iconName) => { ... }
+
+Estás usando una Arrow Function. Es la forma moderna y preferida en Vue 3 porque mantiene el contexto de this de forma automática (aunque en setup casi no usamos this) y hace que el código sea más legible.
+¿Cuál es el siguiente paso lógico?
+
+Ya que tienes la lista de proyectos funcionando tanto en la tabla administrativa como en el Home, lo ideal sería poder crear nuevos proyectos.
+
+¿Te gustaría que trabajemos en el formulario de creación? Podríamos:
+
+    Crear una ruta projects.create (o usar un Modal en la misma vista All.vue).
+
+    Hacer un selector de iconos para que no tengas que escribir el nombre manualmente.
+
+    Usar useForm de Inertia para enviar los datos al controlador.
+
+
+
+Lo que hemos consolidado hoy:
+
+    Renderizado Dinámico: Ya dominas cómo traer arreglos de la BD y pintarlos en tablas y secciones.
+
+    Componentes Flexibles: Aprendiste a usar slots y <component :is> para que tus componentes no sean rígidos, sino que se adapten al contenido (iconos, colores, textos).
+
+    Lógica Limpia: El uso de funciones flecha y la organización del script setup para que el código sea legible y fácil de mantener.
+
+
+
+
+
+
+ Por ultimo en la vista inicial de Welcome en el navegador, al parecer por sustitior la forma de llamar a los iconos estos ya no se muestran
+
+aunque en mi tabla de proyectos en la parte de administración si estan presentes.
+
+
+
+
+¡Ya lo tengo! Al comparar ambos archivos, la lógica de JavaScript y el envío de datos desde Welcome.vue son correctos. Si los iconos aparecen en la tabla de administración pero no en el Welcome, el "misterio" está en el componente Project.vue.
+
+Como mencionaste que habías sustituido la forma de llamar a los iconos, lo más probable es que tu componente Project.vue (el archivo que define la tarjeta del proyecto) todavía esté esperando que el icono se pase de la forma antigua o, lo más seguro, le falta el "buzón" (slot) para recibir el icono que le envías desde el Welcome.
+
+Aquí está la solución definitiva para que aparezcan:
+1. Revisa tu componente Project.vue
+
+Abre el archivo resources/js/Components/Project.vue. Debe tener una etiqueta <slot name="icon" /> para que el código que escribimos en Welcome.vue tenga dónde aterrizar.
+
+Asegúrate de que se vea así:
+HTML
+
+<template>
+    <div :class="color" class="p-6 rounded-xl flex items-center shadow-md">
+        <div class="mr-4 flex-shrink-0">
+            <slot name="icon" />
+        </div>
+
+        <div>
+            <h3 class="text-xl font-bold text-white uppercase">{{ title }}</h3>
+            <p class="text-white opacity-90">{{ description }}</p>
+        </div>
+    </div>
+</template>
+
+<script setup>
+defineProps({
+    title: String,
+    description: String,
+    color: String
+});
+</script>
+
+2. ¿Por qué en la Tabla Admin sí funcionan?
+
+En All.vue funcionan porque ahí no usas el componente <Project />, sino que pones el <component :is="..." /> directamente dentro de un <td>.
+
+En Welcome.vue, estás intentando meter el icono dentro de <Project>, y si ese componente no tiene el <slot name="icon">, simplemente ignora lo que le mandas y por eso ves el espacio vacío en la imagen que compartiste.
+Un último detalle de seguridad en Welcome.vue
+
+He notado que en tu Welcome.vue estás usando:
+:color="project.color || projectColors[index % projectColors.length]"
+
+Esto es excelente para los proyectos que no tienen color, pero asegúrate de que el componente Project.vue reciba ese string correctamente en su prop color.
+
+¿Podrías revisar el contenido de resources/js/Components/Project.vue? Si le falta el slot, agrégalo y tus iconos aparecerán en el Welcome al instante tras guardar.
+
+
+
+solucion de visualizacion de iconos:
+
+que raro por que en
+resources/js/Pages/Projects/All.vue
+que tu nombas como resources/js/Components/Project.vue
+pero es la vista del componente de listado de projectos si tengo definiendo el objeto projects y se recibe como array:
+defineProps({
+    projects: Array,
+});
+creo que no tendria que modificar a esto:
+defineProps({
+    title: String,
+    description: String,
+    color: String
+});
+ademas en la taba si se visualiza los iconos pero donde no se visualizan los iconos es en el componente Welcome que tambien debe hacer un llamado de los objetos para poder hacer uso o lamarlos desde el template del componente welcome, asi en welcome.vue tengo
+const props = defineProps({
+    canLogin: Boolean,
+    canRegister: Boolean,
+    skills: Array,
+    projects: Array,
+});
+
+
+entonces, no se si seaa por la forma de como se llaman a los iconos, entonces me parece que la logica esta bien solo es ajuste en la parte del template en welcome, segun mi punto de vista
+
+Tienes toda la razón en cuanto a la lógica de las vistas (All.vue y Welcome.vue). En ambas estás recibiendo correctamente el array de proyectos y recorriéndolo. No necesitas cambiar los defineProps de esas páginas porque ahí manejas la lista completa.
+
+Sin embargo, el "ajuste en el template de Welcome" que mencionas pasa por un tercer archivo que estamos usando dentro del v-for.
+El origen del problema: El componente "Hijo"
+
+En tu Welcome.vue estás haciendo esto:
+HTML
+
+<div v-for="(project, index) in projects">
+    <Project ... >  <template #icon>
+            <component :is="getIcon(project.icon_name)" ... />
+        </template>
+    </Project>
+</div>
+
+Cuando usas la etiqueta <Project>, Vue busca un archivo llamado resources/js/Components/Project.vue.
+
+En la tabla de administración (All.vue) los iconos sí se ven porque no usas ese componente hijo; escribes el código del icono directamente dentro del <td>. Pero en Welcome.vue, el icono está "encerrado" dentro de <Project>.
+
+Si los iconos no aparecen en el Welcome, es porque el archivo resources/js/Components/Project.vue no sabe qué hacer con ese <template #icon>.
+La solución (El ajuste que falta)
+
+Revisa el contenido de tu componente base: resources/js/Components/Project.vue. Para que el icono "atraviese" la estructura y se muestre, el código de ese archivo debe ser así:
+HTML
+
+<script setup>
+// Aquí es donde SÍ se definen title, description y color
+// porque este componente representa UN SOLO proyecto.
+defineProps({
+    title: String,
+    description: String,
+    color: String,
+});
+</script>
+
+<template>
+    <div :class="color" class="flex items-center p-6 rounded-xl shadow-lg">
+
+        <div class="mr-4 flex-shrink-0">
+            <slot name="icon" />
+        </div>
+
+        <div>
+            <h3 class="text-xl font-bold text-white uppercase">{{ title }}</h3>
+            <p class="text-white opacity-90">{{ description }}</p>
+        </div>
+    </div>
+</template>
+
+¿Por qué esto lo arregla?
+
+    El Slot: La etiqueta <slot name="icon" /> es como un "puerto de entrada". Si no existe en el componente hijo, todo lo que mandes desde el Welcome.vue bajo el nombre #icon se pierde en el camino.
+
+    Propiedad de los Componentes: En Vue, una Página (Welcome.vue) recibe el Array de proyectos, pero el Componente (Project.vue) recibe las propiedades individuales de cada uno.
+
+Haz esta prueba rápida:
+Abre resources/js/Components/Project.vue y verifica si tiene la etiqueta <slot name="icon" />. Si no la tiene, agrégala, guarda el archivo y refresca el navegador. ¡Tus iconos deberían aparecer de inmediato!
+
+¿Me confirmas si ese archivo ya tiene el slot o si estaba vacío?
+You said
+
+ok ahora entiendo que si hay en juego otro componente en juego que no estaba yo visualizando:
+
+resources/js/Components/Project.vue
+
+<template>
+
+<section
+
+class="flex items-center px-44 py-4 justify-between border-b border-gray-500/30 hover:bg-gray-500/5 transition-colors"
+
+>
+
+<div
+
+:class="[color]"
+
+class="h-24 w-24 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+
+>
+
+<slot></slot>
+
+</div>
+
+
+<p class="text-xl font-extrabold mx-10 flex-1 leading-none uppercase">
+
+{{ title }}
+
+</p>
+
+
+<p
+
+class="text-xl mx-10 flex-1 leading-tight text-gray-400 font-light italic"
+
+>
+
+{{ description }}
+
+</p>
+
+</section>
+
+</template>
+
+
+<script setup>
+
+defineProps({
+
+title: String,
+
+description: String,
+
+color: String,
+
+});
+
+</script>
+Gemini said
+
+¡Bingo! Ahí estaba el detalle. Como bien sospechabas, había un tercer componente en juego y es precisamente este el que estaba "bloqueando" la vista de los iconos.
+El Diagnóstico Final
+
+En tu componente Project.vue, tienes definido un slot genérico: <slot></slot>.
+Pero en tu Welcome.vue, estás enviando el icono a un slot nombrado: <template #icon>.
+
+En Vue, si envías algo a #icon pero el componente hijo solo tiene un <slot> (sin nombre), Vue no sabe que debe ponerlo ahí y lo ignora.
+La Solución: Sincronizar los nombres
+
+Tienes dos opciones, pero te recomiendo la Opción A por ser más profesional y clara:
+Opción A: Nombrar el slot en Project.vue (Recomendado)
+
+Modifica tu archivo resources/js/Components/Project.vue así:
+HTML
+
+<template>
+    <section class="flex items-center px-44 py-4 justify-between border-b border-gray-500/30 hover:bg-gray-500/5 transition-colors">
+        <div
+            :class="[color]"
+            class="h-24 w-24 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+        >
+            <slot name="icon"></slot>
+        </div>
+
+        <p class="text-xl font-extrabold mx-10 flex-1 leading-none uppercase">
+            {{ title }}
+        </p>
+
+        <p class="text-xl mx-10 flex-1 leading-tight text-gray-400 font-light italic">
+            {{ description }}
+        </p>
+    </section>
+</template>
+
+Opción B: Usar el slot por defecto en Welcome.vue
+
+Si no quieres cambiar Project.vue, tendrías que cambiar Welcome.vue quitando el <template #icon> y dejando el contenido directo, pero es menos ordenado.
+¿Por qué la Opción A es mejor?
+
+Porque en el futuro, si quieres añadir otro slot (por ejemplo, para un botón de "Ver más" o una fecha), podrías tener <slot name="icon"> y <slot name="footer"> sin que se mezclen.
+Un pequeño consejo extra de diseño:
+
+En tu Project.vue, el contenedor del icono tiene un tamaño fijo (h-24 w-24). Para que los iconos se vean perfectos y centrados, asegúrate de que el componente que envías desde el Welcome tenga un tamaño acorde (como el h-10 w-10 o incluso h-12 w-12 que ya pusimos).
+
+Haz el cambio en Project.vue (añadir name="icon" al slot), guarda, y Ahora
+
+quedo:
+<template>
+    <section
+        class="flex items-center px-44 py-4 justify-between border-b border-gray-500/30 hover:bg-gray-500/5 transition-colors"
+    >
+        <div
+            :class="[color]"
+            class="h-24 w-24 rounded-2xl flex items-center justify-center shrink-0 shadow-lg"
+        >
+            <slot name="icon" />
+        </div>
+
+        <p class="text-xl font-extrabold mx-10 flex-1 leading-none uppercase">
+            {{ title }}
+        </p>
+
+        <p
+            class="text-xl mx-10 flex-1 leading-tight text-gray-400 font-light italic"
+        >
+            {{ description }}
+        </p>
+    </section>
+</template>
+
+basicamente el cambio ocurrio aca:
+
+<slot name="icon" />
+
+y ahora para los ajustes finales en la vista del componente tenemos el siguiente cambio:
+
+Cambia esto:
+HTML
+
+<template #icon>
+    <div class="flex-shrink-0 mr-4 w-12 h-12 flex items-center justify-center"> <component
+            :is="getIcon(project.icon_name)"
+            class="h-10 w-10 text-white"
+        />
+    </div>
+</template>
+
+Por esto (Versión corregida):
+HTML
+
+<template #icon>
+    <component
+        :is="getIcon(project.icon_name)"
+        class="h-14 w-14 text-white"
+    />
+</template>
+
+
+ Gemini said
+
+El ajuste no es en el archivo que me acabas de mostrar (Project.vue). Ese componente ya está perfecto porque tiene las clases flex items-center justify-center que se encargan de centrar lo que pongas dentro.
+
+El ajuste debe ir en resources/js/Pages/Welcome.vue, que es donde estás "enviando" el icono hacia ese cuadro.
+El ajuste en Welcome.vue
+
+Busca la sección de Projects dentro de tu Welcome.vue. Actualmente debes tener un div con mr-4 envolviendo al icono. Quita ese div para que el icono se entregue "limpio" y el cuadro de color lo pueda centrar.
+
+Cambia esto:
+HTML
+
+<template #icon>
+    <div class="flex-shrink-0 mr-4 w-12 h-12 flex items-center justify-center"> <component
+            :is="getIcon(project.icon_name)"
+            class="h-10 w-10 text-white"
+        />
+    </div>
+</template>
+
+Por esto (Versión corregida):
+HTML
+
+<template #icon>
+    <component
+        :is="getIcon(project.icon_name)"
+        class="h-14 w-14 text-white"
+    />
+</template>
+
+¿Por qué esto soluciona el desplazamiento?
+
+Al quitar el div con mr-4 (margen derecho), eliminas la "fuerza" que empujaba el icono hacia la izquierda. Ahora, como el icono llega solo, el contenedor h-24 w-24 de tu Project.vue puede usar sus propiedades de centrado correctamente.
+Resumen de la lógica:
+
+    Project.vue: Es el "marco" que centra las cosas.
+
+    Welcome.vue: Es el que le da el "contenido" al marco. Si el contenido trae márgenes extra (como el mr-4), el marco no podrá centrarlo bien.

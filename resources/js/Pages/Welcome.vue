@@ -117,14 +117,23 @@ const props = defineProps({
     projects: Array,
 });
 
-// 2. Convertimos el antiguo "method" en una función normal
-// Nota: En script setup no usamos "this", usamos la constante "props"
+//El codigo de abajo se modifica a esto
 const getIcon = (iconName) => {
-    // Si iconName es "Beaker", buscamos "BeakerIcon" en el objeto SolidIcons
-    const name = `${iconName || "QuestionMarkCircle"}Icon`; // Agregamos un fallback inicial
-    return SolidIcons[name] || SolidIcons.QuestionMarkCircleIcon; // Icono por defecto si no existe
+    // Heroicons en @heroicons/vue vienen como "AcademicCapIcon"
+    // Si en tu BD guardas "AcademicCap", esto lo convierte correctamente
+    const name = `${iconName || "Briefcase"}Icon`;
+    return SolidIcons[name] || SolidIcons.BriefcaseIcon; // Fallback a un maletín
 };
 
+// 2. Convertimos el antiguo "method" en una función normal
+// Nota: En script setup no usamos "this", usamos la constante "props"
+// const getIcon = (iconName) => {
+//     // Si iconName es "Beaker", buscamos "BeakerIcon" en el objeto SolidIcons
+//     const name = `${iconName || "QuestionMarkCircle"}Icon`; // Agregamos un fallback inicial
+//     return SolidIcons[name] || SolidIcons.QuestionMarkCircleIcon; // Icono por defecto si no existe
+// };
+
+// Nos asegurams de tener este array para los colores de respaldo si el proyecto no tiene uno definido
 const projectColors = [
     "bg-red-500",
     "bg-blue-500",
@@ -262,18 +271,17 @@ const getIconText = (title) => {
                 <Project
                     :title="project.title"
                     :description="project.description"
-                    :color="project.color"
+                    :color="
+                        project.color ||
+                        projectColors[index % projectColors.length]
+                    "
                 >
-                    <!-- <span class="text-3xl font-black text-white">
-                    {{ getIconText(project.title) }}
-                </span> -->
-                    <!-- <BeakerIcon></BeakerIcon> -->
-                    <component
-                        :is="getIcon(project.icon_name)"
-                        class="h-8 w-8 text-white"
-                    />
-
-                    <!-- <span class="ml-2">{{ project.title }}</span> -->
+                    <template #icon>
+                        <component
+                            :is="getIcon(project.icon_name)"
+                            class="h-14 w-14 text-white"
+                        />
+                    </template>
                 </Project>
             </div>
         </div>
