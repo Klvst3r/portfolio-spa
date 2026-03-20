@@ -24,6 +24,11 @@ class Skill extends Model
         $path = resource_path('resources/json/customization.json');
         //$path = resource_path('json/customization.json');
 
+        //Agregamos eso por si no pueden cargarse los colores de fondo
+        if (!File::exists($path)) {
+            return ['bg-gray-500']; // Fallback por si el archivo no existe
+        }
+
         $elements = json_decode(
             File::get($path) //se carrga tamnien la funcionalidad de Skill con los colres de fondo y de texto
         );
