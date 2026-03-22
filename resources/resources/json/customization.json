@@ -21,13 +21,22 @@
     "icons": [
         "AcademicCap",
         "BookOpen",
+        "Briefcase",
+        "ChartBar",     
         "ChartPie",
         "Chat",
         "Chip",
+        "Cog6Tooth",    
         "Cube",
         "CurrencyDollar",
+        "LightBulb",
         "Database",
         "LockClosed",
-        "Terminal"
+        "RocketLaunch", 
+        "ShieldCheck",  
+        "Terminal",
+        "Users"
     ]
 }
+
+ 

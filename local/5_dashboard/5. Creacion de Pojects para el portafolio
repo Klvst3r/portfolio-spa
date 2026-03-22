@@ -126,3 +126,595 @@ Ahora si en la parte de dashboard, se puede ver que escencialmente es lo mismo
   Hacemos la prueba de registro para veriricar que magicamente aparece y esto es todo para crear skills y crear projects y ya solo queda faltante la parte de editar y eliminar, para skill y para project.
 
   
+
+  ------------------
+
+  Ajustes
+
+  para los iconos tengo:
+const availableIcons = [
+    "fas fa-briefcase",
+    "fas fa-chart-line",
+    "fas fa-cogs",
+    "fas fa-users",
+    "fas fa-lightbulb",
+    "fas fa-rocket",
+    "fas fa-shield-alt",
+];
+pero quiero usar Heroicons
+
+
+Usar Heroicons es mucho más limpio en un entorno Vue 3 porque se manejan como componentes de Vue, eliminando la necesidad de cargar librerías externas de CSS como FontAwesome.
+
+Para que esto funcione correctamente, debemos cambiar las cadenas de texto de FontAwesome por los nombres exactos de los componentes de Heroicons que importaste con SolidIcons.
+
+Aquí tienes la configuración corregida:
+1. Actualiza el arreglo de Iconos
+
+Sustituye los nombres de FontAwesome por los nombres de los componentes de Heroicons (en formato PascalCase, sin la palabra "Icon" al final, ya que tu función getIcon se encarga de agregarla).
+JavaScript
+
+// Opciones para el Select de iconos (Nombres de Heroicons)
+const availableIcons = [
+    "Briefcase",
+    "ChartBar",      // Reemplaza a chart-line
+    "Cog6Tooth",     // Reemplaza a cogs
+    "Users",
+    "LightBulb",
+    "RocketLaunch",  // Reemplaza a rocket
+    "ShieldCheck",   // Reemplaza a shield-alt
+];
+
+2. Ajusta la lógica del getIcon
+
+Tu función actual ya está bien encaminada, solo asegúrate de que coincida con la importación masiva que hiciste:
+JavaScript
+
+const getIcon = (iconName) => {
+    // Si iconName es "Briefcase", busca "BriefcaseIcon" en el objeto SolidIcons
+    const name = `${iconName}Icon`;
+    return SolidIcons[name] || SolidIcons.QuestionMarkCircleIcon; // Icono por defecto si falla
+};
+
+3. Limpia el Template (Select y Tabla)
+
+En el <select>, ya no necesitas aplicar .replace("fas fa-", "") porque ahora las strings son limpias.
+
+En el Modal (Select):
+HTML
+
+<select
+    id="icon_name"
+    v-model="form.icon_name"
+    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+>
+    <option value="" disabled>Selecciona un icono</option>
+    <option
+        v-for="icon in availableIcons"
+        :key="icon"
+        :value="icon"
+    >
+        {{ icon }} </option>
+</select>
+
+En la Tabla (Visualización):
+El componente dinámico <component :is="..." /> que ya tienes es la forma correcta de renderizar Heroicons. Solo asegúrate de que el color se aplique bien:
+HTML
+
+<td class="px-6 py-4">
+    <component
+        :is="getIcon(project.icon_name)"
+        class="h-6 w-6"
+        :class="project.color ? project.color.replace('bg-', 'text-') : 'text-gray-500'"
+    />
+</td>
+
+¿Qué cambió?
+
+    Rendimiento: Ya no dependes de clases globales de CSS; Vue solo renderiza el SVG necesario.
+
+    Consistencia: Al usar project.color.replace('bg-', 'text-'), el icono siempre tendrá el mismo tono que el fondo que elegiste para el proyecto, pero en versión texto.
+
+Nota importante: Si al guardar el formulario ves que el icono no aparece en la tabla, revisa en la base de datos que la columna icon_name guarde el nombre nuevo (ej: RocketLaunch) y no el viejo (fas fa-rocket).
+
+
+Teemos entonces nuestro codigo corregido del template
+
+<template>
+    <app-layout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Projects
+            </h2>
+        </template>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="text-right mb-6">
+                    <JetButton
+                        class="p-3 border-2 border-blue-500 text-blue-500 bg-blue-100 hover:bg-blue-200 font-bold ml-2 rounded-xl"
+                        @click="acting = true"
+                    >
+                        Add New +
+                    </JetButton>
+                </div>
+
+                <Modal :show="acting !== null" @close="closeModal">
+                    <div class="p-10 text-center">
+                        <form @submit.prevent="submit" class="p-6">
+                            <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 text-center">
+                                Crear Nuevo Proyecto
+                            </h2>
+
+                            <div class="mt-6 text-left">
+                                <InputLabel for="title" value="Nombre del proyecto" />
+                                <TextInput id="title" type="text" v-model="form.title" class="mt-1 block w-full" placeholder="Ej: Mi Portafolio..." />
+                                <InputError :message="form.errors.title" class="mt-2" />
+                            </div>
+
+                            <div class="mt-6 text-left">
+                                <InputLabel for="description" value="Descripción del proyecto" />
+                                <TextInput id="description" type="text" v-model="form.description" class="mt-1 block w-full" placeholder="Ej: Aplicación SPA con Vue..." />
+                                <InputError :message="form.errors.description" class="mt-2" />
+                            </div>
+
+                            <div class="mt-4 text-left">
+                                <InputLabel for="color" value="Color de Identificación" />
+                                <select id="color" v-model="form.color" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="" disabled>Selecciona un color</option>
+                                    <option v-for="color in availableColors" :key="color" :value="color">
+                                        {{ color.replace("bg-", "").replace("-500", "") }}
+                                    </option>
+                                </select>
+                                <InputError :message="form.errors.color" class="mt-2" />
+                            </div>
+
+                            <div class="mt-4 text-left">
+                                <InputLabel for="icon_name" value="Icono de Identificación" />
+                                <select id="icon_name" v-model="form.icon_name" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="" disabled>Selecciona un icono</option>
+                                    <option v-for="icon in availableIcons" :key="icon" :value="icon">{{ icon }}</option>
+                                </select>
+                                <InputError :message="form.errors.icon_name" class="mt-2" />
+                            </div>
+
+                            <div class="mt-8 flex justify-end">
+                                <SecondaryButton type="button" @click="closeModal">Cancelar</SecondaryButton>
+                                <PrimaryButton type="submit" class="ml-3" :class="{ 'opacity-50': form.processing }" :disabled="form.processing">
+                                    {{ form.processing ? "Enviando..." : "Enviar" }}
+                                </PrimaryButton>
+                            </div>
+                        </form>
+                    </div>
+                </Modal>
+
+                <div v-if="projects.length > 0" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <table class="w-full">
+                        <thead class="border-b-2 border-gray-300 text-indigo-600 bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left font-bold uppercase text-xs">Title</th>
+                                <th class="px-6 py-3 text-left font-bold uppercase text-xs">Description</th>
+                                <th class="px-6 py-3 text-left font-bold uppercase text-xs">Color</th>
+                                <th class="px-6 py-3 text-left font-bold uppercase text-xs">Icon</th>
+                                <th class="px-6 py-3 text-center font-bold uppercase text-xs">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="project in projects" :key="project.id" class="text-sm text-indigo-900 border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                                <td class="px-6 py-4 text-left font-medium">{{ project.title }}</td>
+                                <td class="px-6 py-4 text-left text-gray-600">{{ project.description }}</td>
+                                <td class="px-6 py-4 text-left">
+                                    <div class="flex items-center">
+                                        <span class="mr-3 h-5 w-5 rounded-full border border-gray-200 shadow-sm" :class="project.color"></span>
+                                        <span class="text-xs font-mono text-gray-600">{{ project.color }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-left">
+                                    <component :is="getIcon(project.icon_name)" class="h-6 w-6" :class="project.color ? project.color.replace('bg-', 'text-') : 'text-gray-500'" />
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex justify-center space-x-2">
+                                        <JetButton class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1 text-xs">Edit</JetButton>
+                                        <JetButton class="bg-red-600 text-white hover:bg-red-700 px-3 py-1 text-xs">Delete</JetButton>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div v-else class="bg-red-100 border border-red-400 p-3 rounded-lg text-red-800 text-center">
+                    There are no projects yet. Let's create one :)
+                </div>
+            </div>
+        </div>
+    </app-layout>
+</template> 
+
+
+¿Qué corregimos?
+
+    Jerarquía de DIVs: Eliminé los div adicionales que estaban sobrando y cerré correctamente el contenedor principal max-w-7xl.
+
+    Separación del Botón: Coloqué el botón dentro de un div con mb-6. Esto empuja la tabla hacia abajo, creando ese espacio de aire que necesitabas.
+
+    Doble Texto de Color: Eliminé el {{ project.color }} que estaba suelto fuera del div.flex, para que solo se vea una vez al lado del círculo de color.
+
+    Limpieza de Estilo: Envolví la tabla en un div con bg-white y shadow-sm para que se vea más integrada al diseño de Jetstream.
+
+
+Preview
+-------------
+
+El Preview es de esas cosas que hacen que una interfaz pase de ser "una herramienta" a ser "una experiencia". Ayuda mucho al usuario a no tener que adivinar cómo se ve el color o el icono que eligió.
+
+Para implementarlo, vamos a insertar un bloque de código justo antes de los botones de acción en tu formulario (dentro del modal).
+1. El Bloque del Preview
+
+Busca en tu código donde termina el último select (el de iconos) y, justo antes del div que contiene los botones "Cancelar" y "Enviar", pega este fragmento:
+HTML
+
+<div class="mt-8 p-6 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 text-left">
+        Vista previa de la tarjeta:
+    </p>
+    
+    <div class="flex items-center p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+        <div 
+            class="p-4 rounded-full shadow-md transition-all duration-500 ease-in-out transform hover:scale-110"
+            :class="form.color || 'bg-gray-200'"
+        >
+            <component 
+                :is="getIcon(form.icon_name)" 
+                class="h-8 w-8 text-white" 
+            />
+        </div>
+
+        <div class="ml-5 text-left flex-1">
+            <h4 class="text-lg font-extrabold text-gray-900 leading-tight truncate">
+                {{ form.title || 'Título del Proyecto' }}
+            </h4>
+            <p class="text-sm text-gray-500 line-clamp-2 mt-1">
+                {{ form.description || 'Aquí aparecerá la descripción detallada de tu gran idea...' }}
+            </p>
+        </div>
+    </div>
+</div>
+
+2. ¿Por qué esto es genial?
+
+    Reactividad Pura: Como el form es un objeto creado con useForm, cualquier letra que escribas en el TextInput o cualquier opción que cambies en los select se reflejará instantáneamente en este recuadro.
+
+    Diseño "Card": He usado un estilo de tarjeta con bordes redondeados y sombras suaves para que el usuario sienta que ya está viendo el resultado final.
+
+    Transiciones: Añadí transition-all duration-500 al círculo del icono. Cuando el usuario cambie de color en el selector, el color del círculo en el preview cambiará con una transición suave en lugar de un salto brusco.
+
+3. Un pequeño toque Pro en los Selectores
+
+Para que el usuario identifique mejor los colores en el selector, puedes añadir un pequeño punto de color al lado del nombre en las opciones del select:
+HTML
+
+<option v-for="color in availableColors" :key="color" :value="color">
+    {{ color.replace("bg-", "").replace("-500", "").toUpperCase() }}
+</option>
+
+Y para los iconos, como mencionamos antes, podemos limpiar el nombre para que no se vea "pegado":
+HTML
+
+<option v-for="icon in availableIcons" :key="icon" :value="icon">
+    {{ icon.replace(/([A-Z])/g, ' $1').trim() }}
+</option>
+
+¿Qué sigue?
+
+Prueba abriendo el modal y empieza a escribir. Deberías ver cómo la "tarjeta" del preview cobra vida.
+
+
+Cnotrolador metodo store.
+---
+El Frontend ya está listo y es reactivo, pero ahora necesitamos que el Backend (Laravel) reciba esos datos, los valide y los guarde en la base de datos para que persistan.
+
+Como estás usando Inertia, el controlador debe responder con una redirección para que Inertia refresque los props de la página automáticamente sin recargar todo el navegador.
+
+Pásame tu propuesta del ProjectController. Mientras tanto, aquí te dejo los puntos clave que debería tener para que sea compatible con lo que ya construimos en Vue:
+Lo que revisaremos en tu controlador:
+
+    Validación: Que los nombres de los campos coincidan con el useForm de Vue (title, description, color, icon_name).
+
+    Asignación Masiva: Que el modelo Project tenga el array $fillable configurado.
+
+    Redirección: Que al terminar de guardar, use redirect()->route('projects.index') (o el nombre de tu ruta).
+
+    Mensajes Flash: Opcionalmente, que envíe un mensaje de éxito para que Inertia lo muestre.
+
+Ejemplo de cómo debería verse la estructura base:
+PHP
+
+// ProjectController.php
+
+public function store(Request $request)
+{
+    // 1. Validar
+    $validados = $request->validate([
+        'title'       => 'required|string|max:255',
+        'description' => 'required|string',
+        'color'       => 'required|string',
+        'icon_name'   => 'required|string',
+    ]);
+
+    // 2. Crear (Asegúrate de tener $fillable en el modelo Project)
+    Project::create($validados);
+
+    // 3. Redirigir (Inertia detectará esto y refrescará la tabla)
+    return redirect()->route('projects.index')->with('message', 'Proyecto creado con éxito');
+}
+
+Espero tu código para revisarlo a fondo. También, si quieres, podemos verificar de una vez tu archivo de rutas web.php para asegurar que el route('projects.store') esté bien definido.
+
+
+
+Primero tomamos como base el metodo store de skills
+
+public function store(Request $request)
+    {
+        // Almacenamos los colores válidos para usarlos en la validación
+        $availableColors = Skill::getAvailableBackgroundColors();
+
+        $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(Skill::class)
+            ],
+            'color' => [
+                'required',
+                'string',
+                'in:' . implode(',', $availableColors),
+            ],
+        ]);
+
+        Skill::create($request->all());
+
+        // Inertia necesita una redirección para actualizar los props en el frontend
+        return Redirect::route('skills.index');
+    }
+
+
+
+
+    Finalemnte nuestro controlador de Prjects quedo asi:
+
+    <?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Project;
+
+use Illuminate\Http\Request;
+
+use Inertia\Inertia;
+
+use Illuminate\Validation\Rule;
+
+use Illuminate\Support\Facades\Redirect;
+
+class ProjectController extends Controller
+{
+    public function index()
+    {
+        return Inertia::render('Projects/All', [
+            'projects' => Project::all(),
+            'availableColors' => Project::getAvailableTextColors(),
+            'availableIcons' => Project::getAvailableIcons(),
+        ]);
+    }
+
+
+    public function store(Request $request)
+    {
+        // Almacenamos los colores válidos para usarlos en la validación
+        $availableColors = Project::getAvailableTextColors();
+        $availableIcons = Project::getAvailableIcons();
+
+        $request->validate([
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(Project::class)
+            ],
+            'description' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+
+            'color' => [
+                'required',
+                'string',
+                'in:' . implode(',', $availableColors),
+            ],
+            'icon' => [
+                'required',
+                'string',
+                'in:' . implode(',', $availableIcons),
+            ],
+        ]);
+
+        Project::create($request->all());
+
+        // Inertia necesita una redirección para actualizar los props en el frontend
+        return Redirect::route('projects.index');
+    }
+}
+
+
+Hasta este punto ya podemos crear Skills y Projects, nos falta editar y eliminar.
+
+Reutilizaremos el formulario y haremos tanto pra skills como para project.
+
+
+
+Correccion de validaciones:
+--------------------------
+
+
+El error de validación es un clásico de "desconexión" entre lo que envía el frontend y lo que espera el backend. El culpable principal es el nombre del campo del icono.
+
+Aquí están los puntos exactos donde tu validación está fallando:
+1. El error del nombre del campo (icon vs icon_name)
+
+En tu componente Vue definiste el formulario así:
+icon_name: ""
+
+Pero en tu controlador Laravel estás validando:
+'icon' => [...]
+
+Laravel nunca recibe un campo llamado icon, por lo tanto, la validación falla indicando que el campo "icon" es requerido.
+2. Sincronización con los métodos del Modelo
+
+Estás usando Project::getAvailableIcons() y Project::getAvailableTextColors(). Para que la validación pase, el array que devuelven esos métodos en el Modelo debe ser exactamente igual al que tienes escrito manualmente en tu archivo Vue.
+La Solución: Controlador Corregido
+
+Modifica tu método store para que coincida con los nombres de tu objeto form de Vue:
+PHP
+
+public function store(Request $request)
+{
+    $availableColors = Project::getAvailableTextColors();
+    $availableIcons = Project::getAvailableIcons();
+
+    $request->validate([
+        'title' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique(Project::class)
+        ],
+        'description' => [
+            'required',
+            'string',
+            'max:255',
+        ],
+        'color' => [
+            'required',
+            'string',
+            'in:' . implode(',', $availableColors),
+        ],
+        // CAMBIO AQUÍ: Debe ser 'icon_name' para coincidir con Vue
+        'icon_name' => [
+            'required',
+            'string',
+            'in:' . implode(',', $availableIcons),
+        ],
+    ]);
+
+    // Usar solo los datos validados es más seguro que $request->all()
+    Project::create($request->only(['title', 'description', 'color', 'icon_name']));
+
+    return Redirect::route('projects.index');
+}
+
+3. Verificación en el Modelo Project
+
+Asegúrate de que en tu archivo app/Models/Project.php tengas estos métodos devolviendo los valores actualizados (los de Heroicons y los colores que definimos):
+PHP
+
+public static function getAvailableTextColors()
+{
+    return [
+        "bg-red-500", "bg-blue-500", "bg-green-500", 
+        "bg-yellow-500", "bg-indigo-500", "bg-purple-500", "bg-pink-500"
+    ];
+}
+
+public static function getAvailableIcons()
+{
+    return [
+        "Briefcase", "ChartBar", "Cog6Tooth", 
+        "Users", "LightBulb", "RocketLaunch", "ShieldCheck"
+    ];
+}
+
+¿Por qué esto es mejor?
+
+Al centralizar los arrays en el Modelo, puedes usarlos en el controlador para validar y también podrías pasarlos al componente Vue desde el método index para no tener los arrays escritos a mano en dos lugares (evitando que si cambias un color en el backend se te olvide cambiarlo en el frontend).
+
+¿Quieres que te muestre cómo pasar esos arrays desde el controlador a Vue para que siempre estén sincronizados automáticamente? Sería un paso genial para tu aprendizaje de arquitectura limpia.
+
+
+ Gemini said
+
+¡Buenísimo! Tener un archivo customization.json es una estrategia excelente para mantener la consistencia. Sin embargo, aquí es donde está el "choque" que está causando el error de validación:
+
+En tu Vue, tienes escritos los colores e iconos "a mano" (hardcoded), y en tu Modelo, los lees desde el JSON. Si en el JSON dice "Terminal" y en tu Vue escribiste "Briefcase", la validación de Laravel dirá: "Oye, Briefcase no está en la lista permitida (el JSON)".
+
+Para solucionar esto de forma profesional y que nunca más tengas que actualizar dos archivos, vamos a hacer que el Controlador le pase las opciones del JSON a Vue.
+1. Ajuste en el Controlador (index)
+
+Modifica el método index para enviar los datos reales del JSON a la vista:
+PHP
+
+public function index()
+{
+    return Inertia::render('Projects/All', [
+        'projects' => Project::all(),
+        // Pasamos las opciones reales del JSON a Vue
+        'availableColors' => Project::getAvailableTextColors(),
+        'availableIcons' => Project::getAvailableIcons(),
+    ]);
+}
+
+2. Ajuste en el Frontend (All.vue)
+
+Ahora, en tu componente Vue, vamos a dejar de usar esos arrays escritos a mano y usaremos los que llegan por props.
+
+En el <script setup>:
+JavaScript
+
+const props = defineProps({
+    projects: Array,
+    availableColors: Array, // <--- Recibimos desde el controlador
+    availableIcons: Array,  // <--- Recibimos desde el controlador
+});
+
+// BORRA los arrays "const availableColors = [...]" y "const availableIcons = [...]" 
+// que tenías antes en el script, ya no los necesitas.
+
+En el <template> (los selectores):
+Solo asegúrate de que el v-for apunte a las props:
+HTML
+
+<select v-model="form.color" ...>
+    <option v-for="color in availableColors" :key="color" :value="color">
+        {{ color.replace("bg-", "").replace("-500", "").toUpperCase() }}
+    </option>
+</select>
+
+<select v-model="form.icon_name" ...>
+    <option v-for="icon in availableIcons" :key="icon" :value="icon">
+        {{ icon }}
+    </option>
+</select>
+
+3. El error de la ruta del archivo (Importante)
+
+He notado un detalle técnico en tu modelo. Estás usando:
+File::get(resource_path('resources/json/customization.json'))
+
+La función resource_path() ya te ubica dentro de la carpeta resources/. Por lo tanto, si tu archivo está en resources/json/customization.json, la ruta correcta debería ser:
+resource_path('json/customization.json')
+
+    Nota: Revisa si la carpeta es resources/resources/json/ o simplemente resources/json/. Si es la estándar de Laravel, quita un "resources" de la ruta en el modelo.
+
+Resumen de por qué fallaba:
+
+    Nombre del campo: En Vue mandabas icon_name y en el controlador validabas icon.
+
+    Diferencia de datos: Tu JSON tiene iconos como "AcademicCap", "Terminal", etc. Si en el formulario de Vue intentabas mandar "Briefcase" (que no está en tu JSON), la regla 'in:' . implode(',', $availableIcons) rechazaba la petición.
+
+
+
+
+concluimos el Registro de Proyectos.
