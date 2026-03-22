@@ -1,0 +1,128 @@
+Siguiendo con el tema de creación de caracteristicas y capacidades dentro del panel de adminisración en este caso es crear un proyecto para el portafolio, 
+
+Antes habia quedado pendiente, el detalle del que todo quede a la derecha en el list de skills es el div que encierra a la tabla, esto se soluciona indicandole a nuestra tabla que el texto en su interior debe alinearse a la izquierda, asi que se pone
+
+en el componente de la tabla
+text-left
+
+Esto logra que se vea alineado y estetico, 
+
+Ahora si en la parte de dashboard, se puede ver que escencialmente es lo mismo
+
+1. Activar un boton que activa un formulario
+2. Elformulario envia la peticion al backend que lo valida
+3. Lo crea y retorna una respuesta para despues redireccionar.
+
+
+ Tomando entonces como ejemplo el botno de skills, para tomar la parte del boton y la parte del modal
+
+ Esto se pasa a la parte de projects/all
+
+ y justamente debajo de este div antes de que comience la tabla, vamos a poner todos los componentes
+
+ podremos incluso poner text-right para que el boton aparezca a la derecha y para que la tabla no se dañe vamos a poner 
+
+ text-left
+
+ Pegando el contenido, vamos a tener que adapatarlo.
+
+ Para este caso vamos a tener que crear un nuevo elemento 
+
+ Parece bastante bien 
+
+ la etiqueta 
+
+ Add New +
+
+ Para skill o porject al mismo caso para acting lo mismo para el submit pero ahora en el interior tenemos una serie de cosas, vamos a tener
+ Project title
+
+ replicando esta parte para el segundo campo que es description
+
+ Y para este caso tenemos dos select
+ - uno que va a contener la lista de colores para el texto
+ - un select para la lista de iconos
+
+ Asi que iran un select para form.icon_name y por supuesto de manera equivalente tendremos select Icon, para tener 
+
+ v-for="icon in availableIcons :value="icon" de manera similar se tendra  con
+ {{ icon }}
+
+
+ Hasta aca estamos perfecto, no olvidando la seccion de errores para icon que s lo que se esta modelando en este caso 
+
+ form.errors.icon_name
+
+ y mosrara que esta cargando y simplemente  hara el submit.
+
+ Ahora bien, necesitamos tambien la lista de metodos, escencialmente para el metodo sbmit con la lista de propiedades de colores y de la lista de icons
+
+ y por supuesto los componentes del modal, del input y del inputerror.
+
+ Se copian de skills para no tener que escribir todo de nuevo tomando las partes de jetbutton, jetinput jetinputerror y jetmodal
+
+ POara utilizar cada uno de ellso en la lista, asegurandonos de poner las comas al final y en lap erte de metud tensdemos el submit 
+
+ Asiq eu solamente se va a enadenar despues de componentesName, se tiene ahi y por supuesto esto se enviaria a una peticion de tipo post pero esta vez no  a skills sino a projects.store y vamos a restablecer el title, el description, y el accting lo dejamos en null, pudiendo restablecer para null para icon_name que es justamente lo que tebnemos en el formulario.
+
+ Ahora en el cso de data se va a agregar la informciuón relacionada con este acting
+
+ Esto se hacia con option api, pero ahora se omite con composition api en la parte de scripts pero arranca con null y entonces vamos a tener que tiene un title, un derscription, un color, y un icon_name.
+
+
+ eso es todo el atributo que estamos modelando en el formulario que es justamente lo que estamos restableciendo para que se recorra con una serie de colores, que tenemos con abailable colors, pero ademas de tener los colores diponibles  tambien se tiene la lista de icons
+
+ por ello se tienen disponibles para poder refgrescar nuevamente en la tabla del listado de proyectos veremos el boton de agregar y al pulsarlo se debe mostrar el modal de registro, con select color y sleect icon.
+
+ Hasta aaca no tenemos la iformación. Se tiene un pequeño detalle ya que al parecer un pequeño problema de espaciado.
+
+ Modificamos los margenes, en el formulario donde se tienen el input para el description para ponerselos a description mt-5 para asegurarnos de enviar la informaciuón.
+
+
+ Controlador.
+
+ Vamos ahor a ir a nuestro controlador para enviar la información que requerimos y entonces con la finalidad de que con el modal puedamos crear la información del proyecto.
+
+ Ya en controllers y tomando como referencia de skills, se copia el metodo store, se pone en projectController y lo mismo que con skillcontroller necesitamos tambien la lista de getabailableBackgoundColors pero para obtener la lista de colores tiene un nombre diferente.
+
+ Entonces vamos aprojects
+
+ abailablecolors => Project::getabailableTextColors y replkicamos para
+  availableIcons => Project::getavailableIcons(),
+
+
+  Ya estariamos a enviar la información y con esto podemos ir a la validación
+
+  validación
+  ------------
+
+
+  Tenemos un title que es requerido y que tiene un maximo de 255 caracteres, tiene que ser unico y en esta ocación en la clase de proyect.
+
+  Finalmente tambien tenemos que ademas de una validación de title tenemos un description
+
+  que tambien es requerido con un maxico de 255 caracteres que no es precismante unicao.
+
+  Luego para los select de color ademas de este vamos a tener un iconName
+
+  El color tiene que ser requerido y tiene que estar dentro del campo de valores que 
+
+  Todo biene de la clase Projects por lo que hay qeu definir la importación de Project en casod e que no se tenga y por supuesto el icon_name que nuevamente es requerido ero en este caso la serien de valores provienede de 
+
+  getavailableicons()
+
+
+  Entonces ya con todas las reglas de validación lo que resta es crear el proyecto con información que ya se ha validado y simpl,emnte se lleva una redirección a proyect .index
+
+  con esto hemos reutilizado perfectamente la seriend e contenido que tenismoas desde skill y por supuesto vamos a tener que adapatarlo para projects, entocnes verificando que todo este bien con el modal y con las regla de validación 
+
+  Puede que genere error por que se pudo haber olvidado como se hizo con la definición de rule de skill directamente desde
+  illuminate\Validation\Rule. Para que puiedamos intentar de nuevo
+
+  Verificamos la funcionalidad de la validación y se obteien las reglas de validación, llenamos el modal, como quetenos $currencyDollar se hace submit yjustamente tendfemos nuestro registro funcionando.
+
+  Con esto se ha resuleto dinamicamente todo automaticamnte disponible.
+
+  Hacemos la prueba de registro para veriricar que magicamente aparece y esto es todo para crear skills y crear projects y ya solo queda faltante la parte de editar y eliminar, para skill y para project.
+
+  
