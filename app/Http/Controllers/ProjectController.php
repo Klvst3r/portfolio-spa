@@ -60,7 +60,49 @@ class ProjectController extends Controller
         // Usar solo los datos validados es más seguro que $request->all()
         Project::create($request->only(['title', 'description', 'color', 'icon_name']));
 
-        // Inertia necesita una redirección para actualizar los props en el frontend
-        return Redirect::route('projects.index');
+        // Inertia necesita una redirección para actualizar los props en el frontend, anterior sin mensaje para el usuario
+        //return Redirect::route('projects.index');
+
+        //Redirección con mensaje de exito
+        return redirect()->route('projects.index')
+            ->with('success', 'Proyecto creado con éxito');
+    }
+
+
+
+    public function update(Request $request, Project $project)
+    {
+        // Obtenemos los valores válidos desde el modelo, llamamos a los métodos exactos de nuestro modelo para obtener los valores permitidos
+        $availableColors = Project::getAvailableTextColors();
+        $availableIcons = Project::getAvailableIcons();
+
+        $request->validate([
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(Project::class)->ignore($project->id)
+            ],
+            'description' => 'required|string',
+            'color' => [
+                'required',
+                'string',
+                'in:' . implode(',', $availableColors), // Valida contra backgrounds del JSON
+            ],
+            'icon_name' => [
+                'required',
+                'string',
+                'in:' . implode(',', $availableIcons), // Valida contra icons del JSON
+            ],
+        ]);
+
+        $project->update($request->only('title', 'description', 'color', 'icon_name'));
+
+        //Redirección con mensaje de exito
+        // return redirect()->route('projects.index')
+        //     ->with('message', 'Proyecto actualizado con éxito');
+        // Usamos 'success' para que coincida con tu Middleware HandleInertiaRequests
+        return redirect()->route('projects.index')
+            ->with('success', 'Proyecto actualizado con éxito');
     }
 }
