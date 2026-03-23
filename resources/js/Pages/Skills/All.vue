@@ -17,10 +17,8 @@ defineProps({
     skills: Array,
 });
 
-
 // Estado para controlar el Modal (reemplaza a acting en data)
 //const acting = ref(null);
-
 
 //// Ajustes para Editar y Crear en el mismo modal
 
@@ -34,25 +32,23 @@ const form = useForm({
 });
 
 // 2. Definimos variables para el método y la ruta dinámicos
-const method = ref('post');
-const action = ref(route('skills.store'));
-
+const method = ref("post");
+const action = ref(route("skills.store"));
 
 // 3. Función para preparar el modal de creación
 const openCreateModal = () => {
     acting.value = true;
-    method.value = 'post';
-    action.value = route('skills.store');
+    method.value = "post";
+    action.value = route("skills.store");
     form.reset();
 };
-
 
 // 4. Función para preparar el modal de edición
 const openEditModal = (skill) => {
     acting.value = skill; // Guardamos el objeto skill actual
-    method.value = 'put';
-    action.value = route('skills.update', skill.id);
-    
+    method.value = "put";
+    action.value = route("skills.update", skill.id);
+
     // Llenamos el formulario con los datos existentes
     form.name = skill.name;
     form.color = skill.color;
@@ -65,8 +61,6 @@ const submit = () => {
     });
 };
 
-
-
 // Opciones para el Select
 const availableColors = [
     "bg-red-500",
@@ -78,13 +72,19 @@ const availableColors = [
     "bg-pink-500",
 ];
 
-
 //Despues del paso 5 implementamos cerrar modal y resetear el form en una función aparte para evitar repetir código tanto en creación como en edición
 // Función para cerrar el modal y resetear el form
 const closeModal = () => {
     acting.value = null; // Cierra el modal
     form.reset(); // Limpia los campos del formulario
     form.clearErrors(); // Quita los mensajes de error rojos
+};
+
+//6. Confirmar eliminación:
+const confirmarEliminacion = (e) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar este elemento?")) {
+        e.preventDefault();
+    }
 };
 
 // Función de envío (Submit)
@@ -126,7 +126,11 @@ const closeModal = () => {
                             <h2
                                 class="text-2xl font-bold text-gray-800 border-b pb-3 text-center"
                             >
-                               {{ acting === true ? 'Crear Nueva Habilidad' : 'Editar Habilidad' }}
+                                {{
+                                    acting === true
+                                        ? "Crear Nueva Habilidad"
+                                        : "Editar Habilidad"
+                                }}
                             </h2>
 
                             <div class="mt-6 text-left">
@@ -269,11 +273,23 @@ const closeModal = () => {
                                         Edit
                                     </JetButton>
 
-                                    <JetButton
+                                    <!-- <JetButton
                                         class="bg-red-600 text-white hover:bg-red-700 px-3 py-1 text-xs"
                                     >
                                         Delete
-                                    </JetButton>
+                                    </JetButton> -->
+                                    <Link
+                                        :href="
+                                            route('skills.destroy', skill.id)
+                                        "
+                                        method="delete"
+                                        as="button"
+                                        type="button"
+                                        class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring focus:ring-red-300 disabled:opacity-25 transition"
+                                        @click="confirmarEliminacion"
+                                    >
+                                        Delete
+                                    </Link>
                                 </div>
                             </td>
                         </tr>
@@ -281,7 +297,7 @@ const closeModal = () => {
                 </table>
                 <div
                     v-else
-                    class="bg-red-100 border border-red-400 p-3 rounded-lg text-red-800"
+                    class="bg-red-100 border border-red-400 p-3 rounded-lg text-red-800 mt-5 text-left"
                 >
                     There are no skills yet. Let's create one :)
                 </div>

@@ -76,4 +76,11 @@ class SkillController extends Controller
         // Inertia necesita una redirección para actualizar los props en el frontend
         return Redirect::route('skills.index'); // Inertia refrescará la tabla automáticamente
     }
+
+
+    public function destroy(Skill $skill)
+    {
+        $skill->delete();
+        return Redirect::route('skills.index');
+    }
 }

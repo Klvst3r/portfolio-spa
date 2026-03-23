@@ -105,4 +105,16 @@ class ProjectController extends Controller
         return redirect()->route('projects.index')
             ->with('success', 'Proyecto actualizado con éxito');
     }
+
+
+    public function destroy(Project $project)
+    {
+        // Opcional: Podemos borrar la imagen del servidor para no dejar basura
+        // Storage::delete($project->image);
+
+        $project->delete();
+
+        return Redirect::route('projects.index')
+            ->with('success', 'Projecto  eliminado satisfactoriamente.');
+    }
 }

@@ -128,6 +128,13 @@ watch(
     },
 );
 
+// 8. Para la implementación de elminar proyectos, usamos el siguiente método:(de aca agregamso el mensaje arriba de la tabla)
+const confirmarEliminacion = (e) => {
+    if (!confirm("¿Estás seguro de que deseas eliminar este proyecto?")) {
+        e.preventDefault();
+    }
+};
+
 /**
  * borramos los arrays "const availableColors = [...]" y "const availableIcons = [...]"
  ya no se necesitam, provienent de las funciones estáticas del modelo Project, que a su vez leen los datos de un JSON, lo que hace que el sistema sea más flexible y fácil de mantener. Ahora, si quieres agregar un nuevo color o icono, solo necesitas actualizar el JSON en el backend sin tocar el código del frontend.
@@ -507,10 +514,25 @@ const availableIcons = [
                                             class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1 text-xs"
                                             >Edit</JetButton
                                         >
-                                        <JetButton
+                                        <!-- <JetButton
                                             class="bg-red-600 text-white hover:bg-red-700 px-3 py-1 text-xs"
                                             >Delete</JetButton
+                                        > -->
+                                        <Link
+                                            :href="
+                                                route(
+                                                    'projects.destroy',
+                                                    project.id,
+                                                )
+                                            "
+                                            method="delete"
+                                            as="button"
+                                            type="button"
+                                            class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                                            @click="confirmarEliminacion"
                                         >
+                                            Delete
+                                        </Link>
                                     </div>
                                 </td>
                             </tr>
@@ -520,7 +542,7 @@ const availableIcons = [
 
                 <div
                     v-else
-                    class="bg-red-100 border border-red-400 p-3 rounded-lg text-red-800 text-center"
+                    class="bg-red-100 border border-red-400 p-3 rounded-lg text-red-800 text-center mt-5 text-left"
                 >
                     There are no projects yet. Let's create one :)
                 </div>
