@@ -17,14 +17,55 @@ defineProps({
     skills: Array,
 });
 
+
 // Estado para controlar el Modal (reemplaza a acting en data)
-const acting = ref(null);
+//const acting = ref(null);
+
+
+//// Ajustes para Editar y Crear en el mismo modal
+
+// 1. Cambiamos la lógica de 'acting'
+const acting = ref(null); // null = cerrado, true = creando, {objeto} = editando
 
 // Definición del formulario con useForm hook en lugar del data() como se hacia con opcion api
 const form = useForm({
     name: "",
     color: "",
 });
+
+// 2. Definimos variables para el método y la ruta dinámicos
+const method = ref('post');
+const action = ref(route('skills.store'));
+
+
+// 3. Función para preparar el modal de creación
+const openCreateModal = () => {
+    acting.value = true;
+    method.value = 'post';
+    action.value = route('skills.store');
+    form.reset();
+};
+
+
+// 4. Función para preparar el modal de edición
+const openEditModal = (skill) => {
+    acting.value = skill; // Guardamos el objeto skill actual
+    method.value = 'put';
+    action.value = route('skills.update', skill.id);
+    
+    // Llenamos el formulario con los datos existentes
+    form.name = skill.name;
+    form.color = skill.color;
+};
+
+// 5. Ajuste en el Submit (ahora usa las variables dinámicas)
+const submit = () => {
+    form.submit(method.value, action.value, {
+        onSuccess: () => closeModal(),
+    });
+};
+
+
 
 // Opciones para el Select
 const availableColors = [
@@ -37,6 +78,8 @@ const availableColors = [
     "bg-pink-500",
 ];
 
+
+//Despues del paso 5 implementamos cerrar modal y resetear el form en una función aparte para evitar repetir código tanto en creación como en edición
 // Función para cerrar el modal y resetear el form
 const closeModal = () => {
     acting.value = null; // Cierra el modal
@@ -46,17 +89,18 @@ const closeModal = () => {
 
 // Función de envío (Submit)
 // Antes era un metodo del export default, ahora se define como una función para manejar estados
-const submit = () => {
-    form.post(route("skills.store"), {
-        onSuccess: () => {
-            closeModal(); // Si se guarda con éxito, limpiamos y cerramos
-        },
-        onError: () => {
-            // Aquí puedes manejar qué pasa si hay un error (opcional)
-            console.log("Hubo un error en la validación");
-        },
-    });
-};
+// Ajustamos la logica en el paso 5 para usar las variables dinámicas de method y action, eliminando la necesidad de condicionales dentro del submit
+// const submit = () => {
+//     form.post(route("skills.store"), {
+//         onSuccess: () => {
+//             closeModal(); // Si se guarda con éxito, limpiamos y cerramos
+//         },
+//         onError: () => {
+//             // Aquí puedes manejar qué pasa si hay un error (opcional)
+//             console.log("Hubo un error en la validación");
+//         },
+//     });
+// };
 </script>
 
 <template>
@@ -71,7 +115,7 @@ const submit = () => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 text-right">
                 <JetButton
                     class="p-3 border-2 border-blue-500 text-blue-500 bg-blue-100 hover:bg-blue-200 font-bold ml-2 roundex-xl"
-                    @click="acting = true"
+                    @click="openCreateModal"
                 >
                     Add New +
                 </JetButton>
@@ -82,7 +126,7 @@ const submit = () => {
                             <h2
                                 class="text-2xl font-bold text-gray-800 border-b pb-3 text-center"
                             >
-                                Crear Nueva Habilidad
+                               {{ acting === true ? 'Crear Nueva Habilidad' : 'Editar Habilidad' }}
                             </h2>
 
                             <div class="mt-6 text-left">
@@ -219,6 +263,7 @@ const submit = () => {
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center space-x-2">
                                     <JetButton
+                                        @click="openEditModal(skill)"
                                         class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-1 text-xs"
                                     >
                                         Edit

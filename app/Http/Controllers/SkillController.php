@@ -49,4 +49,31 @@ class SkillController extends Controller
         // Inertia necesita una redirección para actualizar los props en el frontend
         return Redirect::route('skills.index');
     }
+
+
+    public function update(Request $request, Skill $skill)
+    {
+        // Almacenamos los colores válidos para usarlos en la validación
+        $availableColors = Skill::getAvailableBackgroundColors();
+
+        $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(Skill::class)->ignore($skill->id)
+            ],
+            'color' => [
+                'required',
+                'string',
+                'max:50',
+                'in:' . implode(',', $availableColors),
+            ],
+        ]);
+
+        $skill->update($request->only('name', 'color'));
+
+        // Inertia necesita una redirección para actualizar los props en el frontend
+        return Redirect::route('skills.index'); // Inertia refrescará la tabla automáticamente
+    }
 }
