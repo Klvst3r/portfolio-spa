@@ -1,7 +1,7 @@
 <script setup>
-import { ref, watch } from "vue"; // para el estado del modal
+import { ref, watch, onMounted } from "vue"; // para el estado del modal y se agrega onMounted para la barra de progreso
 
-import { useForm, Link, usePage } from "@inertiajs/vue3"; //useform pertenece a la libreria de inertiajs para manejar formularios de manera reactiva y sencilla, con validaciones y manejo de errores integrado. Es una herramienta que facilita la gestión de formularios en aplicaciones Vue.js que utilizan Inertia.js como puente entre el frontend y el backend.
+import { useForm, Link, usePage } from "@inertiajs/vue3"; //useform pertenece a la libreria de inertiajs para manejar formularios de manera reactiva y sencilla, con validaciones y manejo de errores integrado. Es una herramienta que facilita la gestión de formularios en aplicaciones Vue.js que utilizan Inertia.js como puente entre el frontend y el backend. Ademas de usar usePage para la barra de progreso
 
 import AppLayout from "@/Layouts/AppLayout.vue";
 import JetButton from "@/Components/Button.vue"; // Usando el que ya te funcionó en Welcome
@@ -115,18 +115,20 @@ const submit = () => {
 // 7. Como implementamos el fash para feedback del usuario, establecemos el borrado del mensaje despues de 3 segundos
 
 const page = usePage();
+const showMessage = ref(false); //Implementado a final para la barra de progreso
 
 // Borrar el mensaje automáticamente después de 5 segundos
-watch(
-    () => page.props.flash.success,
-    (next) => {
-        if (next) {
-            setTimeout(() => {
-                page.props.flash.success = null;
-            }, 3000);
-        }
-    },
-);
+// watch(
+//     () => page.props.flash.success,
+//     (next) => {
+//         if (next) {
+//             setTimeout(() => {
+//                 page.props.flash.success = null;
+//             }, 3000);
+//         }
+//     },
+// );
+//Comentamos lo anteior para unificar y mantener un solo temporizador, esto seria nuestro paso 10
 
 // 8. Para la implementación de elminar proyectos, usamos el siguiente método:(de aca agregamso el mensaje arriba de la tabla)
 const confirmarEliminacion = (e) => {
@@ -134,6 +136,62 @@ const confirmarEliminacion = (e) => {
         e.preventDefault();
     }
 };
+
+//9. Al implemetar la barra de progreso agragammos:
+// Función para ocultar el mensaje después de 5 segundos
+// const autoHide = () => {
+//     showMessage.value = true;
+//     setTimeout(() => {
+//         showMessage.value = false;
+//         // Opcional: Limpia el prop de Inertia para que no reaparezca al navegar
+//         page.props.flash.success = null;
+//     }, 5000);
+// };
+
+//10. Eliminamos el watch anterior y usa esta versión que centraliza todo. Mantiendo un solo temporizador sincronizado con una barra de progreso.
+// Creamos una única función de control
+// const triggerHide = () => {
+//     showMessage.value = true;
+//     setTimeout(() => {
+//         showMessage.value = false;
+//         // Limpiamos el prop para que no reaparezca al navegar entre páginas
+//         page.props.flash.success = null;
+//     }, 3000); // Sincronizado con los 5s de la barra CSS
+// };
+
+//Versoin mejorada
+const startTimer = () => {
+    showMessage.value = true;
+    setTimeout(() => {
+        showMessage.value = false;
+        // Esperamos un poco después de ocultar para limpiar el prop de Inertia
+        setTimeout(() => {
+            page.props.flash.success = null;
+        }, 500);
+    }, 3000); // 3 segundos coincide con tu CSS de progress-bar
+};
+
+// 1. Vigila si llega un mensaje nuevo mientras el usuario está en la página
+// watch(
+//     () => page.props.flash.success,
+//     (next) => {
+//         if (next) triggerHide();
+//     },
+// );
+watch(
+    () => page.props.flash.success,
+    (next) => {
+        if (next) startTimer();
+    },
+);
+
+// 2. Revisa si ya venía un mensaje al cargar (después de un redirect del controlador)
+// onMounted(() => {
+//     if (page.props.flash.success) triggerHide();
+// });
+onMounted(() => {
+    if (page.props.flash.success) startTimer();
+});
 
 /**
  * borramos los arrays "const availableColors = [...]" y "const availableIcons = [...]"
@@ -207,13 +265,17 @@ const availableIcons = [
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <transition name="fade">
                     <div
-                        v-if="$page.props.flash.success"
+                        v-if="showMessage && $page.props.flash.success"
                         class="max-w-7xl mx-auto mt-4 px-4 sm:px-6 lg:px-8"
                     >
                         <div
-                            class="flex items-center p-4 mb-4 text-green-800 border-t-4 border-green-300 bg-green-50 dark:text-green-400 dark:bg-gray-800 dark:border-green-800 shadow-md"
+                            class="relative overflow-hidden flex items-center p-4 mb-4 text-green-800 border-t-4 border-green-300 bg-green-50 dark:text-green-400 dark:bg-gray-800 dark:border-green-800 shadow-md"
                             role="alert"
                         >
+                            <div
+                                class="absolute bottom-0 left-0 h-1 bg-green-500 progress-bar"
+                            ></div>
+
                             <svg
                                 class="flex-shrink-0 w-5 h-5"
                                 fill="currentColor"
@@ -223,11 +285,13 @@ const availableIcons = [
                                     d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"
                                 />
                             </svg>
+
                             <div class="ml-3 text-sm font-medium">
                                 {{ $page.props.flash.success }}
                             </div>
+
                             <button
-                                @click="$page.props.flash.success = null"
+                                @click="showMessage = false"
                                 type="button"
                                 class="ml-auto -mx-1.5 -my-1.5 bg-green-50 text-green-500 rounded-lg focus:ring-2 focus:ring-green-400 p-1.5 hover:bg-green-200 inline-flex h-8 w-8 dark:bg-gray-800 dark:text-green-400 dark:hover:bg-gray-700"
                             >

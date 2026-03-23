@@ -16,3 +16,17 @@
 .fade-leave-to {
     opacity: 0;
 }
+
+/* Animación para que la barra se mueva*/
+.progress-bar {
+    animation: shrink 3s linear forwards;
+}
+
+@keyframes shrink {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
+}
